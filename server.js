@@ -2,8 +2,9 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-var port = process.env.PORT || 80;
-var mongo = require('mongojs');
+var port = process.env.PORT || 3000;
+var mongo = require('mongoose');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/datatest');
 var db = mongo('ThunderLiteData', ['users', 'active_games', 'gamedata']);
 
 db.on('error', function(err){
@@ -638,7 +639,7 @@ io.on('connection', function(socket){
 		}
 		Connections.Disconnect(socket.index);
 	});
-	
+
 	socket.on('print data', function(){
 		db.users.find({}, function(err, data){
 			if(err||!data){
