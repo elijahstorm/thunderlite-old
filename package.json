@@ -19,7 +19,9 @@
   "homepage": "https://github.com/elijahstormmusic/ThunderLite#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "mongo": "^0.1.0",
     "mongojs": "^2.6.0",
+    "mongoose": "^5.6.6",
     "socket.io": "^2.2.0"
   }
 }

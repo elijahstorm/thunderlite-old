@@ -3,14 +3,15 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
-var mongo = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/datatest');
-var db = mongo('ThunderLiteData', ['users', 'active_games', 'gamedata']);
+var mongo = require('mongojs')
+var db = mongo(process.env.MONGODB_URI || 'mongodb://localhost/datatest');
 
 db.on('error', function(err){
 	console.log('Data Base ERR:', err);
 });
-
+db.on('open', function() {
+  console.log('BALLER');
+});
 server.listen(port, function(){
 	console.log('\********** Server listening on port %d **********', port);
 });
