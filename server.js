@@ -4,7 +4,11 @@ var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 var port = process.env.PORT || 3000;
 var mongo = require('mongojs')
-var db = mongo(process.env.MONGODB_URI || 'mongodb://localhost/datatest');
+
+console.log(encodeURIComponent(process.env.MONGODB_URI));
+console.log(process.env.MONGODB_URI);
+
+var db = mongo(encodeURIComponent(process.env.MONGODB_URI) || 'mongodb://localhost/datatest');
 
 db.on('error', function(err){
 	console.log('Data Base ERR:', err);
