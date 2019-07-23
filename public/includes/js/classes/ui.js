@@ -235,7 +235,7 @@ var Interface_Class = function()
 
 		at = game.Units_Map.At(y,x);
 		if(at==moving_unit&&at!=null)
-		if(!game.Terrain_Map.At(unit.Y,unit.X).Hidden)
+		if(!game.Terrain_Map.At(at.X,at.Y).Hidden)
 			at.UI_Draw(moveUnitCanvas, left, top);
 	};
 	var render = function(left, top, zoom, simple){

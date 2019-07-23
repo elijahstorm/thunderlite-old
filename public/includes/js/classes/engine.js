@@ -39,7 +39,7 @@ var Engine_Class = function(input, is_sample)
 			for(var x=1;x<Terrain_Data.TERRE.length;x++)
 			{
 				var _t = Terrain_Data.TERRE[x];
-				
+
 				if(_t.Connnection==5 || _t.Connnection==3)
 				{
 					Animations.Retrieve(_t.Name+" Ani").Remove_All();
@@ -328,9 +328,9 @@ var Engine_Class = function(input, is_sample)
 	{
 		if(!global_weather[0])return;
 		if(_player!=client)return;
-		
+
 		this.Hide_Terrain();
-		
+
 		let u, _amt = _player.Total_Units();
 		for(let i=0;i<_amt;i++)
 		{
@@ -388,7 +388,7 @@ var Engine_Class = function(input, is_sample)
 			}
 			return;
 		}
-		
+
 		if(_city.Owner==client)
 			_city.Terrain.Hidden = false;
 		else _city.Terrain.Hidden = true;
@@ -446,7 +446,7 @@ var Engine_Class = function(input, is_sample)
 	{	// standing is a numerical rating out of 5 showing how well the player is comparing
 		if(Players[__team]==null)return -1;
 		var standing = 0; // 0 is bad, the higher the better the position
-		
+
 		var percentOfUnits = (Players[__team].Total_Units()/Units.length)*Players.length;
 		if(percentOfUnits>0.4)
 		{
@@ -464,7 +464,7 @@ var Engine_Class = function(input, is_sample)
 		{
 			standing++;
 		}
-		
+
 		return standing; // can be thought of as out of 5 stars
 	};
 
@@ -815,7 +815,7 @@ var Engine_Class = function(input, is_sample)
 		UI = ui;
 	};
 
-	
+
 	let t0 = performance.now();
 	if(input!=null)
 	{			/// when input is new map data or map id--make new game
@@ -830,8 +830,8 @@ var Engine_Class = function(input, is_sample)
 			if(__terre==null)return;
 			global_weather = data[3];
 	console.timeEnd("parse data");
-	
-	console.time("loading map");	
+
+	console.time("loading map");
 				// inside the map work
 			var old_map = __terre;
 			var map = new Array(old_map.length);
@@ -858,7 +858,7 @@ var Engine_Class = function(input, is_sample)
 				for(var y=0;y<boundsY;y++)
 				{	/// paint a realistic out of bounds area
 					paint_off_map[x+xtra_size][y+xtra_size] = old_map[x][y];
-					
+
 					if(x==0)
 					{	/// left side
 						index = old_map[x][y];
@@ -866,13 +866,13 @@ var Engine_Class = function(input, is_sample)
 						index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*6)+1 : index;
 							// border can't have angled connection sprites
 						change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-						
+
 						for(var i=1;i<=xtra_size;i++)
 						for(var j=0;j<change_amt+i-1;j++)
 						{
 							if(paint_off_map[x+xtra_size-i][y+xtra_size]==null)
 								paint_off_map[x+xtra_size-i][y+xtra_size] = index;
-							
+
 							if(j==0)continue;
 							if(paint_off_map[x+xtra_size-i].length>y+xtra_size+j)
 								paint_off_map[x+xtra_size-i][y+xtra_size+j] = index;
@@ -887,13 +887,13 @@ var Engine_Class = function(input, is_sample)
 						index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*6)+1 : index;
 							// border can't have angled connection sprites
 						change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-						
+
 						for(var i=1;i<=xtra_size;i++)
 						for(var j=0;j<change_amt+i-1;j++)
 						{
 							if(paint_off_map[x+xtra_size+i][y+xtra_size]==null)
 								paint_off_map[x+xtra_size+i][y+xtra_size] = index;
-							
+
 							if(j==0)continue;
 							if(paint_off_map[x+xtra_size+i].length>y+xtra_size+j)
 								paint_off_map[x+xtra_size+i][y+xtra_size+j] = index;
@@ -901,7 +901,7 @@ var Engine_Class = function(input, is_sample)
 								paint_off_map[x+xtra_size+i][y+xtra_size-j] = index;
 						}
 					}
-					
+
 					if(y==0)
 					{	/// top side
 						index = old_map[x][y];
@@ -909,13 +909,13 @@ var Engine_Class = function(input, is_sample)
 						index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*6)+1 : index;
 							// border can't have angled connection sprites
 						change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-						
+
 						for(var i=1;i<=xtra_size;i++)
 						for(var j=0;j<change_amt+i-1;j++)
 						{
 							if(paint_off_map[x+xtra_size][y+xtra_size-i]==null)
 								paint_off_map[x+xtra_size][y+xtra_size-i] = index;
-							
+
 							if(j==0)continue;
 							if(paint_off_map.length>x+xtra_size+j)
 								paint_off_map[x+xtra_size+j][y+xtra_size-i] = index;
@@ -930,13 +930,13 @@ var Engine_Class = function(input, is_sample)
 						index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*6)+1 : index;
 							// border can't have angled connection sprites
 						change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-						
+
 						for(var i=1;i<=xtra_size;i++)
 						for(var j=0;j<change_amt+i-1;j++)
 						{
 							if(paint_off_map[x+xtra_size][y+xtra_size+i]==null)
 								paint_off_map[x+xtra_size][y+xtra_size+i] = index;
-							
+
 							if(j==0)continue;
 							if(paint_off_map.length>x+xtra_size+j)
 								paint_off_map[x+xtra_size+j][y+xtra_size+i] = index;
@@ -946,7 +946,7 @@ var Engine_Class = function(input, is_sample)
 					}
 				}
 			}
-			
+
 			for(var x=0;x<old_map.length;x++)
 			{	// turn map data into functional terrain
 				map[x] = new Array(old_map[x].length);
@@ -961,7 +961,7 @@ var Engine_Class = function(input, is_sample)
 						Terrain_Animations.push(map[x][y]);
 				}
 			}
-			
+
 			var outside_map = new Array(paint_off_map.length);
 			for(var x=0;x<paint_off_map.length;x++)
 			{	// turn out of bounds map data into displayable terrain
@@ -984,11 +984,11 @@ var Engine_Class = function(input, is_sample)
 			this.map_source_data = __terre;
 				// outside the map work
 	console.timeEnd("loading map");
-			
+
 			this.Terrain_Map = new Map_Holder(map);
 			this.Units_Map = new Map_Holder(Blank_Map(this.Terrain_Map.Width, this.Terrain_Map.Height));
 			this.Cities_Map = new Map_Holder(Blank_Map(this.Terrain_Map.Width, this.Terrain_Map.Height));
-			
+
 			terre = this.Terrain_Map;
 			units = this.Units_Map;
 			cities = this.Cities_Map;
@@ -1003,7 +1003,7 @@ var Engine_Class = function(input, is_sample)
 				this.Add_Building(Buildings.New(this,Building_Data.Reverse_Get(__cities[i][0]).Name), __cities[i][1], __cities[i][2], __cities[i][3]);
 			}
 	console.timeEnd("coloring assets");
-	
+
 		}
 		else if(input.Name==null)
 		{		/// input is a local map id
@@ -1027,7 +1027,7 @@ var Engine_Class = function(input, is_sample)
 					for(var y=0;y<boundsY;y++)
 					{	/// paint a realistic out of bounds area
 						paint_off_map[x+xtra_size][y+xtra_size] = old_map[x][y];
-						
+
 						if(x==0)
 						{	/// left side
 							index = old_map[x][y];
@@ -1035,13 +1035,13 @@ var Engine_Class = function(input, is_sample)
 							index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*4)+1 : index;
 								// border can't have angled connection sprites
 							change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-							
+
 							for(var i=1;i<=xtra_size;i++)
 							for(var j=0;j<change_amt+i-1;j++)
 							{
 								if(paint_off_map[x+xtra_size-i][y+xtra_size]==null)
 									paint_off_map[x+xtra_size-i][y+xtra_size] = index;
-								
+
 								if(j==0)continue;
 								if(paint_off_map[x+xtra_size-i].length>y+xtra_size+j)
 									paint_off_map[x+xtra_size-i][y+xtra_size+j] = index;
@@ -1056,13 +1056,13 @@ var Engine_Class = function(input, is_sample)
 							index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*4)+1 : index;
 								// border can't have angled connection sprites
 							change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-							
+
 							for(var i=1;i<=xtra_size;i++)
 							for(var j=0;j<change_amt+i-1;j++)
 							{
 								if(paint_off_map[x+xtra_size+i][y+xtra_size]==null)
 									paint_off_map[x+xtra_size+i][y+xtra_size] = index;
-								
+
 								if(j==0)continue;
 								if(paint_off_map[x+xtra_size+i].length>y+xtra_size+j)
 									paint_off_map[x+xtra_size+i][y+xtra_size+j] = index;
@@ -1070,7 +1070,7 @@ var Engine_Class = function(input, is_sample)
 									paint_off_map[x+xtra_size+i][y+xtra_size-j] = index;
 							}
 						}
-						
+
 						if(y==0)
 						{	/// top side
 							index = old_map[x][y];
@@ -1078,13 +1078,13 @@ var Engine_Class = function(input, is_sample)
 							index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*4)+1 : index;
 								// border can't have angled connection sprites
 							change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-							
+
 							for(var i=1;i<=xtra_size;i++)
 							for(var j=0;j<change_amt+i-1;j++)
 							{
 								if(paint_off_map[x+xtra_size][y+xtra_size-i]==null)
 									paint_off_map[x+xtra_size][y+xtra_size-i] = index;
-								
+
 								if(j==0)continue;
 								if(paint_off_map.length>x+xtra_size+j)
 									paint_off_map[x+xtra_size+j][y+xtra_size-i] = index;
@@ -1099,13 +1099,13 @@ var Engine_Class = function(input, is_sample)
 							index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*4)+1 : index;
 								// border can't have angled connection sprites
 							change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-							
+
 							for(var i=1;i<=xtra_size;i++)
 							for(var j=0;j<change_amt+i-1;j++)
 							{
 								if(paint_off_map[x+xtra_size][y+xtra_size+i]==null)
 									paint_off_map[x+xtra_size][y+xtra_size+i] = index;
-								
+
 								if(j==0)continue;
 								if(paint_off_map.length>x+xtra_size+j)
 									paint_off_map[x+xtra_size+j][y+xtra_size+i] = index;
@@ -1115,7 +1115,7 @@ var Engine_Class = function(input, is_sample)
 						}
 					}
 				}
-				
+
 				for(var x=0;x<old_map.length;x++)
 				{
 					map[x] = new Array(old_map[x].length);
@@ -1128,7 +1128,7 @@ var Engine_Class = function(input, is_sample)
 							Terrain_Animations.push(map[x][y]);
 					}
 				}
-				
+
 				var outside_map = new Array(paint_off_map.length);
 				for(var x=0;x<paint_off_map.length;x++)
 				{
@@ -1168,8 +1168,9 @@ var Engine_Class = function(input, is_sample)
 			this.Name = data.name;
 			turn = data.turn;
 			cur_player = data.cur_player;
+			global_weather = [false,false,false];
 			var old_map = Clone_Map(Levels.Terrain.Data(data.map));
-			
+
 			if(old_map!=null)
 			{
 				var _sprite_id,
@@ -1188,7 +1189,7 @@ var Engine_Class = function(input, is_sample)
 					for(var y=0;y<boundsY;y++)
 					{	/// paint a realistic out of bounds area
 						paint_off_map[x+xtra_size][y+xtra_size] = old_map[x][y];
-						
+
 						if(x==0)
 						{	/// left side
 							index = old_map[x][y];
@@ -1196,13 +1197,13 @@ var Engine_Class = function(input, is_sample)
 							index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*4)+1 : index;
 								// border can't have angled connection sprites
 							change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-							
+
 							for(var i=1;i<=xtra_size;i++)
 							for(var j=0;j<change_amt+i-1;j++)
 							{
 								if(paint_off_map[x+xtra_size-i][y+xtra_size]==null)
 									paint_off_map[x+xtra_size-i][y+xtra_size] = index;
-								
+
 								if(j==0)continue;
 								if(paint_off_map[x+xtra_size-i].length>y+xtra_size+j)
 									paint_off_map[x+xtra_size-i][y+xtra_size+j] = index;
@@ -1217,13 +1218,13 @@ var Engine_Class = function(input, is_sample)
 							index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*4)+1 : index;
 								// border can't have angled connection sprites
 							change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-							
+
 							for(var i=1;i<=xtra_size;i++)
 							for(var j=0;j<change_amt+i-1;j++)
 							{
 								if(paint_off_map[x+xtra_size+i][y+xtra_size]==null)
 									paint_off_map[x+xtra_size+i][y+xtra_size] = index;
-								
+
 								if(j==0)continue;
 								if(paint_off_map[x+xtra_size+i].length>y+xtra_size+j)
 									paint_off_map[x+xtra_size+i][y+xtra_size+j] = index;
@@ -1231,7 +1232,7 @@ var Engine_Class = function(input, is_sample)
 									paint_off_map[x+xtra_size+i][y+xtra_size-j] = index;
 							}
 						}
-						
+
 						if(y==0)
 						{	/// top side
 							index = old_map[x][y];
@@ -1239,13 +1240,13 @@ var Engine_Class = function(input, is_sample)
 							index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*4)+1 : index;
 								// border can't have angled connection sprites
 							change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-							
+
 							for(var i=1;i<=xtra_size;i++)
 							for(var j=0;j<change_amt+i-1;j++)
 							{
 								if(paint_off_map[x+xtra_size][y+xtra_size-i]==null)
 									paint_off_map[x+xtra_size][y+xtra_size-i] = index;
-								
+
 								if(j==0)continue;
 								if(paint_off_map.length>x+xtra_size+j)
 									paint_off_map[x+xtra_size+j][y+xtra_size-i] = index;
@@ -1260,13 +1261,13 @@ var Engine_Class = function(input, is_sample)
 							index = Terrain_Data.TERRE[index].Connnection!=2 || Math.random()>.65 ? Math.floor(Math.random()*4)+1 : index;
 								// border can't have angled connection sprites
 							change_amt = Math.random()>.4 ? Math.floor(Math.random()*xtra_size)+1 : 1;
-							
+
 							for(var i=1;i<=xtra_size;i++)
 							for(var j=0;j<change_amt+i-1;j++)
 							{
 								if(paint_off_map[x+xtra_size][y+xtra_size+i]==null)
 									paint_off_map[x+xtra_size][y+xtra_size+i] = index;
-								
+
 								if(j==0)continue;
 								if(paint_off_map.length>x+xtra_size+j)
 									paint_off_map[x+xtra_size+j][y+xtra_size+i] = index;
@@ -1276,7 +1277,7 @@ var Engine_Class = function(input, is_sample)
 						}
 					}
 				}
-				
+
 				for(var x=0;x<old_map.length;x++)
 				{
 					map[x] = new Array(old_map[x].length);
@@ -1289,7 +1290,7 @@ var Engine_Class = function(input, is_sample)
 							Terrain_Animations.push(map[x][y]);
 					}
 				}
-				
+
 				var outside_map = new Array(paint_off_map.length);
 				for(var x=0;x<paint_off_map.length;x++)
 				{
@@ -1312,11 +1313,11 @@ var Engine_Class = function(input, is_sample)
 				this.map_source_data = __terre;
 			}
 			else return;
-			
-			
-			
-			
-			
+
+
+
+
+
 			terre = new Map_Holder(old_map);
 			units = new Map_Holder(Blank_Map(terre.Width, terre.Height));
 			cities = new Map_Holder(Blank_Map(terre.Width, terre.Height));
