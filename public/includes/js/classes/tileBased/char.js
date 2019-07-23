@@ -121,7 +121,7 @@ var Characters = {
 			var NotNullCheck = scale(pic, tile_scale, tile_scale);
 			if(NotNullCheck!=null)
 				pic = NotNullCheck;
-			
+
 			canvas.putImageData(_scale==null ? pic : scale(pic, _scale, _scale), x, y);
 		};
 		this.UI_Draw = function(canvas, x, y)
@@ -167,7 +167,7 @@ var Characters = {
 				Shape.Rectangle.Draw(canvas, 3, 34, 30, 30, "#000");
 				canvas.globalAlpha = 1;
 				Shape.Rectangle.Draw(canvas, 0, 30, 30, 30, "#fff");
-				this.Rescued_Unit.Draw(canvas, 5, 35, .5);
+				this.Rescued_Unit.Draw(canvas, x+5, y+35, .5);
 			}
 			if(showAttackWeakness!=0)
 			{
@@ -214,7 +214,7 @@ var Characters = {
 			}
 			canvas.restore();
 		};
-		
+
 		this.Display_Additional = function()
 		{
 			if(this.Radar())
@@ -297,7 +297,7 @@ var Characters = {
 		{
 			showCounterStrength = 0;
 		};
-		
+
 		this.Open_Selection = function()
 		{
 			if(move_path==null)return;
@@ -378,7 +378,7 @@ var Characters = {
 					end[0]--;
 				}
 			}
-			
+
 			var callback = function(__unit)
 			{
 				if(__unit.Alpha.data<255)
@@ -387,7 +387,7 @@ var Characters = {
 					Core.Fade_Drawable(__unit, 255, 15, function(__unit){
 						__unit.End_Turn();
 						game.Interface.Draw();
-						
+
 						if(whenFinished!=null)
 							whenFinished(__unit);
 					});
@@ -395,7 +395,7 @@ var Characters = {
 				}
 				__unit.End_Turn();
 				game.Interface.Draw();
-				
+
 				if(whenFinished!=null)
 					whenFinished(__unit);
 			};
@@ -411,7 +411,7 @@ var Characters = {
 								unit.Attack(unit.Attacking,callback);
 								return;
 							}
-						}	
+						}
 						if(callback!=null)callback(unit);
 					});
 				else callback(this);
@@ -420,6 +420,8 @@ var Characters = {
 			/// when attacking
 		// this code has error when on server as sent move doesnt initialize path
 		// only put this back in if bug appears where unit can attack wherever even when not in range
+			if(game.Terrain_Map.At(x,y).Hidden)
+				return false; // cannot attack a hidden tile
 			var defender = game.Units_Map.At(x,y);
 			if(defender!=null)
 			if(defender.Alpha.data==255)
@@ -469,8 +471,8 @@ var Characters = {
 			}
 			this.Idle = false;
 			this.Movement = CharData.Movement;
-			
-			
+
+
 			var available = this.Mods_By_Type("Start Turn");
 			var dead_weight = 0;
 			for(var i=0;i<available.length;i++)
@@ -478,9 +480,9 @@ var Characters = {
 				if(available[i].Do(this))
 					dead_weight++;
 			}
-			
+
 			this.Hurt(game.Terrain_Map.At(this.X, this.Y).Damage);
-			
+
 			setTimeout(function(){
 				callback();
 			}, dead_weight*10*fps);
@@ -625,7 +627,7 @@ var Characters = {
 					Core.Fade_Drawable(list[j], 255, 10);
 				}
 			}
-			
+
 			var dir = mover[i];
 			if(dir!=null)
 			{
@@ -978,7 +980,7 @@ var Characters = {
 					bonus*=1.5;
 				}else if(defender.Armor==1)
 				{
-					
+
 				}else
 				{
 					bonus*=.5;
@@ -988,13 +990,13 @@ var Characters = {
 			{
 				if(defender.Armor==0)
 				{
-					
+
 				}else if(defender.Armor==1)
 				{
 					bonus*=1.15;
 				}else
 				{
-					
+
 				}
 			}
 			else
@@ -1004,7 +1006,7 @@ var Characters = {
 					bonus*=.5;
 				}else if(defender.Armor==1)
 				{
-					
+
 				}else
 				{
 					bonus*=1.5;
@@ -1050,7 +1052,7 @@ var Characters = {
 			// 6 = surface water
 			// 7 = submerged
 			// 8 = heavy ship
-			
+
 			if(this.Unit_Type==1)
 			if(game.Location_In_Radar(terrain.X, terrain.Y, this.Player))
 				return 100; // if air is jammed
@@ -1066,7 +1068,7 @@ var Characters = {
 					return 2;	// submerged sea units
 				return 1;
 			}
-			
+
 			var t_data = Terrain_Data.TERRE[terrain.Source];
 			var bonus = 1;
 			//check modifiers path
@@ -1180,7 +1182,7 @@ var Characters = {
 		this.Open_Actions = function(value)
 		{
 			if(game.Interface==null)return;
-			
+
 			if(!value)
 			{
 				game.Interface.Close_Menu();
@@ -1188,9 +1190,9 @@ var Characters = {
 				game.Interface.Select_Tile();
 				return;
 			}
-			
+
 			var self = this;
-			
+
 			var Mods = this.Mods_By_Type("Self Action");
 			if(Mods.length==0)
 			{
@@ -1201,10 +1203,10 @@ var Characters = {
 			var index = 1;
 			var x = (self.X*TILESIZE)+30-game.Interface.X_Offset();
 			var y = (self.Y*TILESIZE)+2-game.Interface.Y_Offset();
-			
-			x += (x<=offset+10) ? offset - 30 + (game.Interface.X_Offset()%TILESIZE) : 0; 
+
+			x += (x<=offset+10) ? offset - 30 + (game.Interface.X_Offset()%TILESIZE) : 0;
 			offset += (x>=game.Interface.Width()-10 - (offset*2)) ? offset + 32 - (game.Interface.X_Offset()%TILESIZE) : 0;
-			
+
 			with(Menu.Game_Prompt)
 			{
 				Erase();
@@ -1212,7 +1214,7 @@ var Characters = {
 					self.Open_Actions(false);
 					game.Interface.Select_Tile();
 				});
-				
+
 				for(var j in Mods)
 				{
 					Mods[j].Active = Mods[j].Test(self);
@@ -1225,7 +1227,7 @@ var Characters = {
 					offset-=30;
 				}
 			}
-			
+
 			INTERFACE.Display_Menu(Menu.Game_Prompt, true);
 		};
 		this.Mods_By_Type = function(type)
@@ -1265,7 +1267,7 @@ var Characters = {
 			}
 			err("Not a valid index");
 		};
-		
+
 		if(this.Resources())
 			Additional_Display = Char_Data.Resources;
 	},

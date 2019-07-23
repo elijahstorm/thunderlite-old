@@ -14,7 +14,7 @@ var Interface_Class = function()
 		invalidBG:"#B7B48F",
 		bad:"#F44450"
 	};
-	
+
 	this.Width = function()
 	{
 		return gameWidth;
@@ -23,7 +23,7 @@ var Interface_Class = function()
 	{
 		return gameHeight;
 	};
-	
+
 	self.setGame = function(g)
 	{
 		game = g;
@@ -70,12 +70,12 @@ var Interface_Class = function()
 	self.isTileOnScreen = function(_x, _y)
 	{
 		var _values = scroller.getValues();
-		
+
 		var FarLeftTile = Math.ceil(_values.left/TILESIZE)+1;
 		var FarRightTile = Math.floor((_values.left+gameWidth)/TILESIZE)-1;
 		var TopTile = Math.ceil(_values.top/TILESIZE)+1;
 		var BottomTile = Math.floor((_values.top+gameHeight)/TILESIZE)-1;
-		
+
 		if(_x<FarLeftTile)
 		if(_y<TopTile)
 			return 5; // top left
@@ -207,10 +207,10 @@ var Interface_Class = function()
 
 		var at = game.Terrain_Map.At(y,x);
 		if(at==null)return;
-		
+
 		at.UI_Draw(terrainCanvas, left, top);
 		paintOffMap(y,x,left,top);
-		
+
 		if(at.Hidden)
 		{
 			at = at.Building;
@@ -219,7 +219,7 @@ var Interface_Class = function()
 			if(at!=null)at.Draw(tileCanvas, left, top, w, h);
 			return;
 		}
-		
+
 		at = at.Building;
 		if(at!=null)at.UI_Draw(buildingCanvas, left, top);
 		at = game.Units_Map.At(y,x);
@@ -229,18 +229,19 @@ var Interface_Class = function()
 	};
 	var simplePaint = function(x, y, left, top, w, h, zoom){
 		if(game==null)return;
-		
-		if(game.Terrain_Map.At(y,x).Hidden)
-			return;
-		
+
+		// if(game.Terrain_Map.At(y,x).Hidden)
+			// return;
+
 		at = game.Units_Map.At(y,x);
 		if(at==moving_unit&&at!=null)
+		if(!game.Terrain_Map.At(unit.Y,unit.X).Hidden)
 			at.UI_Draw(moveUnitCanvas, left, top);
 	};
 	var render = function(left, top, zoom, simple){
 		if(game==null)return;
 		zoom = 1;
-		
+
 		left = Math.round(left);
 		top = Math.round(top);
 		moveUnitCanvas.clearRect(0,0,600,600);
@@ -332,7 +333,7 @@ var Interface_Class = function()
 		Info:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Info", 15, 165, 200, 20, null, Canvas.Background),
 		IconBG:Avatar_Display.Add_Drawable(Shape.Box, "IconBG", 110, 167, 80, 80, "#000", Canvas.Background),
 		Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 110, 170, 80, 80, null, Canvas.Background),
-		
+
 		All_Threaths:Avatar_Display.Add_Drawable({Draw:function(){}}, "Threats", 605, 242, 80, 30, "#EE6352", Canvas.Background),
 		_ThreathsBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "ThreatsBG", 5, 242, 80, 30, "#EE6352", Canvas.Background),
 		_ThreathsBox:Avatar_Display.Add_Drawable(Shape.Box, "ThreatsBox", 5, 242, 80, 30, "#7F9172", Canvas.Background),
@@ -342,16 +343,16 @@ var Interface_Class = function()
 			Font:new Text_Class("15pt Times New Roman", "#ddd"),
 			Draw:function(canvas, x, y, w, h, __game){
 				if(__game==null ||!~__game)return;
-				
+
 				Shape.Rectangle.Draw(canvas, x-5, y-5, w+10, h+10, "#E5D1D0");
 				Shape.Box.Draw(canvas, x-5, y-5, w+10, h+10, "#7F9172");
-				
+
 				var active_player = __game.Active_Player();
 				var total_players = __game.Total_Players();
-				
+
 				var str = new Array(total_players);
 				var box = new Array(total_players);
-				
+
 				for(var i=0;i<total_players;i++)
 				{
 					str = active_player.Name;
@@ -367,19 +368,19 @@ var Interface_Class = function()
 					if(active_player.Dead)
 						str+="XXX";
 					else str+="$"+active_player.Cash_Money();
-					
+
 					var color = Team_Colors.Color[active_player.Color][2]; //turn this to hex
 					box = data_to_hex(color);
-					
+
 					Shape.Rectangle.Draw(canvas, x, y+(i*36), w, 30, box);
 					Shape.Box.Draw(canvas, x, y+(i*36), w, 30, "#000");
 					this.Font.Draw(canvas, x+5, y+(i*36)+5, w, 30, str);
-					
+
 					active_player = __game.Player((active_player.Team+1)%total_players);
 				}
 			}
 		}, "Player List Highlights", 10, 360, 180, 85, null, Canvas.Merge),
-		
+
 		Update_Player_List:function(){
 			var total_players = game.Total_Players();
 			this.PLHighlights.Height.Set(total_players*34+1);
@@ -402,7 +403,7 @@ var Interface_Class = function()
 			this.TurnBox.Alpha.Set(255);
 			this.Turn.State.Set("Day");
 			this.Turn_Number.State.Set(""+(game.Turn()+1));
-			
+
 			var standing = game.Check_Player_Standing(player.Team),
 				str = "";
 			for(var i=0;i<=standing;i++)
@@ -410,11 +411,11 @@ var Interface_Class = function()
 			for(var i=standing+1;i<5;i++)
 				str+="☆   ";
 			this.Standings.State.Set(str);
-			
+
 			this._ThreathsBG.Alpha.Set(255);
 			this._ThreathsBox.Alpha.Set(255);
 			this._ThreathsTEXT.Alpha.Set(255);
-			
+
 			this.Info.State.Set("$"+player.Cash_Money());
 			this.Current_Player.State.Set(player.Name);
 			this.IconBG.Alpha.Set(255);
@@ -539,7 +540,7 @@ var Interface_Class = function()
 		};
 		handler.addEventListener("touchstart", function(e){
 			e.preventDefault();
-			
+
 			var x = Math.round(e.touches[0].clientX);
 			var y = Math.round(e.touches[0].clientY);
 			self.Click(x,y);
@@ -548,15 +549,15 @@ var Interface_Class = function()
 			scroller.doTouchStart(e.touches, e.timeStamp);
 			mousedown = true;
 			in_hl_path = false;
-			
+
 			setTimeout(function(){
 				if(!mousedown)return false;
-				
+
 				in_hl_path = true;
 				self.Release(x,y);
 				scroller.doTouchEnd(e.timeStamp);
 			}, 150);
-			
+
 			return false;
 		});
 		handler.addEventListener("touchmove", function(e){
@@ -569,7 +570,7 @@ var Interface_Class = function()
 				var _x = Math.round(e.touches[1].clientX);
 				var _y = Math.round(e.touches[1].clientY);
 				curPinchDiff = Math.round(Math.sqrt(Math.pow(x - _x, 2)+Math.pow(y - _y, 2)));
-				
+
 				if(prevPinchDiff!=0)
 				{
 					let _zoom = Math.abs(curPinchDiff/prevPinchDiff);
@@ -577,16 +578,16 @@ var Interface_Class = function()
 					// TILESIZE*=_zoom;
 					// TILESIZE = Math.max(Math.min(TILESIZE, 90), 30);
 				}
-				
+
 				prevPinchDiff = curPinchDiff;
 				return false;
 			}
 			else prevPinchDiff = 0;
-			
+
 			if(Math.abs(x-touch_start_loc[0])<5 &&
 				Math.abs(y-touch_start_loc[1])<5)
 				return false;
-			
+
 			touch_start_loc[0] = -1;
 			touch_start_loc[1] = -1;
 			if(in_hl_path)
@@ -594,16 +595,16 @@ var Interface_Class = function()
 				self.Mouse_Move(x,y);
 				return false;
 			}
-			
+
 			mousedown = false;
-			
+
 			scroller.doTouchMove(e.touches, e.timeStamp, e.scale)
-			
+
 			return false;
 		});
 		handler.addEventListener("touchend", function(e){
 			e.preventDefault();
-			
+
 			var x = Math.round(e.touches[0].clientX);
 			var y = Math.round(e.touches[0].clientY);
 
@@ -618,19 +619,19 @@ var Interface_Class = function()
 			touch_start_loc[1] = -1;
 			mousedown = false;
 			in_hl_path = false;
-			
+
 			return false;
 		});
 		handler.addEventListener("touchcancel", function(e){
 			e.preventDefault();
-			
+
 			if(in_hl_path)scroller.doTouchEnd(e.timeStamp);
 			touch_start_loc[0] = -1;
 			touch_start_loc[1] = -1;
 			mousedown = false;
 			in_hl_path = false;
 		});
-		
+
 		handler.addEventListener("mousedown", function(e){
 			if(!self.Click(e.layerX,e.layerY))return;
 			if(e.target.tagName.match(/input|textarea|select/i)) {
@@ -866,7 +867,7 @@ var Interface_Class = function()
 		if(game==null)return;
 		Avatar_Display.Redraw();
 		Stats_Display.Redraw();
-		
+
 		scroller.setDimensions(gameWidth, gameHeight, game.Terrain_Map.Width*TILESIZE, game.Terrain_Map.Height*TILESIZE);
 	};
 
@@ -911,19 +912,19 @@ var Interface_Class = function()
 	{
 		if(player.Game.Client_Player()!=player)return;
 		if(onBuildFnc==null)return;
-		
+
 		var TITLE_TEXT = new Text_Class("20pt Verdana", pallet.title);
 		var NAME_TEXT = new Text_Class("15pt Verdana", pallet.border);
 		var COST_TEXT = new Text_Class("15pt Verdana", pallet.text);
 		var BAD_TEXT = new Text_Class("15pt Verdana", pallet.bad);
-		
+
 		with(Menu.Game_Prompt)
 		{
 			Erase();
-			
+
 			let draw_top = 50,
 				draw_left = 10;
-			
+
 			Add(new Canvas.Drawable(Shape.Rectangle, null, 0, 0, gameWidth, gameHeight, pallet.border, null, 0.45), function(){
 				self.Close_Menu();
 				Menu.Game_Prompt.Erase();
@@ -931,7 +932,7 @@ var Interface_Class = function()
 				if(onCloseFnc!=null)
 					onCloseFnc();
 			});
-			
+
 				// gound units
 			Add(new Canvas.Drawable(TITLE_TEXT, null, draw_left, draw_top-30, 195, 525, "Ground Units"));
 			Add(new Canvas.Drawable(Shape.Rectangle, null, draw_left, draw_top, 175, 525, pallet.inside, null, .4));
@@ -944,7 +945,7 @@ var Interface_Class = function()
 			Add(new Canvas.Drawable(TITLE_TEXT, null, 400+draw_left, draw_top-30, 175, 525, "Sea Units"));
 			Add(new Canvas.Drawable(Shape.Rectangle, null, 400+draw_left, draw_top, 175, 525, pallet.inside, null, .4));
 			Add(new Canvas.Drawable(Shape.Box, null, 400+draw_left, draw_top, 175, 525, pallet.border));
-			
+
 			var _units = player.Buildable_Units();
 			var ground_index = 0,
 				air_index = 0,
@@ -962,11 +963,11 @@ var Interface_Class = function()
 							var NotNullCheck = scale(pic, tile_scale, tile_scale);
 							if(NotNullCheck!=null)
 								pic = NotNullCheck;
-							
+
 							canvas.putImageData(_scale==null ? pic : scale(pic, _scale, _scale), x, y);
 						}
 					}; */
-					
+
 					if(index<0)
 					{	// grey unit cuz cant afford
 						BG = pallet.invalidBG;
@@ -974,9 +975,9 @@ var Interface_Class = function()
 						// UNIT_IMAGE = Char_Data.CHARS[__unit_index].Sprite[0];
 					}
 					// normal unit
-					
-					
-					
+
+
+
 					Shape.Rectangle.Draw(c,x,y,w,h,BG);
 					Shape.Box.Draw(c,x,y,w,h,pallet.border);
 					// here put the unit image
@@ -991,7 +992,7 @@ var Interface_Class = function()
 				self.Select_Tile();
 				onBuildFnc(index);
 			};
-			
+
 			for(var j in _units)
 			{
 				var __unit = Char_Data.CHARS[_units[j]],
@@ -1013,18 +1014,18 @@ var Interface_Class = function()
 					continue;
 				}
 				var cur_drawable = new Canvas.Drawable(drawer, null, x, y, 175, 75, _units[j]);
-				
+
 				if(player.Calculate_Cost(_units[j])>resources)
 				{	// can't afford!
 					Add(cur_drawable);
 					cur_drawable.Index = Canvas.No_Draw;
 					cur_drawable.State.Set(-_units[j], false);
 					continue;
-				}					
+				}
 				Add(cur_drawable, click_fnc, new Canvas.Drawable(Shape.Rectangle, null, x, y, 175, 75, "#ff0", null, .35));
 			}
 		}
-		
+
 		self.Display_Menu(Menu.Game_Prompt);
 	};
 	self.Open_Unit_Direction_Choice = function(unit, directions, onDecisionFnc)
@@ -1035,7 +1036,7 @@ var Interface_Class = function()
 			onDecisionFnc(-1);
 			return;
 		}
-		
+
 		with(Menu.Game_Prompt)
 		{
 			Erase();
@@ -1045,7 +1046,7 @@ var Interface_Class = function()
 				self.Select_Tile();
 				onDecisionFnc();
 			});
-			
+
 			var click_fnc = function(input)
 			{
 				console.log("ooh", input);
@@ -1056,7 +1057,7 @@ var Interface_Class = function()
 			};
 			var _x = unit.X*TILESIZE,
 				_y = unit.Y*TILESIZE;
-			
+
 			for(var i in directions)
 			{
 				if(directions[i]==0)
@@ -1112,7 +1113,7 @@ var Interface_Class = function()
 				}
 			}
 		}
-		
+
 		self.Display_Menu(Menu.Game_Prompt, true);
 	};
 
@@ -1243,8 +1244,8 @@ var Interface_Class = function()
 		Avatar._ThreathsBG.State.Set("#EE6352");
 		hl_map(_danger, 0);
 	};
-	
-	
+
+
 	var selected_tile = null;
 	var hovered_tile = [-1,-1];
 	var selected_unit = null;
@@ -1312,7 +1313,7 @@ var Interface_Class = function()
 			return;
 		}
 		if(!allow_input)return;
-		
+
 		if(selected_tile!=null)
 		if(selected_tile[0]==x&&selected_tile[1]==y)
 		{	// status click cycle goes:
@@ -1360,7 +1361,7 @@ var Interface_Class = function()
 			}
 			return;
 		}
-		
+
 		selected_tile = [x,y];
 		if(hl_path!=null)
 		{
@@ -1370,18 +1371,20 @@ var Interface_Class = function()
 		{	// second click after unit selected
 			selected_unit.Mover.Hide();
 			var check_unit = game.Units_Map.At(x,y);
-			if(!game.Terrain_Map.At(x,y).Hidden && check_unit!=null)
-			if(check_unit.Player==selected_unit.Player)
+			if(game.Terrain_Map.At(x,y).Hidden && check_unit!=null)
 			{
-				selected_tile = null;
-				self.Select_Tile();
-				if(_____danger.length>0)
+				if(check_unit.Player==selected_unit.Player)
 				{
-					self.UNHIGHLIGHT(_____danger);
-					_____danger = self.HIGHLIGHT();
+					selected_tile = null;
+					self.Select_Tile();
+					if(_____danger.length>0)
+					{
+						self.UNHIGHLIGHT(_____danger);
+						_____danger = self.HIGHLIGHT();
+					}
+					self.Select_Tile(x, y);
+					return;
 				}
-				self.Select_Tile(x, y);
-				return;
 			}
 			var path = selected_unit.Mover.Path();
 			self.Allow_Controls(false);
@@ -1423,7 +1426,7 @@ var Interface_Class = function()
 			else Status.Set(selected);
 			return;
 		}
-		
+
 		// everything that gets here -> selecting a unit for the first time
 		if(check_unit.Alpha.data==0)return;
 		if(check_unit.Source==13)return;
@@ -1461,8 +1464,8 @@ var Interface_Class = function()
 			var canvas = Tile_Display.Context;
 			var _x = _unit.X*TILESIZE-scroller.getValues().left,
 				_y = _unit.Y*TILESIZE-scroller.getValues().top;
-				
-			
+
+
 			if(list.length<=1)
 			{
 				_unit.Update_Danger(_unit.X, _unit.Y);
@@ -1472,10 +1475,10 @@ var Interface_Class = function()
 			}
 			_unit.Update_Danger(list[list.length-1][0], list[list.length-1][1]);
 			scroller.repaint();
-			
+
 			canvas.save();
 			canvas.globalAlpha = .85;
-			
+
 			canvas.translate(_x, _y);
 			canvas.save();
 			if(list[0][0]+1==list[1][0])
@@ -1495,7 +1498,7 @@ var Interface_Class = function()
 			}
 			ArrowStart.Draw(canvas, 0, 0, TILESIZE, TILESIZE);
 			canvas.restore();
-			
+
 			for(var i=1;i<list.length-1;i++)
 			{
 				if(list[i-1][0]+1==list[i][0])
@@ -1585,7 +1588,7 @@ var Interface_Class = function()
 				}
 				canvas.restore();
 			}
-			
+
 			canvas.save();
 			var end = list.length-1;
 			var before = end-1;
@@ -1607,7 +1610,7 @@ var Interface_Class = function()
 			else canvas.translate(TILESIZE, 0);
 			ArrowEnd.Draw(canvas, 0, 0, TILESIZE, TILESIZE);
 			canvas.restore();
-			
+
 			canvas.restore();
 		});
 	};

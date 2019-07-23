@@ -25,7 +25,7 @@ var Mod_Class = function(name, act, type, arguments, desc, icon, test_func)
 		var color = "#0F0";
 		if(!this.Active)color = "#704214";
 		Shape.Rectangle.Draw(canvas, (x+29)*zoom, (y+9)*zoom, 26*zoom, 22*zoom, color);
-		
+
 		this.Sprite.Draw(canvas, (x+30)*zoom, (y+10)*zoom, 24*zoom, 20*zoom);
 	};
 	this.Draw = function(canvas, x, y, w, h)
@@ -34,10 +34,10 @@ var Mod_Class = function(name, act, type, arguments, desc, icon, test_func)
 		var color = "#0F0";
 		if(!this.Active)color = "#704214";
 		Shape.Rectangle.Draw(canvas, x+2, y+2, w-4, h-4, color);
-		
+
 		this.Sprite.Draw(canvas, x+3, y+3, w-6, h-6);
 	};
-	
+
 	if(icon)
 	{
 		this.Sprite = Images.Declare("Icons/"+name+".png",name+" Icon");;
@@ -53,10 +53,10 @@ var Mod_List = {
 		},
 		Move:{
 			Tracking:new Mod_Class("Tracking",function(){
-				
+
 			},"Move",[""],"Attack a cloaked stealth unit, if ran into"),
 			Radar:new Mod_Class("Radar",function(){
-				
+
 			},"Move",[""],"Detects stealth units at start of turn")
 		},
 		Attack:{
@@ -83,12 +83,12 @@ var Mod_List = {
 					if(Char_Data.CHARS[player.Get_Unit(i).Source].Modifiers.includes(Mods_List.Units.Death.Insta_Lose))
 						return;
 				}
-				amount = player.Building_Amount();
-				for(var i=0;i<amount;i++)
-				{	// if any instant lose buildings still exist, don't lose
-					if(player.Get_Building(i).Source==unit.Source)
-						return;
-				}
+				// amount = player.Building_Amount();
+				// for(var i=0;i<amount;i++)
+				// {	// if any instant lose buildings still exist, don't lose
+					// if(player.Get_Building(i).Source==unit.Source)
+						// return;
+				// }
 				player.Lose();
 			},"Death","current unit","If all command units die, and player has no more command centers, instantly lose")
 		},
@@ -125,7 +125,7 @@ var Mod_List = {
 					Core.Fade_Drawable(unit, 255, 15);
 					return false;
 				}
-		
+
 					/// down here it's able to cloak
 				if(_game.Client_Player().Team==unit.Player.Team)
 					Core.Fade_Drawable(unit, 155, 15);
@@ -140,6 +140,9 @@ var Mod_List = {
 				transport.Alpha.Set(0);
 				transport.Set_Active(true);
 				transport.Rescued_Unit = unit;
+
+				transport.Health = transport.Max_Health*unit.Health/unit.Max_Health;
+
 				Core.Fade_Drawable(unit, 0, 7, function(){
 					game.Remove_Unit(unit);
 					unit.Set_Active(false);
@@ -156,6 +159,9 @@ var Mod_List = {
 				transport.Alpha.Set(0);
 				transport.Set_Active(true);
 				transport.Rescued_Unit = unit;
+
+				transport.Health = transport.Max_Health*unit.Health/unit.Max_Health;
+
 				Core.Fade_Drawable(unit, 0, 7, function(){
 					game.Remove_Unit(unit);
 					game.Add_Unit(transport, unit.X, unit.Y, unit.Player.Team);
@@ -167,9 +173,11 @@ var Mod_List = {
 			}),
 			Land:new Mod_Class("Land",function(transport){
 				var game = transport.Game;
-				
+
 				var unit = transport.Rescued_Unit;
-				
+
+				unit.Health = unit.Max_Health*transport.Health/transport.Max_Health;
+
 				Core.Fade_Drawable(transport, 0, 7, function(){
 					unit.Alpha.Set(0);
 					game.Remove_Unit(transport);
@@ -183,11 +191,11 @@ var Mod_List = {
 				if(transport.Rescued_Unit==null)
 					return false;
 				var game = transport.Game;
-				if(game.Terrain_Map.At(transport.X, transport.Y).Surface!=transport.Rescued_Unit.Unit_Type)
+				if(transport.Rescued_Unit.Calculate_Move_Cost(game.Terrain_Map.At(transport.X, transport.Y))<transport.Rescued_Unit.Movement)
 					return false;
 				return true;
 			}),
-			
+
 			Builder:new Mod_Class("Builder",function(unit){
 				if(unit.Game.AI_Players(unit.Player))
 				{	// automate decision making with AI
@@ -195,13 +203,13 @@ var Mod_List = {
 					return;
 				}
 				var player = unit.Player;
-				
+
 				unit.Game.Interface.Open_Unit_Create_Menu(player, unit.Cash, function(index){
 					var choices = [];
 					var map = unit.Game.Terrain_Map;
 					var new_unit = new Characters.Char_Class(unit.Game, index);
 					new_unit.Player = player;
-					
+
 					if(unit.X!=0)
 					if(unit.Game.Units_Map.At(unit.X-1, unit.Y)==null)
 					if(new_unit.Calculate_Move_Cost(map.At(unit.X-1, unit.Y))<10)
@@ -236,7 +244,7 @@ var Mod_List = {
 							LOG.add("That unit cannot be built here", "#f00", 2500);
 							return;
 						}
-						
+
 						var loc_x = unit.X;
 						var loc_y = unit.Y;
 						if(direction==0)
@@ -256,7 +264,7 @@ var Mod_List = {
 							loc_y++;
 						}
 						else return;
-						
+
 						SFXs.Retrieve("build").Play();
 						unit.Cash-=player.Calculate_Cost(index);
 						new_unit.Alpha.data = 0;
@@ -272,19 +280,19 @@ var Mod_List = {
 				unit.Player.Data().data.money_gained+=500;
 				unit.Cash+=500;
 				unit.End_Turn();
-				
+
 				var Map = unit.Game.Terrain_Map;
 				var x = unit.X, y = unit.Y;
 				var index = Map.At(x, y).Source+1; // make this areas resources go down
 				var new_ter = new Terrain.Terre_Class(unit.Game, index, "Terrain("+x+","+y+")", x, y,
 					Terrain_Data.Connnection_Decision(index, unit.Game.map_source_data, x, y));
-				
+
 				Map.Set(x, y, new_ter);
-				
+
 				if(Map.At(x, y).Hidden)
 					return;
-				
-				var risingTxt = HUD_Display.Add_Drawable(new Text_Class("18pt Times New Roman","#919399"), "Income "+x+","+y, 
+
+				var risingTxt = HUD_Display.Add_Drawable(new Text_Class("18pt Times New Roman","#919399"), "Income "+x+","+y,
 							x*TILESIZE-unit.Game.Interface.X_Offset(), (y+0.6)*TILESIZE-unit.Game.Interface.Y_Offset(), 100, 30, "$"+500);
 				Core.Slide_Drawable_Y(risingTxt, -TILESIZE, 20, function(){
 					Core.Fade_Drawable(risingTxt, 0, 20);
@@ -297,7 +305,7 @@ var Mod_List = {
 				var mine = Terrain_Data.Get("Ore Deposit");
 				return ground==mine || ground==mine-1;
 			}),
-			
+
 			Repairable:new Mod_Class("Repairable",function(unit){
 				unit.Repair();
 			},"Self Action",[""],"Spend turn fixing this unit for 25% health", true, function(unit){
@@ -411,7 +419,7 @@ var Mod_List = {
 			},"Start Turn","unit on med center","Heals units that start their turn on this building")
 		},
 		End_Turn:{
-		
+
 		}
 	},
 	Terrain:{
@@ -456,12 +464,11 @@ var Mod_List = {
 	Weather:{
 		Properties:{
 			Hidden:new Mod_Class("Hidden",function(tile){
-				
+
 			},"Properties","weather","Units in clouds cannot be seen unless with a radar unit or you have a unit at the tile next to it"),
 			Treacherous:new Mod_Class("Treacherous",function(tile){
-				
+
 			},"Properties","weather","Unit passing thru will lose some health")
 		}
 	}
 };
-
