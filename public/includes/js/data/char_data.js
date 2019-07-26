@@ -7,15 +7,12 @@ var Char_Data = {
 	MoveToStr:["Foot","Wheel","Tank","Low Air","Medium Air","High Air","Surface Water","Submerged","Heavy Boat","Immoveable"],
 	SortByMove:[[],[],[],[],[],[],[],[],[],[]],
 	Resources:function(canvas, x, y, unit){
-		if(unit.Cash!=0)
-		{
-			canvas.save();
-			canvas.translate(x, y);
-			Shape.Rectangle.Draw(canvas, 5, 40, 35, 12, "#ccc");
-			Shape.Rectangle.Draw(canvas, 6, 41, 33, 10, "#4B5320");
-			new Text_Class("8pt Times New Roman","#FFF").Draw(canvas, 7, 42, TILESIZE, 10, "$"+unit.Cash);
-			canvas.restore();
-		}
+		if(unit.Cash==0)
+			return;
+		canvas.save();
+		canvas.translate(x, y);
+		INTERFACE.Resource_Draw(canvas, unit.Cash);
+		canvas.restore();
 	},
 	Radar_Display:function(canvas, x, y){
 		canvas.save();
@@ -367,7 +364,7 @@ Char_Data.CHARS[CURCHAR++] = {	// index = 12
 	Move_Type:2,
 	Slow:true,
 	Range:[2,2],
-	Sight:6,
+	Sight:3,
 	Cost:525,
 	Cash:2000,
 	Actions:[],

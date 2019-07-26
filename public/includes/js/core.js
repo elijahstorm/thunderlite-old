@@ -294,10 +294,15 @@ var Core = {
 	},
 	Explode:function(selectable)
 	{
-		var d = HUD_Display.Add_Drawable(Images.Retrieve("Explosion"),selectable.SELECTABLE+"death"+selectable.X+","+selectable.Y,selectable.X*TILESIZE-INTERFACE.X_Offset(),(selectable.Y-.5)*TILESIZE-INTERFACE.Y_Offset(),TILESIZE,TILESIZE,null,Canvas.Clear,1,0);
-		if(d!=null)
-		Core.Fade_Drawable(d, 0, 15, function(){
-			HUD_Display.Delete_Drawable(d);
+		let ani = Animations.Retrieve("Explosion");
+		ani.Stop = false;
+		Core.Fade_Drawable(selectable, 0, 6);
+		let d = ani.New(HUD_Display.Context,
+			selectable.X*TILESIZE-INTERFACE.X_Offset()+2,
+			(selectable.Y-.7)*TILESIZE-INTERFACE.Y_Offset(), null, null, true);
+		ani.onEnd(function(){
+			selectable.Remove_From_Game();
+			ani.Remove(d.values.index);
 		});
 	},
 	Array:{
@@ -497,7 +502,7 @@ window.onload = function(){
 	worldCanvas = initiateCanvas("worldCanvas");
 	terrainCanvas = initiateCanvas("terrainCanvas");
 	charCanvas = initiateCanvas("charCanvas");
-	
+
 	moveUnitCanvas = initiateCanvas("moveUnitCanvas");
 	buildingCanvas = initiateCanvas("buildingCanvas");
 	weatherCanvas = initiateCanvas("weatherCanvas");
@@ -513,12 +518,18 @@ window.onload = function(){
 	hudCanvas = initiateCanvas("hudCanvas");
 	HUD_Display = Canvas.Create_Canvas(hudCanvas, "hud");
 
+	document.getElementById("avatarCanvas").style.height = 600+"px";
 	avatarCanvas = initiateCanvas("avatarCanvas");
+	avatarCanvas.width = window.mobilecheck() ? 130 : 210;
+	avatarCanvas.height = 600;
 	Avatar_Display = Canvas.Create_Canvas(avatarCanvas, "avatar");
 	Avatar_Display.Background.State.Set("#55D6C2");
 	Avatar_Display.Background.Alpha.Set(1);
 
+	document.getElementById("statsCanvas").style.width = 600+"px";
 	statsCanvas = initiateCanvas("statsCanvas");
+	statsCanvas.width = 600;
+	statsCanvas.height = window.mobilecheck() ? 60 : 70;
 	Stats_Display = Canvas.Create_Canvas(statsCanvas, "stat");
 	Stats_Display.Background.State.Set("#F49097");
 	Stats_Display.Background.Alpha.Set(1);
@@ -537,7 +548,7 @@ window.onload = function(){
 	document.getElementById("menuButton").onclick = function(){
 		if(!confirm("Are you sure?\nYou will lose all current progress"))
 			return;
-		if(online)socket.emit('leave');
+		INTERFACE.Game.Send_Move('leave');
 		INTERFACE.Game.End_Game();
 	};
 	document.getElementById("endTurn").onclick = function(){
@@ -545,7 +556,7 @@ window.onload = function(){
 		if(INTERFACE.Game.Client_Player().Active)
 		{
 			INTERFACE.Select_Tile();
-			if(online)socket.emit('next player', JSON.stringify(INTERFACE.Game.Data()));
+			INTERFACE.Game.Send_Move('next player', JSON.stringify(INTERFACE.Game.Data()));
 			INTERFACE.Game.Client_Player().End_Turn();
 		}
 	};
@@ -575,9 +586,14 @@ function decrypt_game_data(data)
 	return encrypted;
 }
 
-function init_map(map, players, game_id, skip_pregame){
+function init_map(map, players, game_id, skip_pregame, test_game){
 	document.getElementById("mainMenu").style.display="none";
 	var Game = new Engine_Class(map);
+	if(test_game[0])
+	{
+		Game.game_data[0] = true;
+		Game.game_data[2] = test_game[1];
+	}
 	Game.id = game_id;
 	Game.Map = map;
 	INTERFACE.Close_Menu();
@@ -589,7 +605,7 @@ function init_map(map, players, game_id, skip_pregame){
 	Canvas.Redraw();
 	Canvas.Start_All();
 	gameInProgress = true;
-	
+
 	if(skip_pregame)
 	{
 		INTERFACE.Game.Host_Game(socket.game_id);
@@ -656,16 +672,16 @@ function new_game(level, name){
 		window.parent.lobby.contentWindow._openGames.add();
 	}
 }
-function new_custom_game(game_data, name, testing)
+function new_custom_game(game_data, name, testing, save_data_index)
 {
 	if(!name)return;
-	
+
 	var data = Map_Reader.Read(game_data);
 	if(!data.Valid)return;
-	
-	init_map(data, null, null, true);
+
+	init_map(data, null, null, true, [testing, save_data_index]);
 	if(testing)return;
-	
+
 	if(online){
 		socket.emit("open", data.id, name, data.Player_Amount());
 		window.parent.lobby.contentWindow.add_game(name,data.Map,data.id,true);
@@ -694,8 +710,8 @@ function openLevelSelect(){
 	INTERFACE.Allow_Controls(true);
 	INTERFACE.Display_Menu(Menu.LevelSelect);
 }
-function openMapEditor(game_data, testing_won){
-	
+function openMapEditor(game_data, data_index, testing_won){
+
 		/// load saved data
 		if(game_data==null)
 		if(document.cookie!=null)
@@ -713,14 +729,14 @@ function openMapEditor(game_data, testing_won){
 			}
 		}
 		/// delete this later
-	
+
 	document.getElementById("mainMenu").style.display="none";
 	INTERFACE.Close_Menu();
 	INTERFACE.Set_Controls(document.getElementById("inputHandler"));
 	INTERFACE.Allow_Controls(true);
-	
+
 	Menu.MapEditor.Open();
-	Menu.MapEditor.New(0, game_data, testing_won);
+	Menu.MapEditor.New(data_index, game_data, testing_won);
 	INTERFACE.Display_Menu(Menu.MapEditor);
 }
 

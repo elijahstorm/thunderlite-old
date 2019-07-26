@@ -30,6 +30,26 @@ body{
 	z-index:99999;
 }
 
+#avatarCanvas{
+	position:absolute;
+	right:0px;
+	width:210px;
+	min-width:210px;
+	max-width:210px;
+	height:600px;
+	min-height:600px;
+	max-height:600px;
+}#statsCanvas{
+	position:absolute;
+	bottom:0px;
+	height:65px;
+	min-height:65px;
+	max-height:65px;
+	width:600px;
+	min-width:600px;
+	max-width:600px;
+}
+
 #gameHelpers{
 	display:none;
 }#frames{
@@ -46,10 +66,10 @@ body{
 	padding:.5vh 1vw;
 }#endTurn{
 	position:absolute;
-	top:600px;
-	left:600px;
-	width:210px;
-	height:65px;
+	bottom:0px;
+	right:0px;
+	width:152px;
+	height:49px;
 	-moz-box-shadow:inset 0px 1px 0px 0px #fce2c1;
 	-webkit-box-shadow:inset 0px 1px 0px 0px #fce2c1;
 	box-shadow:inset 0px 1px 0px 0px #fce2c1;

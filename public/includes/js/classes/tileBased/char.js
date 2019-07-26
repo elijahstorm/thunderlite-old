@@ -85,14 +85,25 @@ var Characters = {
 			return CharData.Y[this.State]+tileYOff;
 		};
 		this.Data = function()
-		{
+		{	// returns a clone of the data
 			var self = this;
-			return {
+			let data = {
 				index:char_index,
 				x:self.X,
 				y:self.Y,
 				health:self.Health
 			};
+			if(self.Cash!=null)
+				data.cash = self.Cash;
+			let extra_mods = [];
+			for(let i=0;i<mods.length;i++)
+			{
+				if(!CharData.Modifiers.includes(mods[i]))
+					extra_mods.push(mods[i]);
+			}
+			if(extra_mods.length>0)
+				data.mods = extra_mods;
+			return data;
 		};
 
 		this.display_health = true;
@@ -107,7 +118,6 @@ var Characters = {
 		};
 		this.Draw = function(canvas, x, y, _scale)
 		{
-			var tile_scale = TILESIZE/60;
 			var pic = this.Sprites[this.State];
 			if(this.Idle)
 			{
@@ -118,9 +128,10 @@ var Characters = {
 				pic = opacity(pic, this.Alpha.data);
 			}
 			var behind = canvas.getImageData(x, y, pic.width, pic.height);
-			var NotNullCheck = scale(pic, tile_scale, tile_scale);
-			if(NotNullCheck!=null)
-				pic = NotNullCheck;
+			behind = merge(behind, pic);
+			if(behind!=null)
+				pic = behind;
+			else console.log(pic,behind);
 
 			canvas.putImageData(_scale==null ? pic : scale(pic, _scale, _scale), x, y);
 		};
@@ -420,8 +431,7 @@ var Characters = {
 			/// when attacking
 		// this code has error when on server as sent move doesnt initialize path
 		// only put this back in if bug appears where unit can attack wherever even when not in range
-			if(game.Terrain_Map.At(x,y).Hidden)
-				return false; // cannot attack a hidden tile
+			if(!game.Terrain_Map.At(x,y).Hidden) // cannot attack a hidden tile
 			var defender = game.Units_Map.At(x,y);
 			if(defender!=null)
 			if(defender.Alpha.data==255)
@@ -752,8 +762,11 @@ var Characters = {
 		{		// go to this next
 			moveSFX.Play();
 			this.Move_From();
-			game.Interface.Set_Moving_Unit(this);
-			game.Interface.Draw();
+			if(!game.Interface.Fake)
+			{
+				game.Interface.Set_Moving_Unit(this);
+				game.Interface.Draw();
+			}
 			this.On_Move(this, mover);
 			this.display_health = false;
 			var oldX = this.X;
@@ -763,10 +776,15 @@ var Characters = {
 				setTimeout(function(){
 					moveSFX.Stop();
 				}, 2000);
-				game.Player_Visibility(unit.Player);
 				game.Units_Map.Set(oldX,oldY,null);
 				game.Units_Map.Set(unit.X,unit.Y,unit);
-				game.Interface.Set_Moving_Unit(null);
+				if(unit.Rescued_Unit!=null)
+				{
+					unit.Rescued_Unit.X = unit.X;
+					unit.Rescued_Unit.Y = unit.Y;
+				}
+				if(!game.Interface.Fake)
+					game.Interface.Set_Moving_Unit(null);
 				unit.display_health = true;
 				unit.Terrain().Unit = unit;
 				var b = unit.Terrain().Building;
@@ -779,6 +797,7 @@ var Characters = {
 				{
 					available[i].Do(unit);
 				}
+				game.Player_Visibility(unit.Player);
 				var hidden_enemy_check = game.Units_Map.At(unit.X+1, unit.Y);
 				if(hidden_enemy_check!=null)
 				if(hidden_enemy_check.Alpha.data<255)
@@ -1018,9 +1037,7 @@ var Characters = {
 				if(tile_def.Building!=null)
 					tile_def = tile_def.Building;
 				bonus*=(1-tile_def.Protection);
-				// console.log("b4 height",bonus);
-				// bonus*=1+(this.Terrain().Height-tile_def.Height)/100;
-				// console.log("aftr height",1+this.Terrain().Height-tile_def.Height,bonus);
+				bonus*=1+((this.Terrain().Height-tile_def.Height)/300);
 			}
 			var available = this.Mods_By_Type("Damage");
 			for(var i=0;i<available.length;i++)
@@ -1145,18 +1162,18 @@ var Characters = {
 		};
 
 		this.Dead = false;
-		this.Die = function(keep_data)
+		this.Die = function()
 		{
 			this.Dead = true;
 			this.Health = 0;
 			this.Move_From();
 			SFXs.Retrieve('explosion').Play();
 			Core.Explode(this);
-			if(!keep_data)
-			{
-				this.Player.Remove_Unit(this);
-				game.Remove_Unit(this);
-			}
+		};
+		this.Remove_From_Game = function()
+		{
+			this.Player.Remove_Unit(this);
+			game.Remove_Unit(this);
 		};
 
 		var move_path;
@@ -1181,7 +1198,7 @@ var Characters = {
 
 		this.Open_Actions = function(value)
 		{
-			if(game.Interface==null)return;
+			if(game.Interface.Fake)return;
 
 			if(!value)
 			{

@@ -32,9 +32,9 @@ function changePixels(img, d1, d2)
 	{
 		for(var k=0;k<d1.length;k++)
 		{
-			if(img.data[i]==d1[k][0])
-			if(img.data[i+1]==d1[k][1])
-			if(img.data[i+2]==d1[k][2])
+			if(Math.abs(img.data[i]-d1[k][0])<=5)
+			if(Math.abs(img.data[i+1]-d1[k][1])<=5)
+			if(Math.abs(img.data[i+2]-d1[k][2])<=5)
 			{
 				img.data[i] = d2[k][0];
 				img.data[i+1] = d2[k][1];

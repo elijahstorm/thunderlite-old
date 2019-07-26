@@ -213,9 +213,10 @@ var Levels_Class = function()
 
 	this.Draw = function(canvas, x, y, w, h, level)
 	{
-		var holder = new Engine_Class(level);
-		INTERFACE.Sample_Draw(canvas, x, y, w, h, holder);
-		holder.End_Game();
+		console.error("dont call here");
+		// var holder = new Engine_Class(level, true);
+		// INTERFACE.Sample_Draw(canvas, x, y, w, h, holder);
+		// holder.End_Game();
 	};
 	this.Terrain = {
 		Draw:function(canvas, x, y, w, h, level){

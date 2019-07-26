@@ -19,55 +19,60 @@ var Player_Class = function(game, name, team, colors)
 	var placeSprites = new Array(Building_Data.PLACE.length);
 	self.Color = colors;
 	self.Game = game;
-	imageHolderCanvas.clearRect(0,0,imageHolderCanvas.width,imageHolderCanvas.height);
-	
-	for(var x=0;x<Char_Data.CHARS.length;x++)
+
+	if(colors!=-1)
 	{
-		charSprites[x] = [];
-		for(var y=0;y<3;y++)
+		imageHolderCanvas.clearRect(0,0,imageHolderCanvas.width,imageHolderCanvas.height);
+
+		for(var x=0;x<Char_Data.CHARS.length;x++)
 		{
-			var img = Char_Data.CHARS[x].Sprite[y];
+			charSprites[x] = [];
+			for(var y=0;y<3;y++)
+			{
+				var img = Char_Data.CHARS[x].Sprite[y];
+				img.Draw(imageHolderCanvas,0,0);
+				charSprites[x][y] = scale(changePixels(imageHolderCanvas.getImageData(0,0,img.Image().width,img.Image().height), Team_Colors.Color[0], Team_Colors.Color[colors]), TILESIZE/60, TILESIZE/60);
+				imageHolderCanvas.clearRect(0,0,img.Image().width,img.Image().height);
+			}
+			var c = Char_Data.CHARS[x];
+			var img = c.Sprite[0];
+			c.X[3] = 60-img.Image().width-c.X[0];
+			c.Y[3] = c.Y[0];
 			img.Draw(imageHolderCanvas,0,0);
-			charSprites[x][y] = changePixels(imageHolderCanvas.getImageData(0,0,img.Image().width,img.Image().height), Team_Colors.Color[0], Team_Colors.Color[colors]);
+			charSprites[x][3] = scale(flipX(changePixels(imageHolderCanvas.getImageData(0,0,img.Image().width,img.Image().height), Team_Colors.Color[0], Team_Colors.Color[colors])), TILESIZE/60, TILESIZE/60);
 			imageHolderCanvas.clearRect(0,0,img.Image().width,img.Image().height);
 		}
-		var c = Char_Data.CHARS[x];
-		var img = c.Sprite[0];
-		c.X[3] = 60-img.Image().width-c.X[0];
-		c.Y[3] = c.Y[0];
-		img.Draw(imageHolderCanvas,0,0);
-		charSprites[x][3] = flipX(changePixels(imageHolderCanvas.getImageData(0,0,img.Image().width,img.Image().height), Team_Colors.Color[0], Team_Colors.Color[colors]));
-		imageHolderCanvas.clearRect(0,0,img.Image().width,img.Image().height);
-	}
-	for(var x=0;x<Building_Data.PLACE.length;x++)
-	{
-		var img = Building_Data.PLACE[x].Sprite;
-		img.Draw(imageHolderCanvas,0,0);
-		placeSprites[x] = changePixels(imageHolderCanvas.getImageData(0,0,img.Image().width,img.Image().height), Team_Colors.Color[0], Team_Colors.Color[colors]);
-		imageHolderCanvas.clearRect(0,0,img.Image().width,img.Image().height);
+		for(var x=0;x<Building_Data.PLACE.length;x++)
+		{
+			var img = Building_Data.PLACE[x].Sprite;
+			img.Draw(imageHolderCanvas,0,0);
+			placeSprites[x] = scale(changePixels(imageHolderCanvas.getImageData(0,0,img.Image().width,img.Image().height), Team_Colors.Color[0], Team_Colors.Color[colors]), TILESIZE/60, TILESIZE/60);
+			imageHolderCanvas.clearRect(0,0,img.Image().width,img.Image().height);
+		}
+
+		function ICON_DRAWER(imgData)
+		{
+			this.Draw = function(canvas, x, y, w, h)
+			{
+				if(w==null)w=imgData.width;
+				if(h==null)h=imgData.height;
+
+				var back = canvas.getImageData(x, y, w, h);
+				var x_scale = w/imgData.width;
+				var y_scale = h/imgData.height;
+
+				canvas.putImageData(merge(back, scale(imgData, x_scale, y_scale)), x, y);
+			};
+		};
+		self.Icon = new ICON_DRAWER(charSprites[1][0]);
 	}
 
 	self.Name = name;
 	self.Team = team;
 	self.Game = game;
 	self.Dead = false;
-	function ICON_DRAWER(imgData)
-	{
-		this.Draw = function(canvas, x, y, w, h)
-		{
-			if(w==null)w=imgData.width;
-			if(h==null)h=imgData.height;
-			
-			var back = canvas.getImageData(x, y, w, h);
-			var x_scale = w/imgData.width;
-			var y_scale = h/imgData.height;
-			
-			canvas.putImageData(merge(back, scale(imgData, x_scale, y_scale)), x, y);
-		};
-	};
-	self.Icon = new ICON_DRAWER(charSprites[1][0]);
 	self.Data = function()
-	{
+	{	// returns a clone of the data
 		var units_data = [];
 		var build_data = [];
 		for(var i in Units)
@@ -116,7 +121,7 @@ var Player_Class = function(game, name, team, colors)
 		self.data.turns_alive++;
 		self.Active = true;
 		if(Units[0]!=null)
-			INTERFACE.Scroll_To_Tile(Units[0].X, Units[0].Y);
+			game.Interface.Scroll_To_Tile(Units[0].X, Units[0].Y);
 		setTimeout(function(){
 			startUnitRecursive(actable, 0, callback);
 		}, 10);
@@ -126,7 +131,7 @@ var Player_Class = function(game, name, team, colors)
 			var __unit = game.Units_Map.At(city.X, city.Y);
 			if(__unit!=null)
 			if(__unit.Player==self)continue;
-			
+
 			self.Raiding_Cities.splice(i--, 1);
 		}
 		for(var i in Buildings)
@@ -161,7 +166,7 @@ var Player_Class = function(game, name, team, colors)
 			self.data.money_gained+=value;
 		else self.data.money_spent-=value;
 		resources+=value;
-		if(game.Interface!=null)
+		if(!game.Interface.Fake)
 			game.Interface.Update_Player_Info();
 	};
 	self.Cash_Money = function()
@@ -272,18 +277,17 @@ var Player_Class = function(game, name, team, colors)
 		return game.Check_Player_Standing(team);
 	};
 
-	self.Kill_All = function(keep_data)
+	self.Kill_All = function()
 	{
 		setTimeout(function(){
 			for(var i in Units)
 			{
-				Units[i].Die(true);
-				if(!keep_data)game.Remove_Unit(Units[i]);
+				Units[i].Die();
 			}
 			Units = [];
 			for(var i in Buildings)
 			{
-				Buildings[i].Die(true);
+				Buildings[i].Die();
 			}
 			Buildings = [];
 		}, AI.TIMEOUT);
@@ -343,7 +347,7 @@ var Player_Class = function(game, name, team, colors)
 		}
 		input.Owner = self;
 		game.City_Visibility(input);
-		if(game.Interface!=null)game.Interface.Draw();
+		game.Interface.Draw();
 	};
 	self.Ground_Control = function()
 	{

@@ -27,7 +27,7 @@ function reportNewUser(user, pass, report){
 	socket.emit('new user', user, pass);
 }
 function logOut(){
-	
+
 }
 
 var gameFrame;
@@ -102,8 +102,8 @@ window.onload = function(){
 		{	// refresh connection
 			CONNECTION_TIMEOUT = 0;
 		}
-		else if(data.type==1)/** unused */
-		{	}
+		else if(data.type==1)
+		{ /** unused */	}
 		else if(data.type==2)
 		{	// refresh connection info
 			if(!lobby_open)return;
@@ -243,6 +243,10 @@ window.onload = function(){
 			if(game.LOG)game.LOG.add("game started","#F00");
 			game.INTERFACE.Game.Start();
 			lobby.contentWindow._openGames.sub();
+		}
+		else if(data.type==22.5)
+		{	// report updated passkey for game to work
+			game.INTERFACE.Game.Set_Passkey(data.passkey);
 		}
 		else if(data.type==23)
 		{	// report opened game id

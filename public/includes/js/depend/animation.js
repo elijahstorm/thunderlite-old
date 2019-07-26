@@ -1,5 +1,34 @@
 function Animation_Display_Class()
 {
+	let places_class = function(holder,C,X,Y,W,H,S,i)
+	{
+		this.set = function(update)
+		{
+			var ani = this.values;
+			if(ani.show)
+			{
+				holder.Clear(ani.canvas, ani.x, ani.y, ani.width, ani.height);
+			}
+			for(var i in update)
+			{
+				ani[i] = update[i];
+			}
+			if(ani.show)
+			{
+				holder.Draw(ani.canvas, ani.x, ani.y, ani.width, ani.height);
+			}
+		};
+		this.values = {
+			canvas:C,
+			x:X,
+			y:Y,
+			width:W,
+			height:H,
+			show:S,
+			index:i
+		};
+	};
+
 	function Animation_Class(images,name,delay,auto_repeat)
 	{ // delay is how many frames each image displays
 		var imgs = images;
@@ -9,36 +38,14 @@ function Animation_Display_Class()
 		var loaded_images=0;
 		var loop_index=0,delay_index=0;
 		var places = [];
+		let callback;
 
-		var places_class = function(holder,C,X,Y,W,H,S,i)
+		this.onEnd = function(_cb)
 		{
-			this.set = function(update)
-			{
-				var ani = this.values;
-				if(ani.show)
-				{
-					holder.Clear(ani.canvas, ani.x, ani.y, ani.width, ani.height);
-				}
-				for(var i in update)
-				{
-					ani[i] = update[i];
-				}
-				if(ani.show)
-				{
-					holder.Draw(ani.canvas, ani.x, ani.y, ani.width, ani.height);
-				}
-			};
-			this.values = {
-				canvas:C,
-				x:X,
-				y:Y,
-				width:W,
-				height:H,
-				show:S,
-				index:i
-			};
+			callback = _cb;
 		};
 
+		this.Length = imgs.length;
 		this.Stop = true;
 		this.Loaded = function()
 		{
@@ -69,9 +76,12 @@ function Animation_Display_Class()
 				changed = true;
 				delay_index = 0;
 			}
-			if(loop_index>=imgs.length)
+			if(loop_index>=this.Length)
 			{
-				if(!_auto)_stop = true;
+				if(!_auto)
+				{
+					this.Stop = true;
+				}
 				loop_index = 0;
 				changed = true;
 			}
@@ -82,10 +92,13 @@ function Animation_Display_Class()
 					if(places[i].values.show)
 					{
 						this.Clear(places[i].values.canvas, places[i].values.x, places[i].values.y, places[i].values.width, places[i].values.height);
-						this.Draw(places[i].values.canvas, places[i].values.x, places[i].values.y, places[i].values.width, places[i].values.height);
+						if(!this.Stop)this.Draw(places[i].values.canvas, places[i].values.x, places[i].values.y, places[i].values.width, places[i].values.height);
 					}
 				}
 			}
+			if(this.Stop)
+			if(callback)
+				callback();
 		};
 
 		this.New = function(C,X,Y,W,H,S)
@@ -105,6 +118,7 @@ function Animation_Display_Class()
 					places[i].values.index--;
 				}
 			}
+			return this;
 		};
 		this.Remove_All = function()
 		{
@@ -138,6 +152,123 @@ function Animation_Display_Class()
 			_auto = value;
 		};
 	};
+	function Sprite_Sheet_Handler(sheet, name, delay, auto_repeat)
+	{
+		var _name = name;
+		var _delay = delay;
+		var _auto = auto_repeat;
+		var loop_index=0,delay_index=0;
+		var places = [];
+		let frame_w, frame_h;
+		let _length, _height;
+		let callback;
+
+		this.onEnd = function(_cb)
+		{
+			callback = _cb;
+		};
+
+		this.Stop = true;
+
+		this.Draw = function(canvas,x,y,w,h)
+		{
+			sheet.Crop(canvas,x,y,(loop_index%_length)*frame_w,Math.floor(loop_index/_length)*frame_h,frame_w,frame_h,w,h);
+		};
+		this.Clear = function(canvas,x,y,w,h)
+		{
+			canvas.clearRect(x,y,w,h);
+		};
+
+		this.Increment = function()
+		{
+			delay_index++;
+			var changed = false;
+			if(delay_index>=_delay)
+			{
+				loop_index++;
+				changed = true;
+				delay_index = 0;
+			}
+			if(loop_index>=this.Length)
+			{
+				if(!_auto)
+				{
+					this.Stop = true;
+				}
+				loop_index = 0;
+			}
+			if(changed)
+			{
+				for(var i in places)
+				{
+					if(places[i].values.show)
+					{
+						this.Clear(places[i].values.canvas, places[i].values.x, places[i].values.y, places[i].values.width, places[i].values.height);
+						if(!this.Stop)this.Draw(places[i].values.canvas, places[i].values.x, places[i].values.y, places[i].values.width, places[i].values.height);
+					}
+				}
+			}
+			if(this.Stop)
+			if(callback)
+				callback();
+		};
+
+		this.New = function(C,X,Y,W,H,S)
+		{
+			var i = places.length;
+			places[i] = new places_class(this,C,X,Y,W,H,S,i);
+			if(S)this.Draw(C,X,Y,W,H);
+			return places[i];
+		};
+		this.Remove = function(index)
+		{
+			if(places[index])
+			{
+				places.splice(index,1);
+				for(var i=index;i<places.length;i++)
+				{
+					places[i].values.index--;
+				}
+			}
+		};
+		this.Remove_All = function()
+		{
+			places = [];
+		};
+
+		this.Name = function()
+		{
+			return _name;
+		};
+		this.Delay = function()
+		{
+			return _delay;
+		};
+		this.Autoplay = function(value)
+		{
+			if(value==null)
+			{
+				value = true;
+			}
+			_auto = value;
+		};
+
+		this.Frame_Size = function(_w, _h)
+		{
+			_length = _w;
+			_height = _h;
+			frame_w = Math.floor(sheet.Image().width/_w);
+			frame_h = Math.floor(sheet.Image().height/_h);
+			this.Length = _length*_height;
+			return this;
+		};
+		this.Frame_Size(10, 10);
+
+		this.Loaded = function()
+		{
+			return sheet.Loaded();
+		};
+	}
 
 	var Animations = [];
 	var total_animations=0,loaded_animations=0;
@@ -183,7 +314,9 @@ function Animation_Display_Class()
 		{
 			temp_copy[i] = images[i];
 		}
-		Animations[name] = new Animation_Class(temp_copy,name,delay,auto_repeat);
+		let Choice_Class = Animation_Class;
+		if(images.Crop)Choice_Class = Sprite_Sheet_Handler;
+		Animations[name] = new Choice_Class(temp_copy,name,delay,auto_repeat);
 		return Animations[name];
 	};
 	this.Delete = function(name)

@@ -429,18 +429,18 @@ var Mod_List = {
 				if(unit.Range[1]>1)
 				{
 					unit.Range[1]++;
-					unit.Sight++;
+					unit.Sight+=1;
 					unit.On_Move = function(unit, move){
 						unit.Range[1]--;
-						unit.Sight--;
+						unit.Sight-=1;
 						unit.On_Move = function(unit, move){};
 					};
 				}
 				else
-				{
-					unit.Sight++;
+				{	// spider tanks can be good scoutes
+					unit.Sight+=unit.Source==9 ? 2 : 1;
 					unit.On_Move = function(unit, move){
-						unit.Sight--;
+						unit.Sight-=unit.Source==9 ? 2 : 1;
 						unit.On_Move = function(unit, move){};
 					};
 				}

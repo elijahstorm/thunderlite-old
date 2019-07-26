@@ -1,5 +1,6 @@
 var Interface_Class = function()
 {
+	this.IS_MOBILE_GAME = window.mobilecheck();
 	var allow_input = false;
 	var self = this;
 	var game,terrain_disp;
@@ -230,9 +231,6 @@ var Interface_Class = function()
 	var simplePaint = function(x, y, left, top, w, h, zoom){
 		if(game==null)return;
 
-		// if(game.Terrain_Map.At(y,x).Hidden)
-			// return;
-
 		at = game.Units_Map.At(y,x);
 		if(at==moving_unit&&at!=null)
 		if(!game.Terrain_Map.At(at.X,at.Y).Hidden)
@@ -273,156 +271,312 @@ var Interface_Class = function()
 		terrain_disp.render(left, top, zoom, paint);
 	};
 
-	var Status = {
-		Display:0,
-		Icon:Stats_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 0, 0, 1, true, null, Canvas.Background),
-		IconBorder:Stats_Display.Add_Drawable(Shape.Box, "IconBorder", 3, 3, 63, 63, "#3C6BBE", Canvas.Merge),
-		Name:Stats_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Name", 70, 3, 200, 20, "", Canvas.Background),
-		Desc:Stats_Display.Add_Drawable(new Text_Class("10pt Times New Roman", "#000"), "Desc", 70, 25, 200, 35, "", Canvas.Background),
-		Info:Stats_Display.Add_Drawable(new Text_Class("10pt Times New Roman", "#000"), "Info", 290, 5, 130, 50, "", Canvas.Background),
-		Divisor1:Stats_Display.Add_Drawable(Shape.Rectangle, "Div1", 280, 3, 2, 60, "#000", Canvas.Background, 0),
-		Set:function(data)
-		{
-			Stats_Display.Background.Redraw();
-			if(data==null)
+	var Avatar,Status;
+	if(self.IS_MOBILE_GAME) {	// mobile display
+		Status = {
+			Display:0,
+			Icon:Stats_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 0, 0, 1, true, null, Canvas.Background),
+			IconBorder:Stats_Display.Add_Drawable(Shape.Box, "IconBorder", 3, 3, 63, 63, "#3C6BBE", Canvas.Merge),
+			Name:Stats_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Name", 70, 3, 200, 20, "", Canvas.Background),
+			Desc:Stats_Display.Add_Drawable(new Text_Class("10pt Times New Roman", "#000"), "Desc", 70, 25, 200, 35, "", Canvas.Background),
+			Info:Stats_Display.Add_Drawable(new Text_Class("10pt Times New Roman", "#000"), "Info", 290, 5, 130, 50, "", Canvas.Background),
+			Divisor1:Stats_Display.Add_Drawable(Shape.Rectangle, "Div1", 280, 3, 2, 60, "#000", Canvas.Background, 0),
+			Set:function(data)
 			{
-				this.Display = 0;
-				this.Icon.Alpha.Set(0);
-				this.Name.Alpha.Set(0);
-				this.Desc.Alpha.Set(0);
-				this.Info.Alpha.Set(0);
-				this.Divisor1.Alpha.Set(0);
-				return;
-			}
-			this.Display = data.SELECTABLE;
-			this.Icon.Source.Set(data);
-			this.Icon.X.Set(5+data.X_Offset());
-			this.Icon.Y.Set(3+data.Y_Offset());
-			this.Icon.State.Set(true);
-			this.Icon.Alpha.Set(1);
-			this.Name.State.Set(data.Name);
-			this.Name.Alpha.Set(1);
-			this.Desc.State.Set(data.Description());
-			this.Desc.Alpha.Set(1);
-			this.Info.Alpha.Set(1);
-			this.Divisor1.Alpha.Set(1);
-			if(data.SELECTABLE==1)
-			{	/// unit
-				this.Info.State.Set(data.Health+" / "+data.Max_Health+" HP\n"+(data.Health/data.Max_Health*data.Power).toFixed(0)+" Strength\n"+Char_Data.TypeToStr[data.Unit_Type]+"\n"+data.Movement+" "+Char_Data.MoveToStr[data.Move_Type]);
-			}
-			else if(data.SELECTABLE==2)
-			{	/// city
-				this.Icon.State.Set(false);
-				this.Info.State.Set((data.Protection*100)+"% Protection\n\n"+Terrain_Data.TypeToStr[data.Type]+"\n"+data.Damage+" Damage");
-			}
-			else if(data.SELECTABLE==3)
-			{	/// terrain
-				this.Info.State.Set(data.Stature.Get()+" / "+Building_Data.PLACE[data.Source].Stature+" HP\n"+(data.Protection*100)+"% Protection\n\n"+Building_Data.TypeToStr[data.Type]+"\n"+data.Defense+" Defense\n\n");
-			}
-		}
-	};
-	var Avatar = {
-		TurnBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "TurnBG", 20, 15, 150, 55, "#73877B", Canvas.Background),
-		TurnBox:Avatar_Display.Add_Drawable(Shape.Box, "TurnBox", 20, 15, 150, 55, "#E5D1D0", Canvas.Merge),
-		Turn:Avatar_Display.Add_Drawable(new Text_Class("20pt Times New Roman", "#000"), "Turn", 30, 30, 50, 40, null, Canvas.Merge),
-		Turn_Number:Avatar_Display.Add_Drawable(new Text_Class("40pt Times New Roman", "#000"), "Turn Number", 100, 20, 50, 45, null, Canvas.Merge),
-		Standings:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Standings", 20, 85, 200, 20, null, Canvas.Background),
-		Standings_Border1:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border1", 20, 80, 150, 2, "#000", Canvas.Background),
-		Standings_Border2:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border2", 20, 105, 150, 2, "#000", Canvas.Background),
-		Current_Player:Avatar_Display.Add_Drawable(new Text_Class("25pt Times New Roman", "#000"), "Player Name", 10, 130, 200, 35, null, Canvas.Background),
-		Info:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Info", 15, 165, 200, 20, null, Canvas.Background),
-		IconBG:Avatar_Display.Add_Drawable(Shape.Box, "IconBG", 110, 167, 80, 80, "#000", Canvas.Background),
-		Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 110, 170, 80, 80, null, Canvas.Background),
-
-		All_Threaths:Avatar_Display.Add_Drawable({Draw:function(){}}, "Threats", 605, 242, 80, 30, "#EE6352", Canvas.Background),
-		_ThreathsBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "ThreatsBG", 5, 242, 80, 30, "#EE6352", Canvas.Background),
-		_ThreathsBox:Avatar_Display.Add_Drawable(Shape.Box, "ThreatsBox", 5, 242, 80, 30, "#7F9172", Canvas.Background),
-		_ThreathsTEXT:Avatar_Display.Add_Drawable(new Text_Class("13pt Times New Roman", "#57241E"), "ThreatsText", 9, 250, 80, 20, "DANGER", Canvas.Merge),
-
-		PLHighlights:Avatar_Display.Add_Drawable({
-			Font:new Text_Class("15pt Times New Roman", "#ddd"),
-			Draw:function(canvas, x, y, w, h, __game){
-				if(__game==null ||!~__game)return;
-
-				Shape.Rectangle.Draw(canvas, x-5, y-5, w+10, h+10, "#E5D1D0");
-				Shape.Box.Draw(canvas, x-5, y-5, w+10, h+10, "#7F9172");
-
-				var active_player = __game.Active_Player();
-				var total_players = __game.Total_Players();
-
-				var str = new Array(total_players);
-				var box = new Array(total_players);
-
-				for(var i=0;i<total_players;i++)
+				Stats_Display.Background.Redraw();
+				if(data==null)
 				{
-					str = active_player.Name;
-					var j_max = Math.floor(Math.log10(active_player.Cash_Money()))+1;
-					if(active_player.Cash_Money()==0)
-						j_max = 1;
-					if(active_player.Dead)
-						j_max = 3;
-					for(var j=25-str.length;j>j_max;j--)
-					{
-						str+=" ";
-					}
-					if(active_player.Dead)
-						str+="XXX";
-					else str+="$"+active_player.Cash_Money();
-
-					var color = Team_Colors.Color[active_player.Color][2]; //turn this to hex
-					box = data_to_hex(color);
-
-					Shape.Rectangle.Draw(canvas, x, y+(i*36), w, 30, box);
-					Shape.Box.Draw(canvas, x, y+(i*36), w, 30, "#000");
-					this.Font.Draw(canvas, x+5, y+(i*36)+5, w, 30, str);
-
-					active_player = __game.Player((active_player.Team+1)%total_players);
+					this.Display = 0;
+					this.Icon.Alpha.Set(0);
+					this.Name.Alpha.Set(0);
+					this.Desc.Alpha.Set(0);
+					this.Info.Alpha.Set(0);
+					this.Divisor1.Alpha.Set(0);
+					return;
+				}
+				this.Display = data.SELECTABLE;
+				this.Icon.Source.Set(data);
+				this.Icon.X.Set(5+data.X_Offset());
+				this.Icon.Y.Set(3+data.Y_Offset());
+				this.Icon.State.Set(true);
+				this.Icon.Alpha.Set(1);
+				this.Name.State.Set(data.Name);
+				this.Name.Alpha.Set(1);
+				this.Desc.State.Set(data.Description());
+				this.Desc.Alpha.Set(1);
+				this.Info.Alpha.Set(1);
+				this.Divisor1.Alpha.Set(1);
+				if(data.SELECTABLE==1)
+				{	/// unit
+					this.Info.State.Set(data.Health+" / "+data.Max_Health+" HP\n"+(data.Health/data.Max_Health*data.Power).toFixed(0)+" Strength\n"+Char_Data.TypeToStr[data.Unit_Type]+"\n"+data.Movement+" "+Char_Data.MoveToStr[data.Move_Type]);
+				}
+				else if(data.SELECTABLE==2)
+				{	/// city
+					this.Icon.State.Set(false);
+					this.Info.State.Set((data.Protection*100)+"% Protection\n\n"+Terrain_Data.TypeToStr[data.Type]+"\n"+data.Damage+" Damage");
+				}
+				else if(data.SELECTABLE==3)
+				{	/// terrain
+					this.Info.State.Set(data.Stature.Get()+" / "+Building_Data.PLACE[data.Source].Stature+" HP\n"+(data.Protection*100)+"% Protection\n\n"+Building_Data.TypeToStr[data.Type]+"\n"+data.Defense+" Defense\n\n");
 				}
 			}
-		}, "Player List Highlights", 10, 360, 180, 85, null, Canvas.Merge),
+		};
+		Avatar = {
+			TurnBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "TurnBG", 20, 15, 150, 55, "#73877B", Canvas.Background),
+			Turn:Avatar_Display.Add_Drawable(new Text_Class("20pt Times New Roman", "#000"), "Turn", 30, 30, 50, 40, null, Canvas.Merge),
+			TurnBox:Avatar_Display.Add_Drawable(Shape.Box, "TurnBox", 20, 15, 150, 55, "#E5D1D0", Canvas.Merge),
+			Turn_Number:Avatar_Display.Add_Drawable(new Text_Class("40pt Times New Roman", "#000"), "Turn Number", 100, 20, 50, 45, null, Canvas.Merge),
+			Standings:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Standings", 20, 85, 200, 20, null, Canvas.Background),
+			Standings_Border1:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border1", 20, 80, 150, 2, "#000", Canvas.Background),
+			Standings_Border2:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border2", 20, 105, 150, 2, "#000", Canvas.Background),
+			Current_Player:Avatar_Display.Add_Drawable(new Text_Class("25pt Times New Roman", "#000"), "Player Name", 10, 130, 200, 35, null, Canvas.Background),
+			Info:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Info", 15, 165, 200, 20, null, Canvas.Background),
+			IconBG:Avatar_Display.Add_Drawable(Shape.Box, "IconBG", 110, 167, 80, 80, "#000", Canvas.Background),
+			Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 110, 170, 80, 80, null, Canvas.Background),
 
-		Update_Player_List:function(){
-			var total_players = game.Total_Players();
-			this.PLHighlights.Height.Set(total_players*34+1);
-			this.PLHighlights.State.Set(game);
-		},
-		Display:function(player){
-			if(player==null||game.Game_Over)
-			{
-				this.Icon.Alpha.Set(0);
-				this.IconBG.Alpha.Set(0);
-				this.Standings.State.Set("");
-				this.Info.State.Set("");
-				this.Current_Player.State.Set("");
-				this._ThreathsBG.Alpha.Set(0);
-				this._ThreathsBox.Alpha.Set(0);
-				this._ThreathsTEXT.Alpha.Set(0);
-				return;
+			All_Threaths:Avatar_Display.Add_Drawable({Draw:function(){}}, "Threats", 605, 242, 80, 30, "#EE6352", Canvas.Background),
+			_ThreathsBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "ThreatsBG", 5, 242, 80, 30, "#EE6352", Canvas.Background),
+			_ThreathsTEXT:Avatar_Display.Add_Drawable(new Text_Class("13pt Times New Roman", "#57241E"), "ThreatsText", 9, 250, 80, 20, "DANGER", Canvas.Merge),
+			_ThreathsBox:Avatar_Display.Add_Drawable(Shape.Box, "ThreatsBox", 5, 242, 80, 30, "#7F9172", Canvas.Background),
+
+			PLHighlights:Avatar_Display.Add_Drawable({
+				Font:new Text_Class("15pt Times New Roman", "#ddd"),
+				Draw:function(canvas, x, y, w, h, __game){
+					if(__game==null ||!~__game)return;
+
+					Shape.Rectangle.Draw(canvas, x-5, y-5, w+10, h+10, "#E5D1D0");
+					Shape.Box.Draw(canvas, x-5, y-5, w+10, h+10, "#7F9172");
+
+					var active_player = __game.Active_Player();
+					var total_players = __game.Total_Players();
+
+					var str = new Array(total_players);
+					var box = new Array(total_players);
+
+					for(var i=0;i<total_players;i++)
+					{
+						str = active_player.Name;
+						var j_max = Math.floor(Math.log10(active_player.Cash_Money()))+1;
+						if(active_player.Cash_Money()==0)
+							j_max = 1;
+						if(active_player.Dead)
+							j_max = 3;
+						for(var j=25-str.length;j>j_max;j--)
+						{
+							str+=" ";
+						}
+						if(active_player.Dead)
+							str+="XXX";
+						else str+="$"+active_player.Cash_Money();
+
+						var color = Team_Colors.Color[active_player.Color][2]; //turn this to hex
+						box = data_to_hex(color);
+
+						Shape.Rectangle.Draw(canvas, x, y+(i*36), w, 30, box);
+						Shape.Box.Draw(canvas, x, y+(i*36), w, 30, "#000");
+						this.Font.Draw(canvas, x+5, y+(i*36)+5, w, 30, str);
+
+						active_player = __game.Player((active_player.Team+1)%total_players);
+					}
+				}
+			}, "Player List Highlights", 0, 360, 180, 85, null, Canvas.Merge),
+
+			Update_Player_List:function(){
+				var total_players = game.Total_Players();
+				this.PLHighlights.Height.Set(total_players*34+1);
+				this.PLHighlights.State.Set(game);
+			},
+			Display:function(player){
+				if(player==null||game.Game_Over)
+				{
+					this.Icon.Alpha.Set(0);
+					this.IconBG.Alpha.Set(0);
+					this.Standings.State.Set("");
+					this.Info.State.Set("");
+					this.Current_Player.State.Set("");
+					this._ThreathsBG.Alpha.Set(0);
+					this._ThreathsBox.Alpha.Set(0);
+					this._ThreathsTEXT.Alpha.Set(0);
+					return;
+				}
+				this.TurnBG.Alpha.Set(255);
+				this.TurnBox.Alpha.Set(255);
+				this.Turn.State.Set("Day");
+				this.Turn_Number.State.Set(""+(game.Turn()+1));
+
+				var standing = game.Check_Player_Standing(player.Team),
+					str = "";
+				for(var i=0;i<=standing;i++)
+					str+="★   ";
+				for(var i=standing+1;i<5;i++)
+					str+="☆   ";
+				this.Standings.State.Set(str);
+
+				this._ThreathsBG.Alpha.Set(255);
+				this._ThreathsBox.Alpha.Set(255);
+				this._ThreathsTEXT.Alpha.Set(255);
+
+				this.Info.State.Set("$"+player.Cash_Money());
+				this.Current_Player.State.Set(player.Name);
+				this.IconBG.Alpha.Set(255);
+				this.Icon.Source.Set(player.Icon);
+				this.Update_Player_List();
 			}
-			this.TurnBG.Alpha.Set(255);
-			this.TurnBox.Alpha.Set(255);
-			this.Turn.State.Set("Day");
-			this.Turn_Number.State.Set(""+(game.Turn()+1));
+		};
+	}
+	else {	// browser display
+		Status = {
+			Display:0,
+			Icon:Stats_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 0, 0, 1, true, null, Canvas.Background),
+			IconBorder:Stats_Display.Add_Drawable(Shape.Box, "IconBorder", 3, 3, 63, 63, "#3C6BBE", Canvas.Merge),
+			Name:Stats_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Name", 70, 3, 200, 20, "", Canvas.Background),
+			Desc:Stats_Display.Add_Drawable(new Text_Class("10pt Times New Roman", "#000"), "Desc", 70, 25, 200, 35, "", Canvas.Background),
+			Info:Stats_Display.Add_Drawable(new Text_Class("10pt Times New Roman", "#000"), "Info", 290, 5, 130, 50, "", Canvas.Background),
+			Divisor1:Stats_Display.Add_Drawable(Shape.Rectangle, "Div1", 280, 3, 2, 60, "#000", Canvas.Background, 0),
+			Set:function(data)
+			{
+				Stats_Display.Background.Redraw();
+				if(data==null)
+				{
+					this.Display = 0;
+					this.Icon.Alpha.Set(0);
+					this.Name.Alpha.Set(0);
+					this.Desc.Alpha.Set(0);
+					this.Info.Alpha.Set(0);
+					this.Divisor1.Alpha.Set(0);
+					return;
+				}
+				this.Display = data.SELECTABLE;
+				this.Icon.Source.Set(data);
+				this.Icon.X.Set(5+data.X_Offset());
+				this.Icon.Y.Set(3+data.Y_Offset());
+				this.Icon.State.Set(true);
+				this.Icon.Alpha.Set(1);
+				this.Name.State.Set(data.Name);
+				this.Name.Alpha.Set(1);
+				this.Desc.State.Set(data.Description());
+				this.Desc.Alpha.Set(1);
+				this.Info.Alpha.Set(1);
+				this.Divisor1.Alpha.Set(1);
+				if(data.SELECTABLE==1)
+				{	/// unit
+					this.Info.State.Set(data.Health+" / "+data.Max_Health+" HP\n"+(data.Health/data.Max_Health*data.Power).toFixed(0)+" Strength\n"+Char_Data.TypeToStr[data.Unit_Type]+"\n"+data.Movement+" "+Char_Data.MoveToStr[data.Move_Type]);
+				}
+				else if(data.SELECTABLE==2)
+				{	/// city
+					this.Icon.State.Set(false);
+					this.Info.State.Set((data.Protection*100)+"% Protection\n\n"+Terrain_Data.TypeToStr[data.Type]+"\n"+data.Damage+" Damage");
+				}
+				else if(data.SELECTABLE==3)
+				{	/// terrain
+					this.Info.State.Set(data.Stature.Get()+" / "+Building_Data.PLACE[data.Source].Stature+" HP\n"+(data.Protection*100)+"% Protection\n\n"+Building_Data.TypeToStr[data.Type]+"\n"+data.Defense+" Defense\n\n");
+				}
+			}
+		};
+		Avatar = {
+			TurnBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "TurnBG", 20, 15, 150, 55, "#73877B", Canvas.Background),
+			TurnBox:Avatar_Display.Add_Drawable(Shape.Box, "TurnBox", 20, 15, 150, 55, "#E5D1D0", Canvas.Merge),
+			Turn:Avatar_Display.Add_Drawable(new Text_Class("20pt Times New Roman", "#000"), "Turn", 30, 30, 50, 40, null, Canvas.Merge),
+			Turn_Number:Avatar_Display.Add_Drawable(new Text_Class("40pt Times New Roman", "#000"), "Turn Number", 100, 20, 50, 45, null, Canvas.Merge),
+			Standings:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Standings", 20, 85, 200, 20, null, Canvas.Background),
+			Standings_Border1:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border1", 20, 80, 150, 2, "#000", Canvas.Background),
+			Standings_Border2:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border2", 20, 105, 150, 2, "#000", Canvas.Background),
+			Current_Player:Avatar_Display.Add_Drawable(new Text_Class("25pt Times New Roman", "#000"), "Player Name", 10, 130, 200, 35, null, Canvas.Background),
+			Info:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Info", 15, 165, 200, 20, null, Canvas.Background),
+			IconBG:Avatar_Display.Add_Drawable(Shape.Box, "IconBG", 110, 167, 80, 80, "#000", Canvas.Background),
+			Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 110, 170, 80, 80, null, Canvas.Background),
 
-			var standing = game.Check_Player_Standing(player.Team),
-				str = "";
-			for(var i=0;i<=standing;i++)
-				str+="★   ";
-			for(var i=standing+1;i<5;i++)
-				str+="☆   ";
-			this.Standings.State.Set(str);
+			All_Threaths:Avatar_Display.Add_Drawable({Draw:function(){}}, "Threats", 605, 242, 80, 30, "#EE6352", Canvas.Background),
+			_ThreathsBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "ThreatsBG", 5, 242, 80, 30, "#EE6352", Canvas.Background),
+			_ThreathsBox:Avatar_Display.Add_Drawable(Shape.Box, "ThreatsBox", 5, 242, 80, 30, "#7F9172", Canvas.Background),
+			_ThreathsTEXT:Avatar_Display.Add_Drawable(new Text_Class("13pt Times New Roman", "#57241E"), "ThreatsText", 9, 250, 80, 20, "DANGER", Canvas.Merge),
 
-			this._ThreathsBG.Alpha.Set(255);
-			this._ThreathsBox.Alpha.Set(255);
-			this._ThreathsTEXT.Alpha.Set(255);
+			PLHighlights:Avatar_Display.Add_Drawable({
+				Font:new Text_Class("15pt Times New Roman", "#ddd"),
+				Draw:function(canvas, x, y, w, h, __game){
+					if(__game==null ||!~__game)return;
 
-			this.Info.State.Set("$"+player.Cash_Money());
-			this.Current_Player.State.Set(player.Name);
-			this.IconBG.Alpha.Set(255);
-			this.Icon.Source.Set(player.Icon);
-			this.Update_Player_List();
-		}
-	};
+					Shape.Rectangle.Draw(canvas, x-5, y-5, w+10, h+10, "#E5D1D0");
+					Shape.Box.Draw(canvas, x-5, y-5, w+10, h+10, "#7F9172");
+
+					var active_player = __game.Active_Player();
+					var total_players = __game.Total_Players();
+
+					var str = new Array(total_players);
+					var box = new Array(total_players);
+
+					for(var i=0;i<total_players;i++)
+					{
+						str = active_player.Name;
+						var j_max = Math.floor(Math.log10(active_player.Cash_Money()))+1;
+						if(active_player.Cash_Money()==0)
+							j_max = 1;
+						if(active_player.Dead)
+							j_max = 3;
+						for(var j=25-str.length;j>j_max;j--)
+						{
+							str+=" ";
+						}
+						if(active_player.Dead)
+							str+="XXX";
+						else str+="$"+active_player.Cash_Money();
+
+						var color = Team_Colors.Color[active_player.Color][2]; //turn this to hex
+						box = data_to_hex(color);
+
+						Shape.Rectangle.Draw(canvas, x, y+(i*36), w, 30, box);
+						Shape.Box.Draw(canvas, x, y+(i*36), w, 30, "#000");
+						this.Font.Draw(canvas, x+5, y+(i*36)+5, w, 30, str);
+
+						active_player = __game.Player((active_player.Team+1)%total_players);
+					}
+				}
+			}, "Player List Highlights", 10, 360, 180, 85, null, Canvas.Merge),
+
+			Update_Player_List:function(){
+				var total_players = game.Total_Players();
+				this.PLHighlights.Height.Set(total_players*34+1);
+				this.PLHighlights.State.Set(game);
+			},
+			Display:function(player){
+				if(player==null||game.Game_Over)
+				{
+					this.Icon.Alpha.Set(0);
+					this.IconBG.Alpha.Set(0);
+					this.Standings.State.Set("");
+					this.Info.State.Set("");
+					this.Current_Player.State.Set("");
+					this._ThreathsBG.Alpha.Set(0);
+					this._ThreathsBox.Alpha.Set(0);
+					this._ThreathsTEXT.Alpha.Set(0);
+					return;
+				}
+				this.TurnBG.Alpha.Set(255);
+				this.TurnBox.Alpha.Set(255);
+				this.Turn.State.Set("Day");
+				this.Turn_Number.State.Set(""+(game.Turn()+1));
+
+				var standing = game.Check_Player_Standing(player.Team),
+					str = "";
+				for(var i=0;i<=standing;i++)
+					str+="★   ";
+				for(var i=standing+1;i<5;i++)
+					str+="☆   ";
+				this.Standings.State.Set(str);
+
+				this._ThreathsBG.Alpha.Set(255);
+				this._ThreathsBox.Alpha.Set(255);
+				this._ThreathsTEXT.Alpha.Set(255);
+
+				this.Info.State.Set("$"+player.Cash_Money());
+				this.Current_Player.State.Set(player.Name);
+				this.IconBG.Alpha.Set(255);
+				this.Icon.Source.Set(player.Icon);
+				this.Update_Player_List();
+			}
+		};
+	}
+
 	var Screen = {
 		// Border:Dialog_Display.Add_Drawable(Shape.Box, "Border", 0, 0, 600, 600, "#0ff", Canvas.Background),
 		openDrawables:[],
@@ -515,7 +669,156 @@ var Interface_Class = function()
 	var last_handler = null;
 	var curPinchDiff = 0,
 		prevPinchDiff = 0;
-	self.Set_Controls = function(handler){
+
+		//** Add the game event handler interactions */
+	let current_interactions = new Array(8);
+	const ___touchstart = function(e){
+		e.preventDefault();
+
+		var x = Math.round(e.touches[0].clientX);
+		var y = Math.round(e.touches[0].clientY);
+		self.Click(x,y);
+		touch_start_loc[0] = x;
+		touch_start_loc[1] = y;
+		scroller.doTouchStart(e.touches, e.timeStamp);
+		mousedown = true;
+		in_hl_path = false;
+
+		setTimeout(function(){
+			if(!mousedown)return false;
+
+			in_hl_path = true;
+			self.Release(x,y);
+			scroller.doTouchEnd(e.timeStamp);
+		}, 150);
+
+		return false;
+	};
+	const ___touchmove = function(e){
+		e.preventDefault();
+		var x = Math.round(e.touches[0].clientX);
+		var y = Math.round(e.touches[0].clientY);
+		if(e.touches.length==2)
+		{
+			scroller.doTouchEnd(e.timeStamp);
+			var _x = Math.round(e.touches[1].clientX);
+			var _y = Math.round(e.touches[1].clientY);
+			curPinchDiff = Math.round(Math.sqrt(Math.pow(x - _x, 2)+Math.pow(y - _y, 2)));
+
+			if(prevPinchDiff!=0)
+			{
+				let _zoom = Math.abs(curPinchDiff/prevPinchDiff);
+				// LOG.add(""+_zoom, "#FFF", 800);
+				// TILESIZE*=_zoom;
+				// TILESIZE = Math.max(Math.min(TILESIZE, 90), 30);
+			}
+
+			prevPinchDiff = curPinchDiff;
+			return false;
+		}
+		else prevPinchDiff = 0;
+
+		if(Math.abs(x-touch_start_loc[0])<5 &&
+			Math.abs(y-touch_start_loc[1])<5)
+			return false;
+
+		touch_start_loc[0] = -1;
+		touch_start_loc[1] = -1;
+		if(in_hl_path)
+		{
+			self.Mouse_Move(x,y);
+			return false;
+		}
+
+		mousedown = false;
+
+		scroller.doTouchMove(e.touches, e.timeStamp, e.scale)
+
+		return false;
+	};
+	const ___touchend = function(e){
+		e.preventDefault();
+
+		var x = Math.round(e.touches[0].clientX);
+		var y = Math.round(e.touches[0].clientY);
+
+		if(!in_hl_path)
+		{
+			if(Math.abs(x-touch_start_loc[0])<5 &&
+				Math.abs(y-touch_start_loc[1])<5)
+				self.Release(x,y);
+		}
+		scroller.doTouchEnd(e.timeStamp);
+		touch_start_loc[0] = -1;
+		touch_start_loc[1] = -1;
+		mousedown = false;
+		in_hl_path = false;
+
+		return false;
+	};
+	const ___touchcancel = function(e){
+		e.preventDefault();
+
+		if(in_hl_path)scroller.doTouchEnd(e.timeStamp);
+		touch_start_loc[0] = -1;
+		touch_start_loc[1] = -1;
+		mousedown = false;
+		in_hl_path = false;
+	};
+	const ___mousedown = function(e){
+		if(!self.Click(e.layerX,e.layerY))return;
+		if(e.target.tagName.match(/input|textarea|select/i)) {
+			return;
+		}
+		scroller.doTouchStart([{
+			pageX: e.pageX,
+			pageY: e.pageY
+		}], e.timeStamp);
+		mousedown = true;
+		return false;
+	};
+	const ___mouseup = function(e){
+		self.Release(e.layerX,e.layerY);
+		if(!mousedown)return;
+		scroller.doTouchEnd(e.timeStamp);
+		mousedown = false;
+		return false;
+	};
+	const ___contextmenu = function(e){
+		e.preventDefault();
+		self.Right_Click(e.layerX,e.layerY);
+		return false;
+	};
+	const ___mousemove = function(e){
+		if(!mousedown)
+		{
+			self.Mouse_Move(e.layerX,e.layerY);
+			return;
+		}
+		scroller.doTouchMove([{
+			pageX: e.pageX,
+			pageY: e.pageY
+		}], e.timeStamp);
+		return false;
+	};
+	const set_current_interactions = function(list) {
+		for(let i=0;i<8;i++)
+		{
+			if(list[i]!=null)
+				current_interactions[i] = list[i];
+		}
+	};
+	const do_current_interaction = function(index, e) {
+		current_interactions[index](e);
+	};
+	const reset_interations = function(){
+		set_current_interactions([
+			___touchstart,	___touchmove,	___touchend,		___touchcancel,
+			___mousedown,		___mouseup,		___contextmenu,	___mousemove]);
+	};
+	reset_interations();
+
+	self.Set_Controls = function(handler) {
 		if(last_handler!=null)
 		{
 			return;
@@ -539,135 +842,32 @@ var Interface_Class = function()
 			}
 		};
 		handler.addEventListener("touchstart", function(e){
-			e.preventDefault();
-
-			var x = Math.round(e.touches[0].clientX);
-			var y = Math.round(e.touches[0].clientY);
-			self.Click(x,y);
-			touch_start_loc[0] = x;
-			touch_start_loc[1] = y;
-			scroller.doTouchStart(e.touches, e.timeStamp);
-			mousedown = true;
-			in_hl_path = false;
-
-			setTimeout(function(){
-				if(!mousedown)return false;
-
-				in_hl_path = true;
-				self.Release(x,y);
-				scroller.doTouchEnd(e.timeStamp);
-			}, 150);
-
-			return false;
+			do_current_interaction(0, e);
 		});
 		handler.addEventListener("touchmove", function(e){
-			e.preventDefault();
-			var x = Math.round(e.touches[0].clientX);
-			var y = Math.round(e.touches[0].clientY);
-			if(e.touches.length==2)
-			{
-				scroller.doTouchEnd(e.timeStamp);
-				var _x = Math.round(e.touches[1].clientX);
-				var _y = Math.round(e.touches[1].clientY);
-				curPinchDiff = Math.round(Math.sqrt(Math.pow(x - _x, 2)+Math.pow(y - _y, 2)));
-
-				if(prevPinchDiff!=0)
-				{
-					let _zoom = Math.abs(curPinchDiff/prevPinchDiff);
-					// LOG.add(""+_zoom, "#FFF", 800);
-					// TILESIZE*=_zoom;
-					// TILESIZE = Math.max(Math.min(TILESIZE, 90), 30);
-				}
-
-				prevPinchDiff = curPinchDiff;
-				return false;
-			}
-			else prevPinchDiff = 0;
-
-			if(Math.abs(x-touch_start_loc[0])<5 &&
-				Math.abs(y-touch_start_loc[1])<5)
-				return false;
-
-			touch_start_loc[0] = -1;
-			touch_start_loc[1] = -1;
-			if(in_hl_path)
-			{
-				self.Mouse_Move(x,y);
-				return false;
-			}
-
-			mousedown = false;
-
-			scroller.doTouchMove(e.touches, e.timeStamp, e.scale)
-
-			return false;
+			do_current_interaction(1, e);
 		});
 		handler.addEventListener("touchend", function(e){
-			e.preventDefault();
-
-			var x = Math.round(e.touches[0].clientX);
-			var y = Math.round(e.touches[0].clientY);
-
-			if(!in_hl_path)
-			{
-				if(Math.abs(x-touch_start_loc[0])<5 &&
-					Math.abs(y-touch_start_loc[1])<5)
-					self.Release(x,y);
-			}
-			scroller.doTouchEnd(e.timeStamp);
-			touch_start_loc[0] = -1;
-			touch_start_loc[1] = -1;
-			mousedown = false;
-			in_hl_path = false;
-
-			return false;
+			do_current_interaction(2, e);
 		});
 		handler.addEventListener("touchcancel", function(e){
-			e.preventDefault();
-
-			if(in_hl_path)scroller.doTouchEnd(e.timeStamp);
-			touch_start_loc[0] = -1;
-			touch_start_loc[1] = -1;
-			mousedown = false;
-			in_hl_path = false;
+			do_current_interaction(3, e);
 		});
-
 		handler.addEventListener("mousedown", function(e){
-			if(!self.Click(e.layerX,e.layerY))return;
-			if(e.target.tagName.match(/input|textarea|select/i)) {
-				return;
-			}
-			scroller.doTouchStart([{
-				pageX: e.pageX,
-				pageY: e.pageY
-			}], e.timeStamp);
-			mousedown = true;
-			return false;
+			do_current_interaction(4, e);
 		});
 		handler.addEventListener("mouseup", function(e){
-			self.Release(e.layerX,e.layerY);
-			if(!mousedown)return;
-			scroller.doTouchEnd(e.timeStamp);
-			mousedown = false;
-			return false;
+			do_current_interaction(5, e);
 		});
 		handler.addEventListener("contextmenu", function(e){
-			e.preventDefault();
-			self.Right_Click(e.layerX,e.layerY);
-			return false;
+			do_current_interaction(6, e);
 		});
 		handler.addEventListener("mousemove", function(e){
-			self.Mouse_Move(e.layerX,e.layerY);
-			if(!mousedown)return;
-			scroller.doTouchMove([{
-				pageX: e.pageX,
-				pageY: e.pageY
-			}], e.timeStamp);
-			return false;
+			do_current_interaction(7, e);
 		});
-		handler.addEventListener(navigator.userAgent.indexOf("Firefox") > -1 ? "DOMMouseScroll" :  "mousewheel", function(e){
-			scroller.doMouseZoom(e.detail ?(e.detail * -120) : e.wheelDelta, e.timeStamp, e.pageX, e.pageY);
-		}, false);
+		// handler.addEventListener(navigator.userAgent.indexOf("Firefox") > -1 ? "DOMMouseScroll" :  "mousewheel", function(e){
+		// 	scroller.doMouseZoom(e.detail ?(e.detail * -120) : e.wheelDelta, e.timeStamp, e.pageX, e.pageY);
+		// }, false);
 	};
 	self.Clickable = {
 		Button_Class:function(drawable, response, name){
@@ -840,26 +1040,16 @@ var Interface_Class = function()
 		zooming:true
 	});
 	self.reflow = function(w, h){
-		gameWidth = w-(window.mobilecheck()?50:210);
+		gameWidth = w-(window.mobilecheck()?130:210);
 		gameHeight = h-(window.mobilecheck()?60:70);
 		clientWidth = w;
 		clientHeight = h;
 		self.gameXScale = gameWidth/600;
 		self.gameYScale = gameHeight/600;
-		document.getElementById('avatarCanvas').style.left = gameWidth+"px";
-		document.getElementById('statsCanvas').style.top = gameHeight+"px";
-		document.getElementById('endTurn').style.left = gameWidth+5+"px";
-		document.getElementById('endTurn').style.top = gameHeight+"px";
 		Dialog_Display.Scale(self.gameXScale, self.gameYScale);
-		// Screen.Border.Width.Set(gameWidth);
-		// Screen.Border.Height.Set(gameHeight);
 		HUD_Display.Scale(self.gameXScale, self.gameYScale);
 		Avatar_Display.Scale(1, self.gameYScale);
-		Avatar.All_Threaths.X.Set(gameWidth+5);
-		Avatar.All_Threaths.Y.Set(Avatar._ThreathsBG.Y.Get()*self.gameYScale);
 		Stats_Display.Scale(self.gameXScale, 1);
-		Status.Icon.Width.Set(self.gameXScale);
-		Status.Icon.Height.Set(self.gameYScale);
 		if(open_menu && menu_scale){
 			open_menu.Scale(clientWidth/Canvas.MaxWidth, clientHeight/Canvas.MaxHeight);
 			return;
@@ -908,10 +1098,32 @@ var Interface_Class = function()
 	{
 		Avatar.Display(game.Active_Player());
 	};
+	self.Resource_Draw = function(canvas, cash)
+	{
+		if(self.IS_MOBILE_GAME)
+		{
+			canvas.globalAlpha = 0.7;
+			Shape.Rectangle.Draw(canvas, 2, 35, 55, 25, "#4B5320");
+			Shape.Box.Draw(canvas, 2, 35, 55, 25, "#ccc");
+			canvas.globalAlpha = 1;
+			new Text_Class("16pt Verdana","#FFF").Draw(canvas, 2, 39, 55, 25, (cash>999 ? "" : "$")+cash);
+		}
+		else
+		{
+			Shape.Rectangle.Draw(canvas, 5, 40, 35, 12, "#ccc");
+			Shape.Rectangle.Draw(canvas, 6, 41, 33, 10, "#4B5320");
+			new Text_Class("8pt Times New Roman","#FFF").Draw(canvas, 7, 42, TILESIZE, 10, "$"+cash);
+		}
+	};
+
+
+	var lastScroller;
 	self.Open_Unit_Create_Menu = function(player, resources, onBuildFnc, onCloseFnc)
 	{
 		if(player.Game.Client_Player()!=player)return;
 		if(onBuildFnc==null)return;
+
+		lastSCroller = scroller;
 
 		var TITLE_TEXT = new Text_Class("20pt Verdana", pallet.title);
 		var NAME_TEXT = new Text_Class("15pt Verdana", pallet.border);
@@ -921,11 +1133,15 @@ var Interface_Class = function()
 		with(Menu.Game_Prompt)
 		{
 			Erase();
+			STOP_EVENT_CLICKS = false;
 
 			let draw_top = 50,
-				draw_left = 10;
+				draw_left = 10,
+				draw_width = 175,
+				draw_height = 75;
 
-			Add(new Canvas.Drawable(Shape.Rectangle, null, 0, 0, gameWidth, gameHeight, pallet.border, null, 0.45), function(){
+			Add(new Canvas.Drawable(Shape.Rectangle, null, 0, 0, 900, 900, pallet.border, null, 0.45), function(){
+				scroller = lastSCroller;
 				self.Close_Menu();
 				Menu.Game_Prompt.Erase();
 				self.Select_Tile();
@@ -934,39 +1150,26 @@ var Interface_Class = function()
 			});
 
 				// gound units
-			Add(new Canvas.Drawable(TITLE_TEXT, null, draw_left, draw_top-30, 195, 525, "Ground Units"));
-			Add(new Canvas.Drawable(Shape.Rectangle, null, draw_left, draw_top, 175, 525, pallet.inside, null, .4));
-			Add(new Canvas.Drawable(Shape.Box, null, draw_left, draw_top, 175, 525, pallet.border));
+			Add(new Canvas.Drawable(TITLE_TEXT, null, draw_left, draw_top-30, draw_width+20, 7*draw_height, "Ground Units"));
+			Add(new Canvas.Drawable(Shape.Rectangle, null, draw_left, draw_top, draw_width, 7*draw_height, pallet.inside, null, .4));
+			Add(new Canvas.Drawable(Shape.Box, null, draw_left, draw_top, draw_width, 7*draw_height, pallet.border));
 				// air units
-			Add(new Canvas.Drawable(TITLE_TEXT, null, 200+draw_left, draw_top-30, 175, 525, "Air Units"));
-			Add(new Canvas.Drawable(Shape.Rectangle, null, 200+draw_left, draw_top, 175, 525, pallet.inside, null, .4));
-			Add(new Canvas.Drawable(Shape.Box, null, 200+draw_left, draw_top, 175, 525, pallet.border));
+			Add(new Canvas.Drawable(TITLE_TEXT, null, 200+draw_left, draw_top-30, draw_width, 7*draw_height, "Air Units"));
+			Add(new Canvas.Drawable(Shape.Rectangle, null, 200+draw_left, draw_top, draw_width, 7*draw_height, pallet.inside, null, .4));
+			Add(new Canvas.Drawable(Shape.Box, null, 200+draw_left, draw_top, draw_width, 7*draw_height, pallet.border));
 				// sea units
-			Add(new Canvas.Drawable(TITLE_TEXT, null, 400+draw_left, draw_top-30, 175, 525, "Sea Units"));
-			Add(new Canvas.Drawable(Shape.Rectangle, null, 400+draw_left, draw_top, 175, 525, pallet.inside, null, .4));
-			Add(new Canvas.Drawable(Shape.Box, null, 400+draw_left, draw_top, 175, 525, pallet.border));
+			Add(new Canvas.Drawable(TITLE_TEXT, null, 400+draw_left, draw_top-30, draw_width, 7*draw_height, "Sea Units"));
+			Add(new Canvas.Drawable(Shape.Rectangle, null, 400+draw_left, draw_top, draw_width, 7*draw_height, pallet.inside, null, .4));
+			Add(new Canvas.Drawable(Shape.Box, null, 400+draw_left, draw_top, draw_width, 7*draw_height, pallet.border));
+
 
 			var _units = player.Buildable_Units();
-			var ground_index = 0,
-				air_index = 0,
-				sea_index = 0;
-			var drawer = {
+			let drawer = {
 				Draw:function(c,x,y,w,h,index){
 					var __unit_index = Math.abs(index);
 					var BG = pallet.validBG;
 					var _COST_ = COST_TEXT;
 					var UNIT_IMAGE = Char_Data.CHARS[__unit_index].Sprite[0];
-					/* var UNIT_IMAGE = {
-						Draw:function(c,x,y,w,h,s){
-							var pic = player.Unit_Images[__unit_index][0];
-							var behind = canvas.getImageData(x, y, pic.width, pic.height);
-							var NotNullCheck = scale(pic, tile_scale, tile_scale);
-							if(NotNullCheck!=null)
-								pic = NotNullCheck;
-
-							canvas.putImageData(_scale==null ? pic : scale(pic, _scale, _scale), x, y);
-						}
-					}; */
 
 					if(index<0)
 					{	// grey unit cuz cant afford
@@ -975,9 +1178,6 @@ var Interface_Class = function()
 						// UNIT_IMAGE = Char_Data.CHARS[__unit_index].Sprite[0];
 					}
 					// normal unit
-
-
-
 					Shape.Rectangle.Draw(c,x,y,w,h,BG);
 					Shape.Box.Draw(c,x,y,w,h,pallet.border);
 					// here put the unit image
@@ -986,13 +1186,25 @@ var Interface_Class = function()
 					_COST_.Draw(c,x+115,y+55,w,h,"$"+player.Calculate_Cost(__unit_index));
 				}
 			};
-			var click_fnc = function(index){
+			let hl_drawer = {
+				Draw:function(c,x,y,w,h,s) {
+					c.save();
+					c.globalAlpha *= .35;
+					Shape.Rectangle.Draw(c,x,y,w,h,"#FF0");
+					c.restore();
+				}
+			};
+			let click_fnc = function(index){
+				scroller = lastSCroller;
 				self.Close_Menu();
 				Menu.Game_Prompt.Erase();
 				self.Select_Tile();
 				onBuildFnc(index);
 			};
-
+			let g_list = [new Array(), new Array(), new Array()];
+			let ground_index = 0,
+				air_index = 0,
+				sea_index = 0;
 			for(var j in _units)
 			{
 				var __unit = Char_Data.CHARS[_units[j]],
@@ -1001,19 +1213,24 @@ var Interface_Class = function()
 				if(__unit.Type==1)
 				{
 					x+=200;
-					y+=(air_index++)*75;
+					y+=(air_index++)*draw_height;
 				}
 				else if(__unit.Type==2)
 				{
 					x+=400;
-					y+=(sea_index++)*75;
+					y+=(sea_index++)*draw_height;
 				}
-				else y+=(ground_index++)*75;
-				if(y>525)
-				{	// outside of list length
-					continue;
+				else y+=(ground_index++)*draw_height;
+
+				var cur_drawable = new Canvas.Drawable(drawer, null, x, y, draw_width, draw_height, _units[j]);
+
+				cur_drawable.Index = Menu.Game_Prompt;
+				g_list[__unit.Type].push(cur_drawable);
+
+				if(y>=525)
+				{
+					cur_drawable.Alpha.Set(0);
 				}
-				var cur_drawable = new Canvas.Drawable(drawer, null, x, y, 175, 75, _units[j]);
 
 				if(player.Calculate_Cost(_units[j])>resources)
 				{	// can't afford!
@@ -1022,9 +1239,44 @@ var Interface_Class = function()
 					cur_drawable.State.Set(-_units[j], false);
 					continue;
 				}
-				Add(cur_drawable, click_fnc, new Canvas.Drawable(Shape.Rectangle, null, x, y, 175, 75, "#ff0", null, .35));
+				Add(cur_drawable, click_fnc, hl_drawer);
 			}
-		}
+
+
+			let list_painter = function(x, y, left, top, w, h, zoom)
+			{
+				if(g_list[y][x]==null)return;
+				g_list[y][x].Y.Set(top+draw_top);
+				if(top<0)
+				{
+					g_list[y][x].Alpha.Set(1+(top/draw_height));
+					return;
+				}
+				if(top>450)
+				{
+					g_list[y][x].Alpha.Set(1-((top%draw_height)/draw_height));
+					return;
+				}
+				g_list[y][x].Alpha.Set(1);
+			};
+
+			let g_list_display = new Tiling;
+			g_list_display.setup(600, 7*draw_height, 3*draw_width, Math.max(Math.max(ground_index, air_index), sea_index)*draw_height, draw_width, draw_height);
+
+			let g_list_scroller = new Scroller(function(left, top, zoom)
+			{
+				top/=TILESIZE;
+				top*=draw_height;
+				g_list_display.render(left, top, zoom, list_painter);
+			}, {
+				locking:false,
+				zooming:false
+			});
+
+			g_list_scroller.setDimensions(3*draw_width, 80, 4, (Math.max(Math.max(ground_index, air_index), sea_index)-5)*TILESIZE);
+
+			scroller = g_list_scroller;
+		};
 
 		self.Display_Menu(Menu.Game_Prompt);
 	};
@@ -1371,8 +1623,32 @@ var Interface_Class = function()
 		{	// second click after unit selected
 			selected_unit.Mover.Hide();
 			var check_unit = game.Units_Map.At(x,y);
-			if(game.Terrain_Map.At(x,y).Hidden && check_unit!=null)
+			if(check_unit!=null)
 			{
+				if(game.Terrain_Map.At(x,y).Hidden)
+				{
+					selected_unit = null;
+					var selected = game.Terrain_Map.At(x,y);
+					if(selected.Building!=null)
+					{
+						selected = selected.Building;
+						Status.Set(selected);
+						if(!selected.Active)return;
+						if(selected.Owner!=game.Active_Player()||selected.Owner!=game.Client_Player())
+						{
+							if(_____danger.length>0)
+							{
+								self.UNHIGHLIGHT(_____danger);
+								_____danger = self.HIGHLIGHT();
+							}
+							return;
+						}
+						selected.Act();
+					}
+					else Status.Set(selected);
+					return;
+				}
+
 				if(check_unit.Player==selected_unit.Player)
 				{
 					selected_tile = null;
@@ -1392,7 +1668,7 @@ var Interface_Class = function()
 				self.Allow_Controls(true);
 			}))
 			{
-				if(online)socket.emit('send move', selected_unit.Index, x, y, path);
+				game.Send_Move('send move', selected_unit.Index, x, y, path);
 			}
 			selected_tile = null;
 			self.Select_Tile();
@@ -1614,4 +1890,12 @@ var Interface_Class = function()
 			canvas.restore();
 		});
 	};
+};
+
+var Fast_Fake_Interface = {
+	Fake:true,
+	Draw:function(){},
+	Simple_Draw:function(){},
+	Scroll_To_Tile:function(){},
+	Resource_Draw:function(){}
 };

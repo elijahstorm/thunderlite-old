@@ -115,6 +115,21 @@ var con_handler = function(){
 };
 var Connections = new con_handler();
 var Game = function(map, name, slots){
+	let __passkey = null;
+	function passkey_check(input_key)
+	{
+		if(__passkey==null)
+			return true; // no passkey needed yet--game hasn't started
+		if(__passkey==input_key)
+			return true;
+		timestamp("Invalid passkey attempt in Game",self.index_in_server);
+		return false;
+	}
+	this.Passkey = function()
+	{
+			passkey = Math.rand();
+			return __passkey;
+	};
 	var playerData = [];
 	var self = this;
 	for(var i=0;i<slots;i++)
@@ -124,11 +139,13 @@ var Game = function(map, name, slots){
 		// 1 most recent game data
 		// 2 received game data for most recent check
 	}
-	self.Set = function(index, value){
+	self.Set = function(input_passkey, index, value){
+		if(!passkey_check(input_passkey))return;
 		if(index>=playerData.length)return;
 		playerData[index][0] = value;
 	};
-	self.Data = function(index){
+	self.Data = function(input_passkey, index){
+		if(!passkey_check(input_passkey))return null;
 		var arr = [];
 		for(var i in playerData)
 		{
@@ -145,7 +162,7 @@ var Game = function(map, name, slots){
 	self.Map = function(){
 		return map;
 	};
-	self.id = -1;
+	self.index_in_server = -1;
 	self.lobby = -1;
 	self.started = false;
 
@@ -169,7 +186,8 @@ var Game = function(map, name, slots){
 		lastValidGameState = playerData[0][1];
 		goodCallbackFnc();
 	};
-	self.Check_Data = function(goodCallback, badCallback, requestIndex, requestData){
+	self.Check_Data = function(input_passkey, goodCallback, badCallback, requestIndex, requestData){
+		if(!passkey_check(input_passkey))return;
 		self.Send({type:14}, requestIndex); // request everyone else send data
 		for(var i in playerData){
 			// clear last check
@@ -183,7 +201,8 @@ var Game = function(map, name, slots){
 			badCallbackFnc = badCallback;
 		else badCallbackFnc = function(){};
 	};
-	self.Update_Data = function(socketIndex, gameData){
+	self.Update_Data = function(input_passkey, socketIndex, gameData){
+		if(!passkey_check(input_passkey))return;
 		var playerIndex = null;
 		for(var i in playerData){
 			if(playerData[i][0]==socketIndex){
@@ -195,11 +214,13 @@ var Game = function(map, name, slots){
 		playerData[playerIndex][1] = gameData;
 		recievedGameData(playerIndex);
 	};
-	self.Revert = function(){
+	self.Revert = function(input_passkey){
+		if(!passkey_check(input_passkey))return;
 		self.Send({type:15,game:lastValidGameState});
 	};
 
-	self.Leave = function(socketIndex, rejoinTime, outOfTimeFnc){
+	self.Leave = function(input_passkey, socketIndex, rejoinTime, outOfTimeFnc){
+		if(!passkey_check(input_passkey))return;
 		var empty = true;
 		var playerIndex;
 		for(var i in playerData)
@@ -216,7 +237,7 @@ var Game = function(map, name, slots){
 		}
 		if(empty)
 		{
-			Game_List.Close(self.id);
+			Game_List.Close(self.index_in_server);
 			if(typeof outOfTimeFnc==='function')outOfTimeFnc();
 		}
 		else if(playerIndex!=null)
@@ -243,8 +264,10 @@ var Game = function(map, name, slots){
 			}
 		}
 	};
-	self.Rejoin = function(playerIndex, socketIndex){
-	console.log("rejoinging");
+	self.Rejoin = function(input_passkey, playerIndex, socketIndex){
+		if(!passkey_check(input_passkey))return;
+	console.log("---- rejoinging ----");
+	console.log("DEBUG THIS AREA -> Player left and rejoined ASAP");
 	console.log(playerIndex, socketIndex);
 	console.log(playerData[playerIndex]);
 	console.log(playerData);
@@ -261,7 +284,8 @@ var Game = function(map, name, slots){
 		}
 		returningPlayer.send({type:16,game:gamestate}); // send reconnected player last gamestate
 	};
-	self.Send = function(msg){
+	self.Send = function(input_passkey, msg){
+		if(!passkey_check(input_passkey))return;
 		if(!msg)return;
 		// extra arguments means socket indexes excluded from message
 		for(var i in playerData)
@@ -296,12 +320,12 @@ var gl_handler = function(){
 	{
 		return amt;
 	};
-	this.Add = function(game, host)
+	this.Add = function(game, host, input_passkey)
 	{
-		game.Set(0, host);
+		game.Set(0, host, input_passkey);
 		amt++;
 		var gameId = games.Add(game);
-		game.id = gameId;
+		game.index_in_server = gameId;
 		timestamp("Game",gameId,"->",game.Name(),"opened");
 		return gameId;
 	};
@@ -309,18 +333,18 @@ var gl_handler = function(){
 	{
 		return games.Active();
 	};
-	this.Game = function(index)
+	this.Game = function(index, input_passkey)
 	{
 		if(index==null)return null;
 		if(index>=games.list.length)return null;
 		return games.list[index];
 	};
-	this.Close = function(index)
+	this.Close = function(index, input_passkey)
 	{
 		var cur = games.Remove(index);
 		if(!cur)return;
 		amt--;
-		timestamp("Game",cur.id,"->",cur.Name(),"closed");
+		timestamp("Game",cur.index_in_server,"->",cur.Name(),"closed");
 	};
 };
 var Game_List = new gl_handler();
@@ -360,7 +384,7 @@ io.on('connection', function(socket){
 			var game = Game_List.Game(open_games[i]);
 			if(game==null)continue;
 			data[i] = {
-				game:game.id,
+				game:game.index_in_server,
 				map:game.Map(),
 				name:game.Name()
 				//, add player list
@@ -388,40 +412,40 @@ io.on('connection', function(socket){
 		});
 	});
 
-	socket.on('save game', function(data){
+	socket.on('save game', function(__input_passkey, data){
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
 		socket.vars.game_data = data;
-		game.Update_Data(socket.index, data);
+		game.Update_Data(__input_passkey, socket.index, data);
 	});
-	socket.on('send move', function(unit, x, y, path){
+	socket.on('send move', function(__input_passkey, unit, x, y, path){
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
-		game.Send({
+		game.Send(__input_passkey, {
 			type:11,
 			unit:unit,
 			x:x,y:y,
 			path:path
 		}, socket.index);
 	});
-	socket.on('send build', function(building, input){
+	socket.on('send build', function(__input_passkey, building, input){
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
-		game.Send({
+		game.Send(__input_passkey, {
 			type:12,
 			building:building,
 			input:input
 		}, socket.index);
 	});
-	socket.on('next player', function(gameData){
+	socket.on('next player', function(__input_passkey, gameData){
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
-		game.Check_Data(function(){ // check game data
+		game.Check_Data(__input_passkey, function(){ // check game data
 			// game data good, continue game.
-			game.Send({type:10}, socket.index);
+			game.Send(__input_passkey, {type:10}, socket.index);
 		}, function(){
-			game.Revert();
-			timestamp("ERROR: game",game.id,game.Name(),"invalid, reverting to last saved point.");
+			game.Revert(__input_passkey);
+			timestamp("ERROR: game",game.index_in_server,game.Name(),"invalid, reverting to last saved point.");
 		}, socket.index, gameData);
 	});
 
@@ -439,7 +463,7 @@ io.on('connection', function(socket){
 		}, socket.index);
 		socket.send({
 			type:23,
-			id:game_id
+			index_in_server:game_id
 		});
 	});
 	socket.on('join', function(game_id){
@@ -467,7 +491,7 @@ io.on('connection', function(socket){
 			socket.send({
 				type:21,
 				map:game.Map(),
-				game:game.id,
+				game:game.index_in_server,
 				players:{
 					c:connections,
 					n:names
@@ -492,10 +516,10 @@ io.on('connection', function(socket){
 			game:game_id
 		});
 	});
-	socket.on('leave', function(){
+	socket.on('leave', function(__input_passkey){
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
-		game.Leave(socket.index);
+		game.Leave(__input_passkey, socket.index);
 		socket.vars.in_game = null;
 		socket.vars.lobby_listening = true;
 		timestamp(socket.username,"left game",game.Name());
@@ -524,9 +548,14 @@ io.on('connection', function(socket){
 	socket.on('start', function(){
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
-		game.Send({
+		let __new_passkey = game.Passkey();
+		game.Send(__new_passkey, {
 			type:22
 		}, socket.index); // exclude host from message
+		game.Send(__new_passkey, {
+			type:22.5,
+			passkey:__new_passkey
+		});
 		var players = game.Data();
 		for(var i in players)
 		{
@@ -534,7 +563,7 @@ io.on('connection', function(socket){
 			Connections.Socket(players[i]).vars.lobby_listening = false;
 		}
 		game.started = true;
-		timestamp("Game",game.id,"->",game.Name(),"started");
+		timestamp("Game",game.index_in_server,"->",game.Name(),"started");
 		send_lobby_info({
 			type:25,
 			game:socket.vars.in_game
@@ -677,7 +706,7 @@ io.on('connection', function(socket){
 		{
 			if(Game_List.Game(i)!=null)
 			{
-				console.log(i, Game_List.Game(i).Name(), Game_List.Game(i).id, Game_List.Game(i).Data());
+				console.log(i, Game_List.Game(i).Name(), Game_List.Game(i).index_in_server, Game_List.Game(i).Data());
 			}
 			else console.log(i, null);
 		}

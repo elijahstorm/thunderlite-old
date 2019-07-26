@@ -6,6 +6,7 @@ var Menu = {
 		var hovered = -1;
 		var clickPos = -1;
 		var self = this;
+		self.STOP_EVENT_CLICKS = true;
 		self.xScale = 1;
 		self.yScale = 1;
 		if(typeof bgInput==='undefined')bgInput=null;
@@ -24,7 +25,7 @@ var Menu = {
 			if(amount==null)amount = 1;
 			draws.splice(index, amount);
 			clicks.splice(index, amount);
-			
+
 			for(var i=index;i<clicks.length;i++)
 			{
 				clicks[i][0]-=amount;
@@ -78,6 +79,7 @@ var Menu = {
 			x/=self.xScale;
 			y/=self.yScale;
 			clickPos = [x,y];
+			return !self.STOP_EVENT_CLICKS;
 		};
 		self.Release = function(x, y)
 		{

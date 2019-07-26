@@ -22,7 +22,7 @@ var Terrain_Data = {
 		var __sprite, __img;
 		imageHolderCanvas.clearRect(0,0,imageHolderCanvas.width,imageHolderCanvas.height);
 		imageHolderCanvas.restore();
-		
+
 		if(type==1)
 		{	// roll into
 			if(x!=0)
@@ -41,7 +41,7 @@ var Terrain_Data = {
 							__sprite = __img.Image();
 							__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 							__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE)
-							
+
 							return __sprite;
 						}
 						__img = Terrain_Data.TERRE[index].Sprite[4];
@@ -49,11 +49,11 @@ var Terrain_Data = {
 						imageHolderCanvas.save();
 						imageHolderCanvas.rotate(90*Math.PI/180);
 						imageHolderCanvas.translate(0, -TILESIZE);
-						
+
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 						imageHolderCanvas.restore();
-						
+
 						return __sprite;
 					}
 					if(y!=_map[x].length-1)
@@ -64,18 +64,18 @@ var Terrain_Data = {
 						imageHolderCanvas.save();
 						imageHolderCanvas.rotate(3*90*Math.PI/180);
 						imageHolderCanvas.translate(-TILESIZE, 0);
-						
+
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 						imageHolderCanvas.restore();
-						
+
 						return __sprite;
 					}
 					__img = Terrain_Data.TERRE[index].Sprite[2];
 					__sprite = __img.Image();
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-					
+
 					return __sprite;
 				}
 				if(y!=0)
@@ -88,14 +88,14 @@ var Terrain_Data = {
 						__sprite = __img.Image();
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-						
+
 						return __sprite;
 					}
 					__img = Terrain_Data.TERRE[index].Sprite[3];
 					__sprite = __img.Image();
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-					
+
 					return __sprite;
 				}
 				if(y!=_map[x].length-1)
@@ -106,18 +106,18 @@ var Terrain_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.rotate(3*90*Math.PI/180);
 					imageHolderCanvas.translate(-TILESIZE, 0);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 					imageHolderCanvas.restore();
-					
+
 					return __sprite;
 				}
 				__img = Terrain_Data.TERRE[index].Sprite[1];
 				__sprite = __img.Image();
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-				
+
 				return __sprite;
 			}
 			if(x!=_map.length-1)
@@ -134,11 +134,11 @@ var Terrain_Data = {
 						imageHolderCanvas.save();
 						imageHolderCanvas.rotate(2*90*Math.PI/180);
 						imageHolderCanvas.translate(-TILESIZE, -TILESIZE);
-						
+
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 						imageHolderCanvas.restore();
-						
+
 						return __sprite;
 					}
 					__img = Terrain_Data.TERRE[index].Sprite[3];
@@ -146,11 +146,11 @@ var Terrain_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.rotate(90*Math.PI/180);
 					imageHolderCanvas.translate(0, -TILESIZE);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 					imageHolderCanvas.restore();
-					
+
 					return __sprite;
 				}
 				if(y!=_map[x].length-1)
@@ -161,11 +161,11 @@ var Terrain_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.rotate(2*90*Math.PI/180);
 					imageHolderCanvas.translate(-TILESIZE, -TILESIZE);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 					imageHolderCanvas.restore();
-					
+
 					return __sprite;
 				}
 				__img = Terrain_Data.TERRE[index].Sprite[1];
@@ -173,11 +173,11 @@ var Terrain_Data = {
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(2*90*Math.PI/180);
 				imageHolderCanvas.translate(-TILESIZE, -TILESIZE);
-				
+
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
-				
+
 				return __sprite;
 			}
 			if(y!=0)
@@ -191,11 +191,11 @@ var Terrain_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.rotate(90*Math.PI/180);
 					imageHolderCanvas.translate(0, -TILESIZE);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 					imageHolderCanvas.restore();
-					
+
 					return __sprite;
 				}
 				__img = Terrain_Data.TERRE[index].Sprite[1];
@@ -203,11 +203,11 @@ var Terrain_Data = {
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(90*Math.PI/180);
 				imageHolderCanvas.translate(0, -TILESIZE);
-				
+
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
-				
+
 				return __sprite;
 			}
 			if(y!=_map[x].length-1)
@@ -218,11 +218,11 @@ var Terrain_Data = {
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(3*90*Math.PI/180);
 				imageHolderCanvas.translate(-TILESIZE, 0);
-				
+
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
-				
+
 				return __sprite;
 			}
 			__img = Terrain_Data.TERRE[index].Sprite[0];
@@ -246,9 +246,9 @@ var Terrain_Data = {
 			type = Terrain_Data.TERRE[sea_index].Type;
 			var connector = 8;
 			var __ANIMATION = Animations.Retrieve(Terrain_Data.TERRE[index].Name+" Ani");
-			
+
 			/// check if corner add here
-			
+
 			if(x!=0)
 			if(y!=0)
 			if(Terrain_Data.TERRE[_map[x-1][y-1]].Type!=connector)
@@ -297,9 +297,9 @@ var Terrain_Data = {
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
 			}
-			
+
 			var cornerImg = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-			
+
 			if(x!=0)
 			if(Terrain_Data.TERRE[_map[x-1][y]].Type!=connector)
 			if(Terrain_Data.TERRE[_map[x-1][y]].Type!=type)
@@ -319,13 +319,13 @@ var Terrain_Data = {
 							__img = Terrain_Data.TERRE[index].Borders[9];
 							__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 							__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-							
+
 							return [__ANIMATION, __sprite];
 						}
 						__img = Terrain_Data.TERRE[index].Borders[8];
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-						
+
 						return [__ANIMATION, __sprite];
 					}
 					if(y!=_map[x].length-1)
@@ -335,20 +335,20 @@ var Terrain_Data = {
 						__img = Terrain_Data.TERRE[index].Borders[7];
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-						
+
 						return [__ANIMATION, __sprite];
 					}
 					__img = Terrain_Data.TERRE[index].Borders[1];
 					imageHolderCanvas.save();
 					imageHolderCanvas.scale(-1, 1);
 					imageHolderCanvas.translate(-TILESIZE, 0);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					imageHolderCanvas.restore();
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-					
+
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				if(y!=0)
@@ -363,11 +363,11 @@ var Terrain_Data = {
 						imageHolderCanvas.save();
 						imageHolderCanvas.scale(-1, 1);
 						imageHolderCanvas.translate(-TILESIZE, 0);
-						
+
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
 						imageHolderCanvas.restore();
-						
+
 						return [__ANIMATION, __sprite];
 					}
 					__img = Terrain_Data.TERRE[index].Borders[3];
@@ -378,7 +378,7 @@ var Terrain_Data = {
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
 					imageHolderCanvas.restore();
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				if(y!=_map[x].length-1)
@@ -389,22 +389,22 @@ var Terrain_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.scale(-1, 1);
 					imageHolderCanvas.translate(-TILESIZE, 0);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
 					imageHolderCanvas.restore();
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				__img = Terrain_Data.TERRE[index].Borders[1];
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(180*Math.PI/180);
 				imageHolderCanvas.translate(-TILESIZE, -TILESIZE);
-				
+
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
 				imageHolderCanvas.restore();
-				
+
 				return [__ANIMATION, __sprite];
 			}
 			if(x!=_map.length-1)
@@ -422,13 +422,13 @@ var Terrain_Data = {
 						__img = Terrain_Data.TERRE[index].Borders[6];
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-						
+
 						return [__ANIMATION, __sprite];
 					}
 					__img = Terrain_Data.TERRE[index].Borders[3];
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE))
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				if(y!=_map[x].length-1)
@@ -438,13 +438,13 @@ var Terrain_Data = {
 					__img = Terrain_Data.TERRE[index].Borders[10];
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE))
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				__img = Terrain_Data.TERRE[index].Borders[1];
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE))
-				
+
 				return [__ANIMATION, __sprite];
 			}
 			if(y!=0)
@@ -461,13 +461,13 @@ var Terrain_Data = {
 					__img = Terrain_Data.TERRE[index].Borders[2];
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				__img = Terrain_Data.TERRE[index].Borders[0];
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-				
+
 				return [__ANIMATION, __sprite];
 			}
 			if(y!=_map[x].length-1)
@@ -477,10 +477,10 @@ var Terrain_Data = {
 				__img = Terrain_Data.TERRE[index].Borders[2];
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-				
+
 				return [__ANIMATION, __sprite];
 			}
-			
+
 			return [__ANIMATION, cornerImg];
 		}
 		if(type==4)
@@ -491,9 +491,9 @@ var Terrain_Data = {
 		{	// animation
 			var sea = Terrain_Data.TERRE[Terrain_Data.Get("Sea")];
 			var type = Terrain_Data.TERRE[index].Type;
-			
+
 			/// check if corner add here
-			
+
 			if(x!=0)
 			if(y!=0)
 			if(Terrain_Data.TERRE[_map[x-1][y-1]].Type!=type)
@@ -538,7 +538,7 @@ var Terrain_Data = {
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
 			}
-			
+
 			return [Animations.Retrieve(Terrain_Data.TERRE[index].Name+" Ani"), imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE)];
 		}
 		if(type==8)
@@ -550,11 +550,11 @@ var Terrain_Data = {
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(90*Math.PI/180);
 				imageHolderCanvas.translate(0, -TILESIZE);
-				
+
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
-				
+
 				return __sprite;
 			}
 			if(y!=_map[x].length-1)
@@ -564,11 +564,11 @@ var Terrain_Data = {
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(90*Math.PI/180);
 				imageHolderCanvas.translate(0, -TILESIZE);
-				
+
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
-				
+
 				return __sprite;
 			}
 			__img = Terrain_Data.TERRE[index].Sprite[0];
@@ -576,7 +576,7 @@ var Terrain_Data = {
 			__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 			return __sprite;
 		}
-		
+
 			// singular
 		__img = Terrain_Data.TERRE[index].Sprite[0];
 		__sprite = __img.Image();
@@ -671,7 +671,7 @@ Terrain_Data.TERRE[CURTERRE++] = {
 	Type:1,
 	Protection:.2,
 	Damage:0,
-	Height:0,
+	Height:5,
 	Drag:2,
 	Connnection:2,
 	Modifiers:[],
@@ -689,7 +689,7 @@ Terrain_Data.TERRE[CURTERRE++] = {
 	Height:50,
 	Drag:2,
 	Connnection:2,
-	Modifiers:[],
+	Modifiers:[CURMODS.Properties.Extra_Sight],
 	Sprite:null,
 	X:0,
 	Y:0
@@ -746,7 +746,7 @@ Terrain_Data.TERRE[CURTERRE++] = {
 	Type:7,
 	Protection:0,
 	Damage:0,
-	Height:0,
+	Height:100,
 	Drag:100,
 	Connnection:4,
 	Modifiers:[],
@@ -823,7 +823,7 @@ Terrain_Data.TERRE[CURTERRE++] = {
 	Type:6,//5
 	Protection:.1,
 	Damage:0,
-	Height:0,
+	Height:10,
 	Drag:2,
 	Connnection:5,
 	Modifiers:[],
@@ -838,7 +838,7 @@ Terrain_Data.TERRE[CURTERRE++] = {
 	Type:6,//1
 	Protection:.2,
 	Damage:0,
-	Height:0,
+	Height:20,
 	Drag:2,
 	Connnection:5,
 	Modifiers:[],
@@ -883,7 +883,7 @@ Terrain_Data.TERRE[CURTERRE++] = {
 	Type:8,
 	Protection:0,
 	Damage:0,
-	Height:0,
+	Height:10,
 	Drag:1,
 	Connnection:8,
 	Modifiers:[],
@@ -898,7 +898,7 @@ Terrain_Data.TERRE[CURTERRE++] = {
 	Type:8,
 	Protection:0,
 	Damage:0,
-	Height:0,
+	Height:20,
 	Drag:1,
 	Connnection:8,
 	Modifiers:[],
@@ -913,7 +913,7 @@ for(var x=1;x<Terrain_Data.TERRE.length;x++)
 	// setting sprites
 	var _t = Terrain_Data.TERRE[x];
 	_t.Sprite = new Array(Terrain_Data.Connnection_Images(_t.Connnection));
-	
+
 	if(_t.Name=="Sea" || _t.Name=="Shore")
 	{
 		_t.Borders = new Array(11);
@@ -923,7 +923,7 @@ for(var x=1;x<Terrain_Data.TERRE.length;x++)
 			_t.Borders[j].Stretch(true);
 		}
 	}
-	
+
 	if(_t.Connnection==5 || _t.Connnection==3)
 	{
 		_t.Sprite[0] = Images.Declare("Terrain/"+_t.Name+"/"+_t.Name+"0.png",_t.Name+"0");
@@ -942,4 +942,3 @@ for(var x=1;x<Terrain_Data.TERRE.length;x++)
 		_t.Sprite[i].Stretch(true);
 	}
 }
-

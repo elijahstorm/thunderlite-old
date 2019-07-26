@@ -1,5 +1,5 @@
 var TILESIZE = window.mobilecheck() ? 40 : 60;
-// const TILESIZE = window.mobilecheck() ? 60 : 30;
+
 var Converter = {
 	Screen:{
 		X:function(input)
@@ -137,6 +137,11 @@ var Map_Holder = function(map)
 			n_m[x] = new Array(cols);
 			for(var y=0;y<cols;y++)
 			{
+				if(map[x][y].Clone)
+				{
+					n_m[x][y] = map[x][y].Clone();
+					continue;
+				}
 				n_m[x][y] = map[x][y];
 			}
 		}

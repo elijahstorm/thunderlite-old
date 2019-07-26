@@ -14,8 +14,8 @@ Images.Declare("Icons/moves/tile_walk.png","tile walk");
 Images.Declare("Icons/moves/tile_attack.png","tile attack");
 Images.Declare("Icons/moves/tile_danger.png","tile danger");
 var ERRORIMG = Images.Declare("Misc/ERROR.png","ERROR");
-var temp = Images.Declare("Misc/fireball.png","Explosion");
-temp.Stretch(true);
+
+Animations.Declare(Images.Declare("Sheets/animations/ExplosionSheet.png", "Expl Sheet"), "Explosion", 2, false).Frame_Size(4, 3);
 
 Images.Declare("Icons/attacks/great.png","Great Attack");
 Images.Declare("Icons/attacks/okay.png","Okay Attack");

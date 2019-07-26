@@ -52,15 +52,24 @@ var Buildings = {
 			return BuildData.Y;
 		};
 		this.Data = function()
-		{
+		{	// returns a clone of the data
 			var self = this;
-			return {
+			let data = {
 				index:place_index,
 				x:self.X,
 				y:self.Y,
 				stature:self.Stature,
 				resources:self.Resources
 			};
+			let extra_mods = [];
+			for(let i=0;i<mods.length;i++)
+			{
+				if(!BuildData.Modifiers.includes(mods[i]))
+					extra_mods.push(mods[i]);
+			}
+			if(extra_mods.length>0)
+				data.mods = extra_mods;
+			return data;
 		};
 
 		var mods = Core.Array.Clone(BuildData.Modifiers);
@@ -99,7 +108,6 @@ var Buildings = {
 
 		this.Draw = function(canvas, x, y)
 		{
-			var tile_scale = TILESIZE/60;
 			if(this.Sprite==null || this.Terrain.Hidden)
 			{
 				var img = BuildData.Sprite.Image();
@@ -111,16 +119,16 @@ var Buildings = {
 				y = Math.floor(y);
 				var pic = this.Sprite;
 				var behind = canvas.getImageData(x, y, pic.width, pic.height);
-				pic = scale(merge(behind, pic), tile_scale, tile_scale);
+
 				canvas.putImageData(pic, x, y);
 			}
 		};
 		this.UI_Draw = function(canvas, x, y)
 		{
 			this.Draw(canvas,x+(TILESIZE/60*this.X_Offset()),y+(TILESIZE/60*this.Y_Offset()));
-			
+
 			if(this.Terrain.Hidden)return;
-			
+
 			canvas.save();
 			canvas.translate(x,y);
 			canvas.scale(TILESIZE/60,TILESIZE/60);
@@ -141,9 +149,7 @@ var Buildings = {
 			}
 			if(this.Resources!=0)
 			{
-				Shape.Rectangle.Draw(canvas, 5, 40, 35, 12, "#ccc");
-				Shape.Rectangle.Draw(canvas, 6, 41, 33, 10, "#4B5320");
-				new Text_Class("8pt Times New Roman","#FFF").Draw(canvas, 7, 42, TILESIZE, 10, "$"+this.Resources);
+				game.Interface.Resource_Draw(canvas, this.Resources);
 			}
 			canvas.restore();
 		};
@@ -154,7 +160,7 @@ var Buildings = {
 				y:-100
 			});
 		};
-		
+
 		this.Active = false;
 		this.Set_Active = function(value)
 		{
@@ -205,7 +211,8 @@ var Buildings = {
 				this.Resources-=amt;
 				if(this.Owner==null)return;
 				this.Owner.Add_Income(amt);
-				var risingTxt = HUD_Display.Add_Drawable(new Text_Class("18pt Times New Roman","#919399"), "Income "+this.X+","+this.Y, 
+				if(game.Interface.Fake)return;
+				var risingTxt = HUD_Display.Add_Drawable(new Text_Class("18pt Times New Roman","#919399"), "Income "+this.X+","+this.Y,
 							this.X*TILESIZE-game.Interface.X_Offset(), (this.Y+0.6)*TILESIZE-game.Interface.Y_Offset(), 100, 30, "$"+amt);
 				Core.Slide_Drawable_Y(risingTxt, -30, 20, function(){
 					Core.Fade_Drawable(risingTxt, 0, 20);
@@ -245,7 +252,7 @@ var Buildings = {
 			var self = this;
 			INTERFACE.Scroll_To_Tile(self.X, self.Y);
 			raiding_player = unit.Player
-			
+
 			Core.Smooth_Changer(this, self.Stature, -amt/10, 10, function(){
 				if(self.Stature.Get()<=0)
 				{
@@ -258,7 +265,7 @@ var Buildings = {
 					if(self.Owner!=null)unit.Hurt(self.Defense);
 				}
 			});
-			
+
 			game.Interface.Draw();
 		};
 		this.Captured_By = function(player)
@@ -269,16 +276,15 @@ var Buildings = {
 				available[i].Do([this, player]);
 			}
 		};
-		this.Die = function(keep_data)
+		this.Die = function()
 		{
-			if(!keep_data)
-			{
-				if(this.Owner!=null)
-					this.Owner.Lose_Building(this);
-			}
 			this.Owner = null;
-			this.Sprite = null;
 			Core.Explode(this);
+		};
+		this.Remove_From_Game = function()
+		{
+			if(this.Owner!=null)
+				this.Owner.Lose_Building(this);
 		};
 
 		this.Action_Amt = function()

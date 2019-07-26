@@ -33,6 +33,16 @@ function Image_list_class()
 			}
 			canvas.drawImage(img,x,y);
 		};
+		this.Crop = function(canvas, x, y, start_x, start_y, w, h, stretch_w, stretch_h)
+		{
+			if(stretchable)
+			if(stretch_w!=null&&stretch_h!=null)
+			{
+				canvas.drawImage(img,start_x,start_y,w,h,x,y,stretch_w,stretch_h);
+				return;
+			}
+			canvas.drawImage(img,start_x,start_y,w,h,x,y,w,h);
+		};
 		this.Loaded = function()
 		{
 			return loaded;

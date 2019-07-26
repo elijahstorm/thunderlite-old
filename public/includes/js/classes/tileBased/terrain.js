@@ -10,29 +10,33 @@ var Terrain = {
 		var TerreData = Terrain_Data.TERRE[terre_index];
 		var mods = Core.Array.Clone(TerreData.Modifiers);
 		var mod_amt = mods.length;
-		
+
 			// to display correct sprite
 		var sprite,draw_image=false;
-		if(TerreData.Connnection==3)
-		{	// if has borders, then display it right
-			sprite = __sprite[0].New(imageHolderCanvas, x*TILESIZE, y*TILESIZE, TILESIZE, TILESIZE, true);
-			sprite.set({
-				canvas:worldCanvas,
-				width:TILESIZE,
-				height:TILESIZE
-			});
-		}else if(TerreData.Connnection==5)
+
+		if(__sprite!=null)
 		{
-			sprite = __sprite[0].New(imageHolderCanvas, x*TILESIZE, y*TILESIZE, TILESIZE, TILESIZE, true);
-			sprite.set({
-				canvas:worldCanvas,
-				width:TILESIZE,
-				height:TILESIZE
-			});
-		}else sprite = __sprite;
-		if(sprite.Image!=null)
-		{
-			draw_image = true;
+			if(TerreData.Connnection==3)
+			{	// if has borders, then display it right
+				sprite = __sprite[0].New(imageHolderCanvas, x*TILESIZE, y*TILESIZE, TILESIZE, TILESIZE, true);
+				sprite.set({
+					canvas:worldCanvas,
+					width:TILESIZE,
+					height:TILESIZE
+				});
+			}else if(TerreData.Connnection==5)
+			{
+				sprite = __sprite[0].New(imageHolderCanvas, x*TILESIZE, y*TILESIZE, TILESIZE, TILESIZE, true);
+				sprite.set({
+					canvas:worldCanvas,
+					width:TILESIZE,
+					height:TILESIZE
+				});
+			}else sprite = __sprite;
+			if(sprite.Image!=null)
+			{
+				draw_image = true;
+			}
 		}
 
 		this.Building = null;
@@ -84,10 +88,10 @@ var Terrain = {
 		this.UI_Draw = function(canvas, x, y, duplicate)
 		{
 			this.Draw(canvas,x+this.X_Offset(),y+this.Y_Offset()*(TILESIZE/60),duplicate);
-			
+
 			if(duplicate)return;
 				/// show tile location
-				
+
 			if(this.Hidden)
 			{
 				canvas.save();
@@ -127,7 +131,7 @@ var Terrain = {
 
 		this.Clone = function(engine)
 		{
-			return new Terre_Class(engine,terre_index,x,y, __sprite);
+			return new Terrain.Terre_Class(engine,terre_index,x,y);
 		};
 		this.Delete = function()
 		{
@@ -136,7 +140,7 @@ var Terrain = {
 				__sprite[0].Remove(sprite.values.index);
 			}
 		};
-		
+
 		this.Mods_By_Type = function(type)
 		{
 			var cur = [];
