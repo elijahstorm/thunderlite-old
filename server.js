@@ -127,11 +127,12 @@ var Game = function(map, name, slots){
 	}
 	this.Passkey = function()
 	{
-			passkey = Math.rand();
+			__passkey = Math.random();
 			return __passkey;
 	};
 	var playerData = [];
 	var self = this;
+
 	for(var i=0;i<slots;i++)
 	{
 		playerData[i] = [null,null,false];
@@ -139,13 +140,11 @@ var Game = function(map, name, slots){
 		// 1 most recent game data
 		// 2 received game data for most recent check
 	}
-	self.Set = function(input_passkey, index, value){
-		if(!passkey_check(input_passkey))return;
+	self.Set = function(index, value){
 		if(index>=playerData.length)return;
 		playerData[index][0] = value;
 	};
-	self.Data = function(input_passkey, index){
-		if(!passkey_check(input_passkey))return null;
+	self.Data = function(index){
 		var arr = [];
 		for(var i in playerData)
 		{
@@ -172,34 +171,39 @@ var Game = function(map, name, slots){
 	function recievedGameData(playerIndex){
 		playerData[playerIndex][2] = true;
 		for(var i in playerData){
-			if(!playerData[i][2]){
+			if(!playerData[i][2])
+			if(playerData[i][0]!=null){
 				return; // someone has not sent in game data yet
 			}
-		} // if loop ends without returning, then all data is here for check
-		for(var i=1;i<playerData.length;i++){
-			if(playerData[i][1]!=playerData[i-1][1]){
+		} // if loop ends without returning, then all data has been recieved, now ready for check
+
+		for(var i=0,last_i=null;i<playerData.length;i++){
+			if(playerData[i][0]==null)continue;
+			if(last_i!=null)
+			if(playerData[i][1]!=playerData[last_i][1]){
 					// games report differing data
 				badCallbackFnc();
 				return;
 			}
-		} // if loop ends all is okay
+			last_i = i;
+		} // if loop ends, all is okay
 		lastValidGameState = playerData[0][1];
 		goodCallbackFnc();
 	};
 	self.Check_Data = function(input_passkey, goodCallback, badCallback, requestIndex, requestData){
 		if(!passkey_check(input_passkey))return;
-		self.Send({type:14}, requestIndex); // request everyone else send data
+		self.Send(input_passkey, {type:14}, requestIndex); // request everyone else send data
 		for(var i in playerData){
 			// clear last check
 			playerData[i][2] = false;
 		}
-		self.Update_Data(requestIndex, requestData);
 		if(typeof goodCallback==='function')
 			goodCallbackFnc = goodCallback;
 		else goodCallbackFnc = function(){};
 		if(typeof badCallback==='function')
 			badCallbackFnc = badCallback;
 		else badCallbackFnc = function(){};
+		self.Update_Data(input_passkey, requestIndex, requestData);
 	};
 	self.Update_Data = function(input_passkey, socketIndex, gameData){
 		if(!passkey_check(input_passkey))return;
@@ -216,7 +220,7 @@ var Game = function(map, name, slots){
 	};
 	self.Revert = function(input_passkey){
 		if(!passkey_check(input_passkey))return;
-		self.Send({type:15,game:lastValidGameState});
+		self.Send(input_passkey, {type:15,game:lastValidGameState});
 	};
 
 	self.Leave = function(input_passkey, socketIndex, rejoinTime, outOfTimeFnc){
@@ -244,22 +248,22 @@ var Game = function(map, name, slots){
 		{
 			playerData[playerIndex][0] = null;
 			if(!self.started){	// if game hasn't started, just remove immediately
-				self.Send({type:24,slot:playerIndex});
+				self.Send(input_passkey, {type:24,slot:playerIndex});
 				if(typeof outOfTimeFnc==='function')outOfTimeFnc();
 				return;
 			}
 			if(rejoinTime){ // give player chance to reconnect
-				self.Send({type:28,slot:playerIndex}); // warn that player lost connection
+				self.Send(input_passkey, {type:28,slot:playerIndex}); // warn that player lost connection
 				var disconPlayer = Connections.Socket(socketIndex); // disconnected player
 				if(disconPlayer!=null)
 					timestamp("user",disconPlayer.username,"lost connection mid game");
 				setTimeout(function(){
 					if(playerData[playerIndex][0]!=null)return;
-					self.Send({type:24,slot:playerIndex}); // report player failed to reconnect
+					self.Send(input_passkey, {type:24,slot:playerIndex}); // report player failed to reconnect
 					if(typeof outOfTimeFnc==='function')outOfTimeFnc();
 				}, rejoinTime);
 			}else{ // player cannot try to reconnect, auto termination
-				self.Send({type:24,slot:playerIndex});
+				self.Send(input_passkey, {type:24,slot:playerIndex});
 				if(typeof outOfTimeFnc==='function')outOfTimeFnc();
 			}
 		}
@@ -277,7 +281,7 @@ var Game = function(map, name, slots){
 		var returningPlayer = Connections.Socket(socketIndex);
 		if(returningPlayer==null)return;
 		playerData[playerIndex][0] = socketIndex;
-		self.Send({type:29,slot:playerIndex}, socketIndex); // report player reconnected
+		self.Send(input_passkey, {type:29,slot:playerIndex}, socketIndex); // report player reconnected
 		var gamestate = lastValidGameState;
 		if(gamestate==null){ // this is the case if the game hasn't started
 			gamestate = self.Map; // so send new game data
@@ -467,7 +471,7 @@ io.on('connection', function(socket){
 		});
 	});
 	socket.on('join', function(game_id){
-	//search node
+		// search node
 		var game = Game_List.Game(game_id);
 		var connections = game.Data();
 		var names = [];
@@ -500,7 +504,7 @@ io.on('connection', function(socket){
 			game.Set(i, socket.index);
 			socket.vars.slotIndex = i;
 			connections[i] = socket.index;
-			game.Send({
+			game.Send(-1, {
 				type:26,
 				player:socket.index,
 				name:socket.username,
@@ -571,9 +575,9 @@ io.on('connection', function(socket){
 		Lobby.Remove(game.lobby);
 		game.lobby = -1;
 	});
-	socket.on('chat', function(msg){
+	socket.on('chat', function(__input_passkey, msg){
 		if(socket.vars.in_game==null)return;
-		Game_List.Game(socket.vars.in_game).Send({
+		Game_List.Game(socket.vars.in_game).Send(__input_passkey, {
 			type:13,
 			sender:socket.index, // send index instead and interpret client side
 			txt:msg

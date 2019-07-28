@@ -33,6 +33,9 @@ var Building_Data = {
 					if(callback!=null)callback(building);
 					return false;
 				}
+
+				game.Send_Move('send build', building.Index, input);
+
 				SFXs.Retrieve("build").Play();
 				player.Add_Income(-player.Calculate_Cost(input));
 				var c = new Characters.Char_Class(game, input);

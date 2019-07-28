@@ -556,7 +556,7 @@ window.onload = function(){
 		if(INTERFACE.Game.Client_Player().Active)
 		{
 			INTERFACE.Select_Tile();
-			INTERFACE.Game.Send_Move('next player', JSON.stringify(INTERFACE.Game.Data()));
+			INTERFACE.Game.Send_Move('next player', JSON.stringify(INTERFACE.Game.Data(true)));
 			INTERFACE.Game.Client_Player().End_Turn();
 		}
 	};
@@ -589,6 +589,7 @@ function decrypt_game_data(data)
 function init_map(map, players, game_id, skip_pregame, test_game){
 	document.getElementById("mainMenu").style.display="none";
 	var Game = new Engine_Class(map);
+	if(test_game!=null)
 	if(test_game[0])
 	{
 		Game.game_data[0] = true;

@@ -119,6 +119,9 @@ var Buildings = {
 				y = Math.floor(y);
 				var pic = this.Sprite;
 				var behind = canvas.getImageData(x, y, pic.width, pic.height);
+				behind = merge(behind, pic);
+				if(behind!=null)
+					pic = behind;
 
 				canvas.putImageData(pic, x, y);
 			}
@@ -168,13 +171,14 @@ var Buildings = {
 			this.Active = value;
 			select_animation.set({show:value});
 		};
-		this.Act = function(input, callback)
+		this.Act = function(input, callback, scrollTo)
 		{
 			if(BuildData.Act==null)
 			{
 				if(callback!=null)callback(this);
 				return null;
 			}
+			if(scrollTo)game.Interface.Scroll_To_Tile(this.X, this.Y);
 			return BuildData.Act(game, this, input, callback);
 		};
 

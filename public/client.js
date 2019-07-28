@@ -177,11 +177,11 @@ window.onload = function(){
 		}
 		else if(data.type==11)
 		{	// move unit
-			game.INTERFACE.Game.Move(data.unit, data.x, data.y, data.path);
+			game.INTERFACE.Game.Move(data.unit, data.x, data.y, data.path, null, true);
 		}
 		else if(data.type==12)
 		{	// act building
-			var result = game.INTERFACE.Game.Build(data.building, data.input);
+			var result = game.INTERFACE.Game.Build(data.building, data.input, null,  true);
 			game.INTERFACE.Draw();
 		}
 		else if(data.type==13)
@@ -192,7 +192,7 @@ window.onload = function(){
 		else if(data.type==14)
 		{	// request game data
 			if(!game.INTERFACE.Game)return;
-			socket.emit('save game', JSON.stringify(game.INTERFACE.Game.Data()));
+			game.INTERFACE.Game.Update_Server_With_Gamestate();
 		}
 		else if(data.type==15)
 		{	// report invalid game data -> fix or break if unfixable
@@ -402,19 +402,19 @@ function refresh_game(){
 	gameFrame.src = gameFrame.src;
 }
 
-function send_chat(text){
+function send_chat(__input_passkey, text){
 	if(!game.currently_playing)return;
-	socket.emit('chat', text);
+	socket.emit('chat', __input_passkey, text);
 	lobby.contentWindow.add_msg(socket.index, text);
 }
-function join_game(game){
+function join_game(game_id){
 	if(game.currently_playing)
 	{
 		if(!confirm("Are you sure you want to leave this game?"))
 			return;
 		game.INTERFACE.Game.End_Game(false);
 	}
-	socket.emit('join', game);
+	socket.emit('join', game_id);
 }
 
 function timestamp(){

@@ -361,7 +361,7 @@ var Characters = {
 			});
 		};
 
-		this.Act = function(x, y, mover, whenFinished)
+		this.Act = function(x, y, mover, whenFinished, scrollTo)
 		{
 			if(mover==null)
 			{
@@ -389,6 +389,7 @@ var Characters = {
 					end[0]--;
 				}
 			}
+			if(scrollTo)game.Interface.Scroll_To_Tile(this.X, this.Y);
 
 			var callback = function(__unit)
 			{
@@ -1037,7 +1038,7 @@ var Characters = {
 				if(tile_def.Building!=null)
 					tile_def = tile_def.Building;
 				bonus*=(1-tile_def.Protection);
-				bonus*=1+((this.Terrain().Height-tile_def.Height)/300);
+				// bonus*=1+((this.Terrain().Height-tile_def.Height)/300);
 			}
 			var available = this.Mods_By_Type("Damage");
 			for(var i=0;i<available.length;i++)

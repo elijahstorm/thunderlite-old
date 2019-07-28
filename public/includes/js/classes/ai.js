@@ -7,22 +7,23 @@ var AI_Class = function(_last_game, _ai_player, _index)
 	if(_index==null)
 		_index = 0;
 
-	var self = this;
-	var STATE = {
+	let self = this;
+	let STATE = {
 		Scared:0,
 		Gathering:1,
 		Setup:2,
 		Argo:3,
 		Domination:4
 	};
-	var SUB_GAME_AI = false;
-	var TIMEOUT = 735;
-	var FAKE_GAME;
-	var Fog_Check = false;
-	var Visible_Enemies = null;
-	var Recursion_Break = 50;
-	var Last_Attempted = null;
-	var STATUS_CHOICE = function(standing, __game, __player)
+	let SUB_GAME_AI = false;
+	let TIMEOUT = 735;
+	let FAKE_GAME;
+	let Fog_Check = false;
+	let Visible_Enemies = null;
+	let Estimated_Enemies;
+	let Recursion_Break = 50;
+	let Last_Attempted = null;
+	let STATUS_CHOICE = function(standing, __game, __player)
 	{
 		if(__game.Game_Over)return; // game over
 		if(!__player.Active)return; // not __player's turn
@@ -80,7 +81,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 		if(!~__unit || __unit==null)
 		{ // if ai player has no more units to move, then build / act buildings
 			let _special_unit = __player.Next_Active_Unit();
-			if(_special_unit!=null)
+			if(~_special_unit)
 			{
 				Manuver_Capital_Unit(standing, __game, __player, _special_unit);
 				return;
@@ -89,9 +90,9 @@ var AI_Class = function(_last_game, _ai_player, _index)
 			var __city = __player.Next_Active_Building();
 			if(!~__city)return;
 
-			if(!__game.Terrain_Map.At(_cur_city.X, _cur_city.Y).Hidden)
-				INTERFACE.Scroll_To_Tile(_cur_city.X, _cur_city.Y);
-			if(!TRY_BUILD(__game, __player, __city, null, function(_cur_city){
+			if(!__game.Terrain_Map.At(__city.X, __city.Y).Hidden)
+				INTERFACE.Scroll_To_Tile(__city.X, __city.Y);
+			if(!TRY_BUILD(__game, __player, __city, null, function(__city){
 				INTERFACE.Draw();
 				setTimeout(function(){
 					INTERFACE.Draw();

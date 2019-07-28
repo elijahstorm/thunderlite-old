@@ -126,7 +126,7 @@ var Engine_Data = function(data)
 			}
 			return nameList;
 		};
-		this.Move = function(unit, x, y, path, whenFinished)
+		this.Move = function(unit, x, y, path, whenFinished, scrollTo)
 		{
 			if(unit.SELECTABLE==null)
 			{
@@ -151,9 +151,9 @@ var Engine_Data = function(data)
 				if(whenFinished!=null)whenFinished(unit);
 				return false;
 			}
-			return unit.Act(x, y, path, whenFinished);
+			return unit.Act(x, y, path, whenFinished, scrollTo);
 		};
-		this.Build = function(city, input, whenFinished)
+		this.Build = function(city, input, whenFinished, scrollTo)
 		{
 			if(city.SELECTABLE==null)
 			{
@@ -173,7 +173,7 @@ var Engine_Data = function(data)
 					return false;
 				}
 			}
-			return city.Act(input, whenFinished);
+			return city.Act(input, whenFinished, scrollTo);
 		};
 		this.Check_Player_Standing = function(__team)
 		{	// standing is a numerical rating out of 5 showing how well the player is comparing
@@ -365,10 +365,73 @@ var Engine_Class = function(input, is_sample)
 		__server_passkey = key;
 	};
 
+
+	let _self = this;
+	let last_move_time = new Date(),
+		last_timeout;
+	const	MAX_MOVE_DELAY_TIME = 60000;
+	const AI_HALTED_CORRECTION = MAX_MOVE_DELAY_TIME/4;
+	function sentGameMove()
+	{	// if player doesn't move for a whole minute, force end their turn
+		if(!online)return;
+		last_move_time = new Date();
+		const this_move_time = last_move_time;
+
+		clearLastTimeoutCheck();
+			// this isn't nessisary, it just might be more memory effecient
+
+		if(_self.AI_Players().includes(_self.Active_Player()))
+		{
+			last_timeout = setTimeout(function(){
+				if(last_move_time==this_move_time)
+				{	// fix AI stalling issue by ending their turn
+					if(last_move_time==this_move_time)
+					{	// force player to end their turn
+						_self.Active_Player().End_Turn();
+					}
+				} // because they haven't moved for a whole minute
+			}, AI_HALTED_CORRECTION);
+			return;
+		}
+
+		last_timeout = setTimeout(function(){
+			if(last_move_time==this_move_time)
+			{ // warn that user has 15 seconds to make a move
+				LOG.add((client==_self.Active_Player() ? "You" : "They")+" have 15 seconds to make another move", "#F00", 10000);
+				last_timeout = setTimeout(function(){
+					if(last_move_time==this_move_time)
+					{	// force player to end their turn
+						if(client!=_self.Active_Player())return;
+						_self.Send_Move('next player', JSON.stringify(_self.Data(true)));
+						_self.Active_Player().End_Turn();
+					}
+				}, MAX_MOVE_DELAY_TIME/4);
+			} // because they haven't moved for a whole minute
+		}, MAX_MOVE_DELAY_TIME*3/4);
+	};
+	function clearLastTimeoutCheck()
+	{	// only to be used when ending and starting new turns
+		if(last_timeout!=null)
+		{	// clear out the last time check
+			clearTimeout(last_timeout);
+		}
+	}
+
 	this.Send_Move = function(type, arg1, arg2, arg3, arg4)
 	{
 		if(!online)return;
 		socket.emit(type, __server_passkey, arg1, arg2, arg3, arg4);
+		if(type=='send move' || type=='send build')sentGameMove();
+	};
+	this.Send_Chat = function(msg)
+	{
+		if(!online)return;
+		window.parent.send_chat(__server_passkey, msg);
+	};
+	this.Update_Server_With_Gamestate = function()
+	{
+		if(!online)return;
+		socket.emit('save game', __server_passkey, JSON.stringify(this.Data(true)));
 	};
 
 	var Terrain_Animations = [];
@@ -875,7 +938,7 @@ var Engine_Class = function(input, is_sample)
 			_city.Terrain.Hidden = false;
 		else _city.Terrain.Hidden = true;
 	};
-	this.Move = function(unit, x, y, path, whenFinished)
+	this.Move = function(unit, x, y, path, whenFinished, scrollTo)
 	{
 		if(unit.SELECTABLE==null)
 		{
@@ -900,11 +963,10 @@ var Engine_Class = function(input, is_sample)
 			if(whenFinished!=null)whenFinished(unit);
 			return false;
 		}
-		return unit.Act(x, y, path, whenFinished);
+		return unit.Act(x, y, path, whenFinished, scrollTo);
 	};
-	this.Build = function(city, input, whenFinished)
+	this.Build = function(city, input, whenFinished, scrollTo)
 	{
-		console.error('oof');
 		if(city.SELECTABLE==null)
 		{
 			var found = false;
@@ -923,7 +985,7 @@ var Engine_Class = function(input, is_sample)
 				return false;
 			}
 		}
-		return city.Act(input, whenFinished);
+		return city.Act(input, whenFinished, scrollTo);
 	};
 	this.Check_Player_Standing = function(__team)
 	{	// standing is a numerical rating out of 5 showing how well the player is comparing
@@ -1098,6 +1160,7 @@ var Engine_Class = function(input, is_sample)
 				UI.Select_Tile();
 				UI.Set_Next_Player(active_player, function(){
 					active_player.Start_Turn(socket.index==Connected_Players[cur_player], function(){
+						sentGameMove();
 						if(Connected_Players[cur_player]==null)
 						{	/// start AI
 							setTimeout(function(){
@@ -1119,7 +1182,7 @@ var Engine_Class = function(input, is_sample)
 		if(UI)UI.ReportLeft(slot);
 	};
 
-	this.Data = function()
+	this.Data = function(string)
 	{	/// create a clone of the data for the current game state
 		var self = this;
 		var player_data = [];
@@ -1132,12 +1195,20 @@ var Engine_Class = function(input, is_sample)
 		{
 			weather_clone[i] = global_weather[i];
 		}
+		let terrain_data;
+		if(string)
+		{
+			terrain_data = "";
+			for(let x=0;x<terre.Width;x++)
+			for(let y=0;y<terre.Height;y++)
+				terrain_data+=terre.At(x, y).Source+".";
+		}else terrain_data = terre.Clone();
 		return {
 			Game_Engine:true,
 			valid:self.valid,
 			name:self.Name,
 			turn:turn,
-			Terrain:terre.Clone(),
+			Terrain:terrain_data,
 			weather:weather_clone,
 			cur_player:cur_player,
 			connected:Connected_Players,
@@ -1263,6 +1334,7 @@ var Engine_Class = function(input, is_sample)
 			if(!UI.Check_Controls())return;
 			SFXs.Stop_Loops();
 		}
+		clearLastTimeoutCheck();
 		cur_player++;
 		while(Players[cur_player%Players.length].Dead)cur_player++;
 		if(cur_player>=Players.length)
@@ -1277,6 +1349,7 @@ var Engine_Class = function(input, is_sample)
 			UI.Select_Tile();
 			UI.Set_Next_Player(active_player, function(){
 				active_player.Start_Turn(socket.index==Connected_Players[cur_player], function(){
+					sentGameMove();
 					if(Connected_Players[cur_player]==null)
 					{	/// start AI
 						setTimeout(function(){

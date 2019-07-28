@@ -322,9 +322,9 @@ var Interface_Class = function()
 			}
 		};
 		Avatar = {
-			TurnBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "TurnBG", 20, 15, 150, 55, "#73877B", Canvas.Background),
+			TurnBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "TurnBG", 20, 15, 150, 55, "#E5D1D0", Canvas.Background),
 			Turn:Avatar_Display.Add_Drawable(new Text_Class("20pt Times New Roman", "#000"), "Turn", 30, 30, 50, 40, null, Canvas.Merge),
-			TurnBox:Avatar_Display.Add_Drawable(Shape.Box, "TurnBox", 20, 15, 150, 55, "#E5D1D0", Canvas.Merge),
+			TurnBox:Avatar_Display.Add_Drawable(Shape.Box, "TurnBox", 20, 15, 150, 55, "#F2F5FF", Canvas.Merge),
 			Turn_Number:Avatar_Display.Add_Drawable(new Text_Class("40pt Times New Roman", "#000"), "Turn Number", 100, 20, 50, 45, null, Canvas.Merge),
 			Standings:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Standings", 20, 85, 200, 20, null, Canvas.Background),
 			Standings_Border1:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border1", 20, 80, 150, 2, "#000", Canvas.Background),
@@ -475,7 +475,7 @@ var Interface_Class = function()
 		};
 		Avatar = {
 			TurnBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "TurnBG", 20, 15, 150, 55, "#73877B", Canvas.Background),
-			TurnBox:Avatar_Display.Add_Drawable(Shape.Box, "TurnBox", 20, 15, 150, 55, "#E5D1D0", Canvas.Merge),
+			TurnBox:Avatar_Display.Add_Drawable(Shape.Box, "TurnBox", 20, 15, 150, 55, "#DFB2F4", Canvas.Merge),
 			Turn:Avatar_Display.Add_Drawable(new Text_Class("20pt Times New Roman", "#000"), "Turn", 30, 30, 50, 40, null, Canvas.Merge),
 			Turn_Number:Avatar_Display.Add_Drawable(new Text_Class("40pt Times New Roman", "#000"), "Turn Number", 100, 20, 50, 45, null, Canvas.Merge),
 			Standings:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Standings", 20, 85, 200, 20, null, Canvas.Background),

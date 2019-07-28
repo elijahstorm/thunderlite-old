@@ -1,7 +1,7 @@
 document.getElementById('inputMessage').onkeypress = function(event){
 	if(event.keyCode==13&&this.value!='')
 	{
-		window.parent.send_chat(this.value);
+		window.parent.game.INTERFACE.Game.Send_Chat(this.value);
 		this.value = "";
 	}
 };
