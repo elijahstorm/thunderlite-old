@@ -157,7 +157,7 @@ var Player_Class = function(game, name, team, colors)
 			if(game.Game_Over)
 				return;
 		}
-		game.Next_Player();
+		game.Next_Player(true);
 	};
 
 	self.Add_Income = function(value)

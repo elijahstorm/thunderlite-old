@@ -633,20 +633,10 @@ function init_map(map, players, game_id, skip_pregame, test_game){
 	Menu.PreGame.Map(map, INTERFACE.Get_Sample(Game));
 	if(players!=null)
 	{
-		var set = false;
 		for(var i in players.c)
 		{
-			if(players.c[i]==null)
-			{
-				if(!set)
-				{
-					Game.Set_Player(i, socket.index, socket.username, true);
-					Menu.PreGame.Set(i, socket.username);
-					set = true;
-				}
-				continue;
-			}
-			Game.Set_Player(i, players.c[i], players.n[i], false);
+			if(players.c[i]==null)continue;
+			Game.Set_Player(i, players.c[i], players.n[i], players.n[i]==socket.username);
 			Menu.PreGame.Set(i, players.n[i]);
 		}
 	}
@@ -677,10 +667,13 @@ function new_custom_game(game_data, name, testing, save_data_index)
 {
 	if(!name)return;
 
-	var data = Map_Reader.Read(game_data);
+	let data;
+	if(game_data.Valid)
+		data = game_data;
+	else data = Map_Reader.Read(game_data);
 	if(!data.Valid)return;
 
-	init_map(data, null, null, true, [testing, save_data_index]);
+	init_map(data, null, null, testing, [testing, save_data_index]);
 	if(testing)return;
 
 	if(online){
@@ -705,6 +698,8 @@ function load_game(gameData){
 }
 
 function openLevelSelect(){
+	socket.emit('gamedata get', 'sort_by', 0, 4);
+
 	document.getElementById("mainMenu").style.display="none";
 	INTERFACE.Close_Menu();
 	INTERFACE.Set_Controls(document.getElementById("inputHandler"));
@@ -712,25 +707,6 @@ function openLevelSelect(){
 	INTERFACE.Display_Menu(Menu.LevelSelect);
 }
 function openMapEditor(game_data, data_index, testing_won){
-
-		/// load saved data
-		if(game_data==null)
-		if(document.cookie!=null)
-		if(document.cookie!=""){
-			var cookies = document.cookie.split("; ");
-			for(var i in cookies){
-				var curCookie = cookies[i];
-				if(curCookie.substr(0,5)=="data0"){
-					var equals = curCookie.indexOf('=');
-					if(~equals){
-						game_data = Map_Reader.Read(decrypt_game_data(curCookie.substr(equals+1)));
-					}
-					break;
-				}
-			}
-		}
-		/// delete this later
-
 	document.getElementById("mainMenu").style.display="none";
 	INTERFACE.Close_Menu();
 	INTERFACE.Set_Controls(document.getElementById("inputHandler"));

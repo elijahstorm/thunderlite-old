@@ -18,5 +18,5 @@ data should follow this pattern:
 	[id, x, y, player]
 7) cities (array of 4)
 	[id, x, y, player]
-8) weather 
+8) weather
 	[fog, rain, snow]

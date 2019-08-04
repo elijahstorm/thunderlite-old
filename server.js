@@ -9,9 +9,6 @@ var db = mongo(process.env.MONGODB_URI || 'mongodb://localhost/datatest');
 db.on('error', function(err){
 	console.log('Data Base ERR:', err);
 });
-db.on('open', function() {
-  console.log('BALLER');
-});
 server.listen(port, function(){
 	console.log('\********** Server listening on port %d **********', port);
 });
@@ -492,23 +489,39 @@ io.on('connection', function(socket){
 				Game_List.Game(socket.vars.in_game).Leave(socket.index);
 			}
 			socket.vars.in_game = game_id;
-			socket.send({
-				type:21,
-				map:game.Map(),
-				game:game.index_in_server,
-				players:{
-					c:connections,
-					n:names
-				}
-			});
 			game.Set(i, socket.index);
 			socket.vars.slotIndex = i;
 			connections[i] = socket.index;
+			names[i] = socket.username;
+			db.gamedata.find({Map_Id:game.Map(), PUBLISHED:true}, function(err, data){
+				if(err){
+					socket.send({
+						type:100,
+						game:game_id
+					});
+					return;
+				}
+				if(data.length==0){
+					socket.send({
+						type:100,
+						game:game_id
+					});
+					return;
+				}
+				socket.send({
+					type:21,
+					map:data[0].mapdata,
+					game:game.index_in_server,
+					players:{
+						c:connections,
+						n:names
+					}
+				});
+			});
 			game.Send(-1, {
 				type:26,
 				player:socket.index,
 				name:socket.username,
-				/* game:game_id, */
 				slot:i
 			}, socket.index);
 			socket.broadcast.emit('joined game', socket.index, socket.username, game_id, i);
@@ -587,6 +600,331 @@ io.on('connection', function(socket){
 	socket.on('log', function(msg){
 		timestamp(socket.username+": "+msg);
 	});
+
+	function Make_Unique_Map_Index(onFinish)
+	{
+		function make_letter(){ // 65 = A, 97 = a
+			let start = Math.random()>0.5 ? 65 : 97;
+			let index = Math.floor(Math.random()*26)+start;
+			if(start==65)
+			{	// these if/else's prevent lookalike characters from existing, to make course input freindlier
+				while(index==14 || index==8)	// O, I
+				{
+					index = Math.floor(Math.random()*26)+start;
+				}
+			}
+			else
+			{
+				while(index==11)	// l
+				{
+					index = Math.floor(Math.random()*26)+start;
+				}
+			}
+			return index;
+		}
+		function make_number(){	// 1 to 9
+			let index = Math.random()*9+49;
+			return Math.floor(index);
+		}
+		db.gamedata.find({}, function(err, existing_maps){
+			let unique_str_id, remake = true;
+			while(remake)
+			{
+				unique_str_id = "";
+				for(let bunch=0;bunch<3;bunch++)
+				{
+					for(let index=0;index<3;index++)
+					{
+						unique_str_id+=String.fromCharCode(Math.random()>0.3 ? make_letter() : make_number());
+					}
+				}
+				remake = false;
+				for(let cur in existing_maps)
+				{	// check to see if index is actually unique, if it's not then remake it until it is
+					if(existing_maps[cur].Map_Id==unique_str_id)
+					{
+						remake = true;
+						break;
+					}
+				}
+			}
+			onFinish(unique_str_id);
+		});
+	}
+	socket.on('mapdata download', function(userpass){
+
+		db.users.find({username:userpass.name}, function(err, data){
+			if(err){
+				socket.send({type:700});
+				return;
+			}
+			if(data[0].password!=userpass.pass)
+			{	// invalid username and password -- possible potential hijacking attempt
+				socket.send({type:700});
+				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
+				return;
+			}
+		});
+		db.gamedata.find({mapowner:userpass.name}, function(err, data){
+			if(err){
+				socket.send({type:700});
+				return;
+			}
+			let report_data = new Array();
+
+			for(let i=0;i<data.length;i++)
+			{
+				report_data.push({
+					saveindex:data[i].saveindex,
+					map:data[i].mapdata,
+					map_id:data[i].Map_Id
+				});
+			}
+
+			socket.send({type:701, data:report_data});
+		});
+	});
+	socket.on('mapdata upload', function(userpass, input_data){
+		db.users.find({username:userpass.name}, function(err, data){
+			if(err){
+				socket.send({type:700});
+				return;
+			}
+			if(data[0].password!=userpass.pass)
+			{	// invalid username and password -- possible potential hijacking attempt
+				socket.send({type:700});
+				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
+				return;
+			}
+		});
+		Make_Unique_Map_Index(function(__index){
+			db.gamedata.find({mapowner:userpass.name}, function(err, data){
+				if(err){
+					socket.send({type:777});
+					return;
+				}
+				if(data.length<9){
+					for(let i=0;i<data.length;i++)
+					{
+						if(data[i].saveindex==input_data.index)
+						{
+							socket.send({type:777});
+							return;
+						}
+					}
+					db.gamedata.save({
+						mapowner:userpass.name,
+						saveindex:input_data.index,
+						mapdata:input_data.map,
+						playtested:false,
+						last_playtested:null,
+						upload_date:new Date(),
+						PUBLISHED:false,
+						publish_date:null,
+						Map_Id:__index
+					}, function(err, saved){
+						if(err||!saved)socket.send({type:707});
+						else{
+							socket.send({type:706,mapid:__index});
+							timestamp("User saved map with map ID:", __index);
+						}
+					});
+				}
+				else socket.send({type:708});
+			});
+		});
+	});
+	socket.on('mapdata update', function(userpass, input_data){
+
+		db.users.find({username:userpass.name}, function(err, data){
+			if(err){
+				socket.send({type:700});
+				return;
+			}
+			if(data[0].password!=userpass.pass)
+			{	// invalid username and password -- possible potential hijacking attempt
+				socket.send({type:700});
+				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
+				return;
+			}
+		});
+		db.gamedata.find({Map_Id:input_data.index}, function(err, data){
+			if(err){
+				socket.send({type:777});
+				return;
+			}
+			if(data.length!=0){
+				if(data[0].mapowner!=userpass.name)
+				{
+					timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+					socket.send({type:709});
+					return;
+				}
+				db.gamedata.update({Map_Id:data[0].Map_Id}, {$set:{
+					mapdata:input_data.map,
+					playtested:false,
+					PUBLISHED:false
+				}}, function(err, saved){
+					if(err||!saved)socket.send({type:707});
+					else{
+						socket.send({type:710});
+						timestamp("MAP EDITOR -> "+userpass.name+" updated map with map ID:", input_data.index);
+					}
+				});
+			}
+			else socket.send({type:709});
+		});
+	});
+	socket.on('mapdata mark playtested', function(userpass, mapid){
+
+		db.users.find({username:userpass.name}, function(err, data){
+			if(err){
+				socket.send({type:700});
+				return;
+			}
+			if(data[0].password!=userpass.pass)
+			{	// invalid username and password -- possible potential hijacking attempt
+				socket.send({type:700});
+				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
+				return;
+			}
+		});
+		db.gamedata.find({Map_Id:mapid}, function(err, data){
+			if(err){
+				socket.send({type:777});
+				return;
+			}
+			if(data.length!=0){
+				if(data[0].mapowner!=userpass.name)
+				{
+					timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+					socket.send({type:709});
+					return;
+				}
+				db.gamedata.update({Map_Id:mapid}, {$set:{
+					playtested:true,
+					last_playtested:new Date()
+				}}, function(err, saved){
+					if(err||!saved)socket.send({type:707});
+					else{
+						socket.send({type:710});
+						timestamp("MAP EDITOR -> "+userpass.name+" playtested map with map ID:", data[0].Map_Id);
+					}
+				});
+			}
+			else socket.send({type:709});
+		});
+	});
+	socket.on('mapdata delete', function(userpass, mapid){
+		db.users.find({username:userpass.name}, function(err, data){
+			if(err){
+				socket.send({type:700});
+				return;
+			}
+			if(data[0].password!=userpass.pass)
+			{	// invalid username and password -- possible potential hijacking attempt
+				socket.send({type:700});
+				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
+				return;
+			}
+		});
+		db.gamedata.find({Map_Id:mapid}, function(err, data){
+			if(err){
+				socket.send({type:777});
+				return;
+			}
+			if(data.length!=0){
+				if(data[0].mapowner!=userpass.name)
+				{
+					timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+					socket.send({type:709});
+					return;
+				}
+				db.gamedata.removeOne({Map_Id:mapid}, function(err, saved){
+					if(err||!saved)socket.send({type:707});
+					else{
+						socket.send({type:710});
+						timestamp("MAP EDITOR -> "+userpass.name+" deleted map with map ID:", data[0].Map_Id);
+					}
+				});
+			}
+			else socket.send({type:709});
+		});
+	});
+	socket.on('mapdata publish', function(userpass, mapid){
+		db.users.find({username:userpass.name}, function(err, data){
+			if(err){
+				socket.send({type:700});
+				return;
+			}
+			if(data[0].password!=userpass.pass)
+			{	// invalid username and password -- possible potential hijacking attempt
+				socket.send({type:700});
+				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
+				return;
+			}
+		});
+		db.gamedata.find({Map_Id:mapid}, function(err, data){
+			if(err){
+				socket.send({type:777});
+				return;
+			}
+			if(data.length!=0){
+				if(data[0].mapowner!=userpass.name)
+				{
+					timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+					socket.send({type:709});
+					return;
+				}
+				db.gamedata.update({Map_Id:mapid}, {$set:{
+					PUBLISHED:true,
+					publish_date:new Date()
+				}}, function(err, saved){
+					if(err||!saved)socket.send({type:707});
+					else{
+						socket.send({type:710});
+						timestamp("MAP EDITOR -> "+userpass.name+" PUBLISHED map with map ID:", data[0].Map_Id);
+					}
+				});
+			}
+			else socket.send({type:709});
+		});
+	});
+
+	socket.on('gamedata id', function(mapid){
+		db.gamedata.find({Map_Id:mapid, PUBLISHED:true}, function(err, data){
+			if(err){
+				socket.send({type:500});
+				return;
+			}
+			if(data.length==0){
+				socket.send({type:501});
+				return;
+			}
+			socket.send({type:502, data:data[0].mapdata});
+		});
+	});
+	socket.on('gamedata get', function(sort_by, start_index, end_amt){
+		db.gamedata.find({PUBLISHED:true}, function(err, data){
+			if(err){
+				socket.send({type:500});
+				return;
+			}
+			if(data.length==0){
+				socket.send({type:501});
+				return;
+			}
+			let arr = new Array();
+
+			for(let i=0;i<end_amt && i<data.length;i++)
+			{
+				arr.push(data[i].mapdata);
+			}
+
+			socket.send({type:503, data:arr});
+		});
+	});
+
 
 	socket.on('new user', function(username, password, email){
 		if(socket.vars.online)return;

@@ -1183,7 +1183,6 @@ var AI_Class = function(_last_game, _ai_player, _index)
 			bestChoiceImpact;
 		var best_path,checked_path;
 
-console.log(Estimated_Enemies);
 		if(Visible_Enemies!=null)
 		if(Visible_Enemies.length==0)
 		if(Estimated_Enemies.length!=0)
@@ -1222,8 +1221,6 @@ console.log(Estimated_Enemies);
 				}
 			}
 		}
-
-console.log(DECISION_MADE, destination);
 
 		if(!DECISION_MADE)
 		{	// if no contact found

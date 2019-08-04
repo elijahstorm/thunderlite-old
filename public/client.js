@@ -236,7 +236,7 @@ window.onload = function(){
 		}
 		else if(data.type==21)
 		{	// setup game to play
-			game.init_map(data.map, data.players, data.game);
+			game.init_map(game.Map_Reader.Read(game.decrypt_game_data(data.map)), data.players, data.game);
 		}
 		else if(data.type==22)
 		{	// starting game
@@ -298,6 +298,104 @@ window.onload = function(){
 				playerName = playerName.Name;
 			else playerName = data.slot;
 			game.LOG.add("Player "+playerName+" reconnected connection.", "#FFF");
+		}
+
+			/** loading published games */
+		else if(data.type==500)
+		{	// error requesting mapdata
+			console.error(data);
+		}
+		else if(data.type==501)
+		{	// map index does not exist
+			console.error(data);
+		}
+		else if(data.type==502)
+		{	// recieved game data
+			console.error(data);
+			let name = "";
+			while(name!="")
+			{
+				name = prompt("What do you want to name the game?");
+			}
+			game.new_custom_game(game_data, name);
+		}
+		else if(data.type==503)
+		{	// recieved a list of game data that matched the query
+			console.error(data);
+			game.Menu.LevelSelect.Update_Map_Search(data.data);
+		}
+
+			/** client saved custom map data */
+		else if(data.type==700)
+		{	// error requesting mapdata
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			console.error(data);
+		}
+		else if(data.type==701)
+		{	// download existing maps
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			game.Menu.MapEditor.Server_Response.Map_List(data.data);
+		}
+		else if(data.type==702)
+		{	// UNUSED
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			console.error(data);
+		}
+		else if(data.type==703)
+		{	// delete existing map
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			console.error(data);
+		}
+		else if(data.type==704)
+		{	// report map playtested
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			console.error(data);
+		}
+		else if(data.type==705)
+		{	// publish playtested map
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			console.error(data);
+		}
+		else if(data.type==706)
+		{	// report newly uploaded map's unique Identification\
+			if(game.Menu.MapEditor.Server_Response==null)return;
+			game.Menu.MapEditor.Server_Response.Report_Id(data.mapid);
+		}
+		else if(data.type==707)
+		{	// report faulty map upload -- try again?
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			console.error(data);
+		}
+		else if(data.type==708)
+		{	// user has too many maps saved, delete old map or update exsisting map
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			console.error(data);
+		}
+		else if(data.type==709)
+		{	// cannot find map with that ID on server... if you think this is an accident on our part, please report the incident to us
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			console.error(data);
+		}
+		else if(data.type==710)
+		{	// map succesfully updated / deleted / renammed
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			game.Menu.MapEditor.Server_Response.Updated_With_Server(true);
+		}
+		else if(data.type==777)
+		{	// unlucky general error -- don't know what caused error here
+			if(game.Menu.MapEditor.Server_Response==null)return;
+
+			console.error(data);
 		}
 
 			/** in-game error messages */

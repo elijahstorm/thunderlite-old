@@ -6,6 +6,43 @@ Menu.MapEditor = new Menu.Menu_Class("#7F9172");
 Menu.MapEditor.Open = function()
 {
 	with(Menu.MapEditor){
+		let SERVER = {
+			LOAD:'download',
+			SAVE:'update',
+			PLAYTEST:'mark playtested',
+			DELETE:'delete',
+			PUBLISH:'publish',
+			new_map:true,
+			Report_List:null,
+			onReportGameList:function(fnc)
+			{
+				SERVER.Report_List = fnc;
+			}
+		};
+		function send_map_data_to_server(type, data)
+		{
+			if(!online)return;
+			if(SERVER.new_map && type=='update')
+				type = 'upload';
+
+			socket.emit('mapdata '+type, {name:socket.username,pass:socket.password}, data);
+		}
+		Menu.MapEditor.Server_Response = {
+			Map_List:function(data)
+			{
+				SERVER.Report_List(data);
+			},
+			Report_Id:function(data)
+			{
+				SERVER.new_map = false;
+				id = data;
+			},
+			Updated_With_Server:function(value)
+			{
+				data_saved = value;
+			}
+		};
+
 		function Map_Data_To_Str(){
 			var str = ""+id+";";
 			str+=name+";";
@@ -696,14 +733,7 @@ Menu.MapEditor.Open = function()
 			if(!data_saved)return;
 
 			var color = "#fff";
-			LOG.add("Uploading", color, 700, function(){
-				LOG.add("Uploading.", color, 700, function(){
-					LOG.add("Uploading..", color, 700, function(){
-						LOG.add("Uploading...", color, 700);
-					});
-				});
-			});
-			/// upload to server here
+			send_map_data_to_server(SERVER.PUBLISH, id);
 		}, {
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(beaten_game && data_saved) ? 1:4]);
@@ -722,13 +752,15 @@ Menu.MapEditor.Open = function()
 			while(name=="" || name=="Unnamed Custom Map")
 				name = prompt("Give your map a name", name);
 
-			var date = new Date();
-			date.setTime(date.getTime()+604800000);
-			var expires = date.toGMTString();
-			document.cookie = "data"+local_saved_map+"="+encrypt_game_data(Map_Data_To_Str())+";expires="+expires+";path=/";
+			if(local_saved_map==-1)
+			{
+				return;
+			}
 
-			data_saved = true;
-			Draw();
+			send_map_data_to_server(SERVER.SAVE, {
+				index:id==-1 ? local_saved_map : id,
+				map:encrypt_game_data(Map_Data_To_Str())
+			});
 		}, {
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(!data_saved) ? 1:4]);
@@ -752,107 +784,109 @@ Menu.MapEditor.Open = function()
 			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 527, 132, 20, 18, "X"), POPUP_CLOSER);
 
 
-			/// load saved data
+				/// load saved data
 			var _read_game_data = new Array(9),
 				_data_text = new Array(9),
 				_game_imgs = new Array(9);
-			var cookies = document.cookie.split("; ");
-			if(document.cookie==null || document.cookie=="")
-				return;
-			for(var _c in cookies)
-			{
-				var curCookie = cookies[_c];
-				if(curCookie.substr(0, 4)=="data" && curCookie.charAt(4)!='=')
-				{
-					var index = parseInt(curCookie.charAt(4));
-					_data_text[index] = decrypt_game_data(curCookie.substr(6));
-					_read_game_data[index] = Map_Reader.Read(_data_text[index]);
 
-					console.time('drawing map '+index+' sample');
+			SERVER.onReportGameList(function(_list_data){
+					/// start load maps
+				for(let _m in _list_data)
+				{
+					let curMap = _list_data[_m];
+					var index = curMap.saveindex;
+					_data_text[index] = decrypt_game_data(curMap.map);
+					_read_game_data[index] = Map_Reader.Read(_data_text[index]);
+					_read_game_data[index].id = curMap.map_id;
 
 					if(_read_game_data[index].Valid)
 					{
-						var sampledGame = new Engine_Class(Map_Reader.Read(_data_text[index]), true);
-						_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
-						sampledGame.End_Game();
+						setTimeout(function(index){
+							console.time('drawing map '+index+' sample');
+							var sampledGame = new Engine_Class(_read_game_data[index], true);
+							_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
+							sampledGame.End_Game();
+							Menu.MapEditor.Draw();
+							console.timeEnd('drawing map '+index+' sample');
+						}, 5, index);
 					}
-
-					setTimeout(function(){
-						LOG.add('Done loading "'+_read_game_data[index].Name+'"', "#0F0", 1500);
-					}, 10);
-
-					console.timeEnd('drawing map '+index+' sample');
 				}
-			}
-			for(var i=0;i<9;i++)
-			{
-				if(_game_imgs[i]!=null)
+
+				for(var i=0;i<9;i++)
 				{
-					POPUP_ADDER(new Canvas.Drawable({
-						Draw:function(c,x,y,w,h,_load){
-							Canvas.ScaleImageData(c, _game_imgs[_load], (x+2)*Menu.MapEditor.xScale, (y+2)*Menu.MapEditor.yScale, w/(_game_imgs[_load].width-4)*Menu.MapEditor.xScale, 100/(_game_imgs[_load].height-4)*Menu.MapEditor.yScale);
-							new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
-						}
-					}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), function(_load){
-						Erase();
-						Open();
-						Menu.MapEditor.New(_load, _read_game_data[_load]);
-						Draw();
-					}, {
-						Draw:function(c,x,y,w,h,_load){
-							Canvas.ScaleImageData(c, _game_imgs[_load], x+2, y+2, w/(_game_imgs[_load].width-4), 100/(_game_imgs[_load].height-4));
-							new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
-							Shape.Box.Draw(c,x,y,w,h,"#F5E960");
-						}
-					}, function(_delete){
-						var ask = confirm("Do you really want to delete "+_read_game_data[_delete].Name+"?");
-						if(!ask)
-						{
+					if(_read_game_data[i]!=null)
+					{
+						POPUP_ADDER(new Canvas.Drawable({
+							Draw:function(c,x,y,w,h,_load){
+								if(_game_imgs[_load]!=null)
+									Canvas.ScaleImageData(c, _game_imgs[_load], (x+2)*Menu.MapEditor.xScale, (y+2)*Menu.MapEditor.yScale, w/(_game_imgs[_load].width-4)*Menu.MapEditor.xScale, 100/(_game_imgs[_load].height-4)*Menu.MapEditor.yScale);
+								new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
+							}
+						}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), function(_load){
 							Erase();
 							Open();
-							Menu.MapEditor.New(_delete);
-							console.error("new map",local_saved_map);
+							Menu.MapEditor.New(_load, _read_game_data[_load]);
 							Draw();
-							return;
+						}, {
+							Draw:function(c,x,y,w,h,_load){
+								Canvas.ScaleImageData(c, _game_imgs[_load], x+2, y+2, w/(_game_imgs[_load].width-4), 100/(_game_imgs[_load].height-4));
+								new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
+								Shape.Box.Draw(c,x,y,w,h,"#F5E960");
+							}
+						}, function(_delete){
+							var ask = confirm("Do you really want to delete "+_read_game_data[_delete].Name+"?");
+							if(!ask)
+							{
+								Erase();
+								Open();
+								Menu.MapEditor.New(_delete);
+								console.error("new map",local_saved_map);
+								Draw();
+								return;
+							}
+
+						});
+						continue;
+					}
+
+					// empty new game here
+
+					POPUP_ADDER(new Canvas.Drawable({
+						Draw:function(c,x,y,w,h){
+							Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
+							new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
 						}
-
+					}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), function(_new){
+						Erase();
+						Open();
+						Menu.MapEditor.New(_new);
+						Draw();
+					}, {
+						Draw:function(c,x,y,w,h){
+							Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
+							new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
+							Shape.Box.Draw(c,x,y,w,h,"#F5E960");
+						}
 					});
-					continue;
 				}
+					/// end load map
 
-				// empty new game here
-
-				POPUP_ADDER(new Canvas.Drawable({
-					Draw:function(c,x,y,w,h){
-						Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
-						new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
-					}
-				}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), function(_new){
-					Erase();
-					Open();
-					Menu.MapEditor.New(_new);
-					Draw();
-				}, {
-					Draw:function(c,x,y,w,h){
-						Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
-						new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
-						Shape.Box.Draw(c,x,y,w,h,"#F5E960");
-					}
-				});
-			}
-			/// end load map
-
-			Select_Animation.Remove_All();
-			Repair_Animation.Remove_All();
-			for(var x=1;x<Terrain_Data.TERRE.length;x++)
-			{
-				var _t = Terrain_Data.TERRE[x];
-
-				if(_t.Connnection==5 || _t.Connnection==3)
+				for(var x=1;x<Terrain_Data.TERRE.length;x++)
 				{
-					Animations.Retrieve(_t.Name+" Ani").Remove_All();
+					var _t = Terrain_Data.TERRE[x];
+
+					if(_t.Connnection==5 || _t.Connnection==3)
+					{
+						Animations.Retrieve(_t.Name+" Ani").Remove_All();
+					}
 				}
-			}
+				Select_Animation.Remove_All();
+				Repair_Animation.Remove_All();
+
+				Menu.MapEditor.Draw();
+			});
+
+			send_map_data_to_server(SERVER.LOAD);
 
 			Draw();
 		}, {
@@ -1349,6 +1383,7 @@ Menu.MapEditor.Open = function()
 		Menu.MapEditor.New = function(save_data_index, game_data, tested_complete){
 			if(tested_complete)
 			{
+				send_map_data_to_server(SERVER.PLAYTEST, game_data.id);
 				beaten_game = true;
 				data_saved = true;
 			}
@@ -1358,23 +1393,26 @@ Menu.MapEditor.Open = function()
 			ACTIVE_PLAYER = 0;
 			ACTIVE_TYPE = 0;
 			OLD_TYPE = 1;
-			local_saved_map = (save_data_index==null) ? 0 : save_data_index;
+			local_saved_map = (save_data_index==null) ? -1 : save_data_index;
 			units = new Array();
 			cities = new Array();
 			name = "Unnamed Custom Map";
 			players = ["Red","Blue","Yellow","Green"];
 			max_players = 2;
+			id = -1;
 
 			if(game_data==null || !game_data.Valid)
 			{
 				map_list = null;
 				Map_Size(10, 10);
 				Update_Active_List(TYPES.TERRAIN);
+				SERVER.new_map = true;
 				return;
 			}
+			SERVER.new_map = false;
 
 			var data = game_data.Data.Get();
-			id = data.id;
+			id = game_data.id;
 			name = data.name;
 			width = data.t_width;
 			height = data.t_height;
@@ -1406,7 +1444,6 @@ with(Menu.LevelSelect){
 	Add(new Canvas.Drawable(new Text_Class("32pt Impact", "#A349A4"), null, 30, 10, 600, 45, "Level Select"));
 	Add(new Canvas.Drawable(new Text_Class("28pt Impact", "#642D64"), null, 50, 65, 600, 45, "Free maps"));
 	Add(new Canvas.Drawable(new Text_Class("28pt Impact", "#642D64"), null, 50, 300, 600, 45, "User Created Maps"));
-	Add(new Canvas.Drawable(new Text_Class("20pt Impact", "#000"), null, 30, 360, 600, 45, "None quite yet..."));
 	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 280, 230, 3, "#000000", null, .6));
 	Add(new Canvas.Drawable({ // back btn
 		Draw:function(c, x, y, w, h, s){
@@ -1438,6 +1475,49 @@ with(Menu.LevelSelect){
 			new_game(level, gameName);
 		}, new Canvas.Drawable(Shape.Rectangle, null, 30+160*i, 100, 150, 150, "#666607", null, .5));
 	}
+
+	Menu.LevelSelect.Update_Map_Search = function(_data_text)
+	{
+		var _read_game_data = new Array(_data_text.length),
+		_game_imgs = new Array(_data_text.length);
+		let remove_index;
+			/// start load maps
+		for(let index in _data_text)
+		{
+			_data_text[index] = decrypt_game_data(_data_text[index]);
+			_read_game_data[index] = Map_Reader.Read(_data_text[index]);
+
+			if(_read_game_data[index].Valid)
+			{
+				setTimeout(function(index){
+					console.time('drawing map '+index+' sample');
+					var sampledGame = new Engine_Class(_read_game_data[index], true);
+					_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
+					sampledGame.End_Game();
+					Menu.LevelSelect.Draw();
+					console.timeEnd('drawing map '+index+' sample');
+				}, 5, index);
+			}
+		}
+
+		for(var i=0;i<_data_text.length;i++){
+			let _index = Add(new Canvas.Drawable({ // level display
+				Draw:function(c,x,y,w,h,_load){
+					if(_game_imgs[_load]!=null)
+						Canvas.ScaleImageData(c, _game_imgs[_load], (x+2)*Menu.LevelSelect.xScale, (y+2)*Menu.LevelSelect.yScale, w/(_game_imgs[_load].width-4)*Menu.LevelSelect.xScale, h/(_game_imgs[_load].height-4)*Menu.LevelSelect.yScale);
+					caption.Draw(c,x+5,y+153,w,h,_read_game_data[_load].Name);
+				}
+			}, null, 30+160*i, 360, 150, 150, i), function(level){
+				var gameName = "";
+				while(gameName=="")gameName = prompt("Name the game ");
+				if(!gameName)return;
+				new_custom_game(_read_game_data[level], gameName);
+				Menu.LevelSelect.Remove(remove_index, _data_text.length);
+			}, new Canvas.Drawable(Shape.Rectangle, null, 30+160*i, 360, 150, 150, "#666607", null, .5));
+			if(i==0)
+				remove_index = _index;
+		}
+	};
 }
 
 
@@ -1457,9 +1537,22 @@ Menu.PreGame.Set = function(index,value){
 };
 Menu.PreGame.Map = function(map, gameImage){
 	if(map==null || gameImage==null)return;
-	var playersAmount = Levels.Players(map);
+
+	let playersAmount, __name;
+
+	if(map.Valid)
+	{
+		playersAmount = map.Player_Amount();
+		__name = map.Name;
+	}
+	else
+	{
+		playersAmount = Levels.Players(map);
+		__name = Levels.Names(map);
+	}
+
 	this.Erase();
-	this.Add(new Canvas.Drawable(new Text_Class("45pt Impact", Menu.Button[1]), null, 50, 70, 600, 45, Levels.Names(map)));
+	this.Add(new Canvas.Drawable(new Text_Class("45pt Impact", Menu.Button[1]), null, 50, 70, 600, 45, __name));
 	this.Add(new Canvas.Drawable({ // back btn
 		Draw:function(c, x, y, w, h, s){
 			Shape.Rectangle.Draw(c,x,y,85,35,Menu.Button[0]);

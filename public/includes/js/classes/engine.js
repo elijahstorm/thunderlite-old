@@ -465,7 +465,7 @@ var Engine_Class = function(input, is_sample)
 	this.End_Game = function(client_won)
 	{
 		this.Game_Over = true;
-		if(UI!=null)
+		if(UI!=Fast_Fake_Interface)
 		{
 			Select_Animation.Remove_All();
 			Repair_Animation.Remove_All();
@@ -489,11 +489,11 @@ var Engine_Class = function(input, is_sample)
 		setTimeout(function(){
 			if(self.game_data[0]!=false)
 			{
-				if(UI!=null)
+				if(UI!=Fast_Fake_Interface)
 					UI.End_Game();
 				openMapEditor(self.game_data[1], self.game_data[2], client_won);
 			}
-			else if(UI!=null)
+			else if(UI!=Fast_Fake_Interface)
 				UI.End_Game(Players, turn);
 			self.game_data = [false,input,0];
 		}, 750);
@@ -699,13 +699,24 @@ var Engine_Class = function(input, is_sample)
 			u = _player.Get_Unit(i);
 			list = Core.Target.Diamond(u.Sight);
 			let tile_height = this.Terrain_Map.At(u.X, u.Y).Height,
-				stop_direction = [false, false, false, false];
+				stop_direction = [false, false, false, false],
+				impeded_tiles = [];
 
 			for(let l in list)
 			{
 				t = this.Terrain_Map.At(u.X+list[l][0], u.Y+list[l][1]);
 				if(t==null)continue;
-				if(u.Radar())
+				if(l<5)
+				{	// can see tile next to unit no matter what
+					t = this.Units_Map.At(u.X, u.Y);
+					if(t==null)continue;
+					if(t.Player==_player)continue;
+					if(data.includes(t))continue;
+					data.push(t);
+					continue;
+				}
+
+				if(u.Radar() || u.Unit_Type==1)
 				{	// radar units can see thru high/dense terrain
 					t = this.Units_Map.At(u.X, u.Y);
 					if(t==null)continue;
@@ -715,38 +726,68 @@ var Engine_Class = function(input, is_sample)
 					continue;
 				}
 
-				if(tile_height<t.Height)
+				if(tile_height<t.Height || t.Source==3)
 				{
-					if(list[l][0]<0)
-					{
-						stop_direction[0] = true;
-					}
-					if(list[l][1]<0)
-					{
-						stop_direction[1] = true;
-					}
-					if(list[l][0]>0)
-					{
-						stop_direction[2] = true;
-					}
-					if(list[l][1]>0)
-					{
-						stop_direction[3] = true;
-					}
+					impeded_tiles.push([list[l][0], list[l][1]]);
+					continue;
 				}
 
-				if(stop_direction[0])
-				if(list[l][0]<0)
-					continue;
-				if(stop_direction[1])
-				if(list[l][1]<0)
-					continue;
-				if(stop_direction[2])
-				if(list[l][0]<0)
-					continue;
-				if(stop_direction[3])
-				if(list[l][1]<0)
-					continue;
+				for(var tile_check in impeded_tiles)
+				{
+					if(list[l][0]<0 && list[l][1]==0)	// pure left
+					if(impeded_tiles[tile_check][0]<0 && impeded_tiles[tile_check][1]==0)
+					if(impeded_tiles[tile_check][0]<list[l][0])
+					{
+						continue;
+					}
+					if(list[l][1]<0 && list[l][0]==0)	// pure up
+					if(impeded_tiles[tile_check][1]<0 && impeded_tiles[tile_check][0]==0)
+					if(impeded_tiles[tile_check][1]<list[l][1])
+					{
+						continue;
+					}
+					if(list[l][0]>0 && list[l][1]==0)	// pure right
+					if(impeded_tiles[tile_check][0]>0 && impeded_tiles[tile_check][1]==0)
+					if(impeded_tiles[tile_check][0]<list[l][0])
+					{
+						continue;
+					}
+					if(list[l][1]>0 && list[l][0]==0)	// pure down
+					if(impeded_tiles[tile_check][1]>0 && impeded_tiles[tile_check][0]==0)
+					if(impeded_tiles[tile_check][1]<list[l][1])
+					{
+						continue;
+					}
+
+					if(list[l][0]<0 && list[l][1]<0)	// North West
+					if(impeded_tiles[tile_check][0]<0 && impeded_tiles[tile_check][1]<0)
+					if(impeded_tiles[tile_check][0]<=list[l][0])
+					if(impeded_tiles[tile_check][1]<=list[l][1])
+					{
+						continue;
+					}
+					if(list[l][0]<0 && list[l][1]>0)	// North East
+					if(impeded_tiles[tile_check][0]<0 && impeded_tiles[tile_check][1]>0)
+					if(impeded_tiles[tile_check][0]<=list[l][0])
+					if(impeded_tiles[tile_check][1]<=list[l][1])
+					{
+						continue;
+					}
+					if(list[l][0]>0 && list[l][1]>0)	// South East
+					if(impeded_tiles[tile_check][0]>0 && impeded_tiles[tile_check][1]>0)
+					if(impeded_tiles[tile_check][0]<=list[l][0])
+					if(impeded_tiles[tile_check][1]<=list[l][1])
+					{
+						continue;
+					}
+					if(list[l][0]>0 && list[l][1]<0)	// South West
+					if(impeded_tiles[tile_check][0]>0 && impeded_tiles[tile_check][1]<0)
+					if(impeded_tiles[tile_check][0]<=list[l][0])
+					if(impeded_tiles[tile_check][1]<=list[l][1])
+					{
+						continue;
+					}
+				}
 
 				t = this.Units_Map.At(u.X, u.Y);
 				if(t==null)continue;
@@ -823,10 +864,7 @@ var Engine_Class = function(input, is_sample)
 		let t, list = Core.Target.Diamond(_unit.Sight);
 
 		let tile_height = this.Terrain_Map.At(_unit.X, _unit.Y).Height,
-			stop_direction = [false, false, false, false,
-							false, false, false, false];
-			/// left, up, right, down
-			/// NW, NE, SE, SW
+			impeded_tiles = [];
 
 		for(let l in list)
 		{
@@ -846,66 +884,66 @@ var Engine_Class = function(input, is_sample)
 
 			if(tile_height<t.Height || t.Source==3)
 			{
-				if(list[l][0]<0 && list[l][1]<0)
-				{	// NW
-					stop_direction[4] = true;
-				}
-				else if(list[l][0]>0 && list[l][1]<0)
-				{	// NE
-					stop_direction[5] = true;
-				}
-				else if(list[l][0]>0 && list[l][1]>0)
-				{	// SE
-					stop_direction[6] = true;
-				}
-				else if(list[l][0]<0 && list[l][1]>0)
-				{	// SW
-					stop_direction[7] = true;
-				}
-				else if(list[l][0]<0 && list[l][1]==0)
-				{	// left
-					stop_direction[0] = true;
-				}
-				else if(list[l][1]<0 && list[l][0]==0)
-				{	// top
-					stop_direction[1] = true;
-				}
-				else if(list[l][0]>0 && list[l][1]==0)
-				{	// right
-					stop_direction[2] = true;
-				}
-				else if(list[l][1]>0 && list[l][0]==0)
-				{	// down
-					stop_direction[3] = true;
-				}
+				impeded_tiles.push([list[l][0], list[l][1]]);
+				continue;
 			}
 
-// console.log(stop_direction);
+			for(var tile_check in impeded_tiles[tile_check])
+			{
+				if(list[l][0]<0 && list[l][1]==0)	// pure left
+				if(impeded_tiles[tile_check][0]<0 && impeded_tiles[tile_check][1]==0)
+				if(impeded_tiles[tile_check][0]<list[l][0])
+				{
+					continue;
+				}
+				if(list[l][1]<0 && list[l][0]==0)	// pure up
+				if(impeded_tiles[tile_check][1]<0 && impeded_tiles[tile_check][0]==0)
+				if(impeded_tiles[tile_check][1]<list[l][1])
+				{
+					continue;
+				}
+				if(list[l][0]>0 && list[l][1]==0)	// pure right
+				if(impeded_tiles[tile_check][0]>0 && impeded_tiles[tile_check][1]==0)
+				if(impeded_tiles[tile_check][0]<list[l][0])
+				{
+					continue;
+				}
+				if(list[l][1]>0 && list[l][0]==0)	// pure down
+				if(impeded_tiles[tile_check][1]>0 && impeded_tiles[tile_check][0]==0)
+				if(impeded_tiles[tile_check][1]<list[l][1])
+				{
+					continue;
+				}
 
-			if(stop_direction[0])
-			if(list[l][0]<0 && list[l][1]==0)
+				if(list[l][0]<0 && list[l][1]<0)	// North West
+				if(impeded_tiles[tile_check][0]<0 && impeded_tiles[tile_check][1]<0)
+				if(impeded_tiles[tile_check][0]<=list[l][0])
+				if(impeded_tiles[tile_check][1]<=list[l][1])
+				{
 					continue;
-			if(stop_direction[1])
-			if(list[l][1]<0 && list[l][0]==0)
+				}
+				if(list[l][0]<0 && list[l][1]>0)	// North East
+				if(impeded_tiles[tile_check][0]<0 && impeded_tiles[tile_check][1]>0)
+				if(impeded_tiles[tile_check][0]<=list[l][0])
+				if(impeded_tiles[tile_check][1]<=list[l][1])
+				{
 					continue;
-			if(stop_direction[2])
-			if(list[l][0]>0 && list[l][1]==0)
+				}
+				if(list[l][0]>0 && list[l][1]>0)	// South East
+				if(impeded_tiles[tile_check][0]>0 && impeded_tiles[tile_check][1]>0)
+				if(impeded_tiles[tile_check][0]<=list[l][0])
+				if(impeded_tiles[tile_check][1]<=list[l][1])
+				{
 					continue;
-			if(stop_direction[3])
-			if(list[l][1]>0 && list[l][0]==0)
+				}
+				if(list[l][0]>0 && list[l][1]<0)	// South West
+				if(impeded_tiles[tile_check][0]>0 && impeded_tiles[tile_check][1]<0)
+				if(impeded_tiles[tile_check][0]<=list[l][0])
+				if(impeded_tiles[tile_check][1]<=list[l][1])
+				{
 					continue;
-			if(stop_direction[4])
-			if(list[l][0]<0 && list[l][1]<0)
-					continue;
-			if(stop_direction[5])
-			if(list[l][0]>0 && list[l][1]<0)
-					continue;
-			if(stop_direction[6])
-			if(list[l][0]>0 && list[l][1]>0)
-					continue;
-			if(stop_direction[7])
-			if(list[l][0]<0 && list[l][1]>0)
-					continue;
+				}
+			}
 
 			t.Hidden = false;
 		}
@@ -1147,7 +1185,7 @@ var Engine_Class = function(input, is_sample)
 	this.Start = function()
 	{
 		currently_playing = true;
-		if(UI!=null)
+		if(UI!=Fast_Fake_Interface)
 		{
 			UI.Close_Menu();
 			Canvas.Reflow();
@@ -1221,7 +1259,7 @@ var Engine_Class = function(input, is_sample)
 	};
 	this.Restart = function()
 	{
-		if(UI!=null)
+		if(UI!=Fast_Fake_Interface)
 		{
 			UI.Select_Tile();
 		}
@@ -1263,7 +1301,7 @@ var Engine_Class = function(input, is_sample)
 			{
 				this.Player_Won(Players[alive]);
 			}
-			if(UI!=null)
+			if(UI!=Fast_Fake_Interface)
 				UI.Draw();
 			return;
 		}
@@ -1284,7 +1322,7 @@ var Engine_Class = function(input, is_sample)
 			}
 			var self = this;
 			self.Game_Over = true;
-			if(UI!=null)
+			if(UI!=Fast_Fake_Interface)
 				setTimeout(function(){
 					alert(input.Name+" wins!");
 					self.End_Game(client == input);
@@ -1326,14 +1364,16 @@ var Engine_Class = function(input, is_sample)
 		}
 		return Connected_Players[_player.Team]==null;
 	};
-	this.Next_Player = function()
+	this.Next_Player = function(ignore_controls)
 	{
 		if(this.Game_Over)return;
-		if(UI!=null)
+
+		if(UI!=Fast_Fake_Interface)
 		{
-			if(!UI.Check_Controls())return;
+			if(!UI.Check_Controls() && !ignore_controls)return;
 			SFXs.Stop_Loops();
 		}
+
 		clearLastTimeoutCheck();
 		cur_player++;
 		while(Players[cur_player%Players.length].Dead)cur_player++;
@@ -1342,7 +1382,8 @@ var Engine_Class = function(input, is_sample)
 			cur_player = 0;
 			turn++;
 		}
-		if(UI!=null)
+
+		if(UI!=Fast_Fake_Interface)
 		{
 			var active_player = Players[cur_player];
 			var self = this;
@@ -1586,7 +1627,8 @@ var Engine_Class = function(input, is_sample)
 	console.timeEnd("initalizing assets");
 
 		}
-		else if(typeof(input)==='string')
+		else console.error("oh this is BAD",input);
+		/** else if(typeof(input)==='string')
 		{		/// when input is data from existing game -> load gamestate
 	console.time("parse data");
 			var data = JSON.parse(input);
@@ -1659,7 +1701,7 @@ console.log(data);
 	console.time("initalizing assets");
 			Levels.Run(this, input);
 	console.timeEnd("initalizing assets");
-		}
+} */
 	}
 	else this.valid = false; // game does not have valid input to function
 	let t1 = performance.now();
