@@ -1,14 +1,18 @@
-var signupShown = false;
+var signupShown = false,
+	passwordShown = false;
 var title = document.getElementById('title');
+var sendBtn = document.getElementById('sendBtn');
 var data = document.getElementById('data_contents');
 var user = document.getElementById('username');
 var pass = document.getElementById('pass');
-var btn = document.getElementById('btnSignup');
+var btn = document.getElementById('signupBtn');
 var error = document.getElementById('error');
 var stayCheck = document.getElementById('staySignedOn');
 
+document.getElementById('loginLogo').src = "Login "+(window.parent.mobilecheck() ? "Mobile" : "Desktop")+".png";
+
 var report = function(err){
-	error.style.display = 'inline';
+	error.style.visibility = 'visible';
 	error.innerHTML = err;
 }
 
@@ -50,13 +54,25 @@ window.parent.onFinishedLoading(function(){
 
 function openSignup(){
 	if(signupShown){
-		title.innerHTML = 'Logging in...';
+		// title.innerHTML = 'Logging in...';
+		sendBtn.value = 'Log in';
 		signupShown = false;
-		btn.value = 'Sign up instead...';
+		btn.value = "Don't have an account?";
 	}else{
-		title.innerHTML = 'Signning up...';
+		// title.innerHTML = 'Signning up...';
+		sendBtn.value = 'Sign up';
 		signupShown = true;
 		btn.value = 'Log in instead...';
+	}
+}
+
+function seePassword() {
+	if(passwordShown){
+		pass.type = "password";
+		passwordShown = false;
+	}else{
+		pass.type = "text";
+		passwordShown = true;
 	}
 }
 

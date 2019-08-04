@@ -33,7 +33,7 @@ var LOG = {
 		var level = 0;
 		for(var i in this.list)
 		{
-			this.list[i].txt.Draw(devCanvas, 10, (level++)*30, Canvas.Width-(window.mobilecheck() ? 0 : 210), 15, this.list[i].index+": "+this.list[i].msg);
+			this.list[i].txt.Draw(devCanvas, 10, (level++)*30, Canvas.Width-(window.parent.mobilecheck() ? 0 : 210), 15, this.list[i].index+": "+this.list[i].msg);
 		}
 	},
 	add:function(msg, color, time, callback){
@@ -471,6 +471,8 @@ window.onload = function(){
 	if(window.parent)socket = window.parent.socket;
 	if(socket)online = true;
 
+	document.getElementById("gameLogo").src = "img/Logo "+(window.parent.mobilecheck() ? "Mobile" : "Desktop")+".png";
+
 	// game setup
 	FRAMERATEDISPLAY = document.getElementById("frames");
 	FRAMERATEDISPLAY.value = 0;
@@ -520,7 +522,7 @@ window.onload = function(){
 
 	document.getElementById("avatarCanvas").style.height = 600+"px";
 	avatarCanvas = initiateCanvas("avatarCanvas");
-	avatarCanvas.width = window.mobilecheck() ? 130 : 210;
+	avatarCanvas.width = window.parent.mobilecheck() ? 130 : 210;
 	avatarCanvas.height = 600;
 	Avatar_Display = Canvas.Create_Canvas(avatarCanvas, "avatar");
 	Avatar_Display.Background.State.Set("#55D6C2");
@@ -529,7 +531,7 @@ window.onload = function(){
 	document.getElementById("statsCanvas").style.width = 600+"px";
 	statsCanvas = initiateCanvas("statsCanvas");
 	statsCanvas.width = 600;
-	statsCanvas.height = window.mobilecheck() ? 60 : 70;
+	statsCanvas.height = window.parent.mobilecheck() ? 60 : 70;
 	Stats_Display = Canvas.Create_Canvas(statsCanvas, "stat");
 	Stats_Display.Background.State.Set("#F49097");
 	Stats_Display.Background.Alpha.Set(1);

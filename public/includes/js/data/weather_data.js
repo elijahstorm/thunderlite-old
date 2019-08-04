@@ -1,7 +1,10 @@
 	/// all weather traverses thru the map
 	/// due to wind
 	/// as the match plays on
-
+	// lets start by making no wind the defult
+	// because this might be a more fun feature, rather than wind
+	// and weather should just be a tile affecting air units
+	// that is translucent so you can see how the ground below can also affect you
 
 // clouds
 //	units below cannot be seen
@@ -33,7 +36,7 @@ var Weather_Data = {
 		var __sprite, __img;
 		imageHolderCanvas.clearRect(0,0,imageHolderCanvas.width,imageHolderCanvas.height);
 		imageHolderCanvas.restore();
-		
+
 		if(type==1)
 		{	// roll into
 			if(x!=0)
@@ -52,7 +55,7 @@ var Weather_Data = {
 							__sprite = __img.Image();
 							__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 							__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE)
-							
+
 							return __sprite;
 						}
 						__img = Weather_Data.WEATHER[index].Sprite[4];
@@ -60,11 +63,11 @@ var Weather_Data = {
 						imageHolderCanvas.save();
 						imageHolderCanvas.rotate(90*Math.PI/180);
 						imageHolderCanvas.translate(0, -TILESIZE);
-						
+
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 						imageHolderCanvas.restore();
-						
+
 						return __sprite;
 					}
 					if(y!=_map[x].length-1)
@@ -75,18 +78,18 @@ var Weather_Data = {
 						imageHolderCanvas.save();
 						imageHolderCanvas.rotate(3*90*Math.PI/180);
 						imageHolderCanvas.translate(-TILESIZE, 0);
-						
+
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 						imageHolderCanvas.restore();
-						
+
 						return __sprite;
 					}
 					__img = Weather_Data.WEATHER[index].Sprite[2];
 					__sprite = __img.Image();
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-					
+
 					return __sprite;
 				}
 				if(y!=0)
@@ -99,14 +102,14 @@ var Weather_Data = {
 						__sprite = __img.Image();
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-						
+
 						return __sprite;
 					}
 					__img = Weather_Data.WEATHER[index].Sprite[3];
 					__sprite = __img.Image();
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-					
+
 					return __sprite;
 				}
 				if(y!=_map[x].length-1)
@@ -117,18 +120,18 @@ var Weather_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.rotate(3*90*Math.PI/180);
 					imageHolderCanvas.translate(-TILESIZE, 0);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 					imageHolderCanvas.restore();
-					
+
 					return __sprite;
 				}
 				__img = Weather_Data.WEATHER[index].Sprite[1];
 				__sprite = __img.Image();
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-				
+
 				return __sprite;
 			}
 			if(x!=_map.length-1)
@@ -145,11 +148,11 @@ var Weather_Data = {
 						imageHolderCanvas.save();
 						imageHolderCanvas.rotate(2*90*Math.PI/180);
 						imageHolderCanvas.translate(-TILESIZE, -TILESIZE);
-						
+
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 						imageHolderCanvas.restore();
-						
+
 						return __sprite;
 					}
 					__img = Weather_Data.WEATHER[index].Sprite[3];
@@ -157,11 +160,11 @@ var Weather_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.rotate(90*Math.PI/180);
 					imageHolderCanvas.translate(0, -TILESIZE);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 					imageHolderCanvas.restore();
-					
+
 					return __sprite;
 				}
 				if(y!=_map[x].length-1)
@@ -172,11 +175,11 @@ var Weather_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.rotate(2*90*Math.PI/180);
 					imageHolderCanvas.translate(-TILESIZE, -TILESIZE);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 					imageHolderCanvas.restore();
-					
+
 					return __sprite;
 				}
 				__img = Weather_Data.WEATHER[index].Sprite[1];
@@ -184,11 +187,11 @@ var Weather_Data = {
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(2*90*Math.PI/180);
 				imageHolderCanvas.translate(-TILESIZE, -TILESIZE);
-				
+
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
-				
+
 				return __sprite;
 			}
 			if(y!=0)
@@ -202,11 +205,11 @@ var Weather_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.rotate(90*Math.PI/180);
 					imageHolderCanvas.translate(0, -TILESIZE);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 					imageHolderCanvas.restore();
-					
+
 					return __sprite;
 				}
 				__img = Weather_Data.WEATHER[index].Sprite[1];
@@ -214,11 +217,11 @@ var Weather_Data = {
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(90*Math.PI/180);
 				imageHolderCanvas.translate(0, -TILESIZE);
-				
+
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
-				
+
 				return __sprite;
 			}
 			if(y!=_map[x].length-1)
@@ -229,11 +232,11 @@ var Weather_Data = {
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(3*90*Math.PI/180);
 				imageHolderCanvas.translate(-TILESIZE, 0);
-				
+
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
-				
+
 				return __sprite;
 			}
 			__img = Weather_Data.WEATHER[index].Sprite[0];
@@ -253,9 +256,9 @@ var Weather_Data = {
 		{	// border and animation
 			__sprite = null;
 			var __ANIMATION = Animations.Retrieve("Sea Ani");
-			
+
 			/// check if corner add here
-			
+
 			if(x!=0)
 			if(y!=0)
 			if(_map[x-1][y-1]!=index)
@@ -304,10 +307,10 @@ var Weather_Data = {
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				imageHolderCanvas.restore();
 			}
-			
+
 			var cornerImg = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 			__sprite = cornerImg;
-			
+
 			if(x!=0)
 			if(_map[x-1][y]!=index)
 			{	// border to left
@@ -324,14 +327,14 @@ var Weather_Data = {
 							__sprite = __img.Image();
 							__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 							__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-							
+
 							return [__ANIMATION, __sprite];
 						}
 						__img = Weather_Data.WEATHER[index].Borders[8];
 						__sprite = __img.Image();
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-						
+
 						return [__ANIMATION, __sprite];
 					}
 					if(y!=_map[x].length-1)
@@ -341,7 +344,7 @@ var Weather_Data = {
 						__sprite = __img.Image();
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-						
+
 						return [__ANIMATION, __sprite];
 					}
 					__img = Weather_Data.WEATHER[index].Borders[1];
@@ -349,13 +352,13 @@ var Weather_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.scale(-1, 1);
 					imageHolderCanvas.translate(-TILESIZE, 0);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					imageHolderCanvas.restore();
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-					
+
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				if(y!=0)
@@ -369,11 +372,11 @@ var Weather_Data = {
 						imageHolderCanvas.save();
 						imageHolderCanvas.scale(-1, 1);
 						imageHolderCanvas.translate(-TILESIZE, 0);
-						
+
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
 						imageHolderCanvas.restore();
-						
+
 						return [__ANIMATION, __sprite];
 					}
 					__img = Weather_Data.WEATHER[index].Borders[3];
@@ -385,7 +388,7 @@ var Weather_Data = {
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
 					imageHolderCanvas.restore();
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				if(y!=_map[x].length-1)
@@ -396,11 +399,11 @@ var Weather_Data = {
 					imageHolderCanvas.save();
 					imageHolderCanvas.scale(-1, 1);
 					imageHolderCanvas.translate(-TILESIZE, 0);
-					
+
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
 					imageHolderCanvas.restore();
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				__img = Weather_Data.WEATHER[index].Borders[1];
@@ -408,11 +411,11 @@ var Weather_Data = {
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(180*Math.PI/180);
 				imageHolderCanvas.translate(-TILESIZE, -TILESIZE);
-				
+
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
 				imageHolderCanvas.restore();
-				
+
 				return [__ANIMATION, __sprite];
 			}
 			if(x!=_map.length-1)
@@ -428,14 +431,14 @@ var Weather_Data = {
 						__sprite = __img.Image();
 						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 						__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-						
+
 						return [__ANIMATION, __sprite];
 					}
 					__img = Weather_Data.WEATHER[index].Borders[3];
 					__sprite = __img.Image();
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE))
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				if(y!=_map[x].length-1)
@@ -445,14 +448,14 @@ var Weather_Data = {
 					__sprite = __img.Image();
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE))
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				__img = Weather_Data.WEATHER[index].Borders[1];
 				__sprite = __img.Image();
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE))
-				
+
 				return [__ANIMATION, __sprite];
 			}
 			if(y!=0)
@@ -469,14 +472,14 @@ var Weather_Data = {
 					__sprite = __img.Image();
 					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 					__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-					
+
 					return [__ANIMATION, __sprite];
 				}
 				__img = Weather_Data.WEATHER[index].Borders[0];
 				__sprite = __img.Image();
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-				
+
 				return [__ANIMATION, __sprite];
 			}
 			if(y!=_map[x].length-1)
@@ -486,23 +489,57 @@ var Weather_Data = {
 				__sprite = __img.Image();
 				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
 				__sprite = merge(cornerImg, imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE));
-				
+
 				return [__ANIMATION, __sprite];
 			}
-			
+
 			return [__ANIMATION, __sprite];
 		}
 		if(type==4)
 		{	// tall terrain
 			return Weather_Data.WEATHER[index].Sprite[0];
 		}
-		
+
 			// singular
 		__img = Weather_Data.WEATHER[index].Sprite[0];
 		__sprite = __img.Image();
 		__img.Draw(imageHolderCanvas,0,0,__sprite.width,__sprite.height);
 		__sprite = imageHolderCanvas.getImageData(0,0,__sprite.width,__sprite.height);
 		return __sprite;
+	},
+	Change_Queue:[],
+	Fade:function(state, tile, rate, check_dup)
+	{
+		if(check_dup)
+		for(var i in Weather_Data.Change_Queue)
+		{
+			if(Weather_Data.Change_Queue[i][1]==t)
+				return;
+		}
+		Weather_Data.Change_Queue.push([state, tile, rate]);
+	},
+	Remove_Fade:function(state, tile)
+	{
+		for(var i in Weather_Data.Change_Queue)
+		{
+			if(Weather_Data.Change_Queue[i][1]==t)
+			{
+				Weather_Data.Change_Queue.splice(i, 1);
+				return;
+			}
+		}
+	},
+	Execute_Change:function()
+	{
+		// fog show -> on
+		// fog hide -> off
+		for(var i in Weather_Data.Change_Queue)
+		{
+			// execute
+			// 0 state
+			// 1 tile
+			// 2 rate
+		}
 	},
 	Get:function(check)
 	{
@@ -572,7 +609,7 @@ for(var x=1;x<Weather_Data.WEATHER.length;x++)
 {
 	// setting sprites
 	var _w = Weather_Data.WEATHER[x];
-	
+
 	_w.Sprite = new Array(5);
 	for(var i=0;i<_w.Sprite.length;i++)
 	{
@@ -580,6 +617,3 @@ for(var x=1;x<Weather_Data.WEATHER.length;x++)
 		_w.Sprite[i].Stretch(true);
 	}
 }
-
-
-

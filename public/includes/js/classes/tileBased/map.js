@@ -1,4 +1,4 @@
-var TILESIZE = window.mobilecheck() ? 40 : 60;
+var TILESIZE = window.parent.mobilecheck() ? 40 : 60;
 
 var Converter = {
 	Screen:{

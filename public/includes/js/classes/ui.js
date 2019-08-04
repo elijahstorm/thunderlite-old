@@ -1,6 +1,6 @@
 var Interface_Class = function()
 {
-	this.IS_MOBILE_GAME = window.mobilecheck();
+	this.IS_MOBILE_GAME = window.parent.mobilecheck();
 	var allow_input = false;
 	var self = this;
 	var game,terrain_disp;
@@ -253,7 +253,7 @@ var Interface_Class = function()
 		}
 		// hide offscreen terrain animations
 		game.Hide_Terrain_Anis();
-		// TILESIZE = Math.floor((window.mobilecheck() ? 30 : 60 )*zoom);
+		// TILESIZE = Math.floor((window.parent.mobilecheck() ? 30 : 60 )*zoom);
 		self.zoom = zoom;
 		// backCanvas.clearRect(0,0,600,600);
 		backCanvas.fillStyle = "#3C6BBE";
@@ -1040,8 +1040,8 @@ var Interface_Class = function()
 		zooming:true
 	});
 	self.reflow = function(w, h){
-		gameWidth = w-(window.mobilecheck()?130:210);
-		gameHeight = h-(window.mobilecheck()?60:70);
+		gameWidth = w-(window.parent.mobilecheck()?130:210);
+		gameHeight = h-(window.parent.mobilecheck()?60:70);
 		clientWidth = w;
 		clientHeight = h;
 		self.gameXScale = gameWidth/600;

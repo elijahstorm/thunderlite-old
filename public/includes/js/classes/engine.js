@@ -835,29 +835,13 @@ var Engine_Class = function(input, is_sample)
 		if(!global_weather[0])return;
 		for(let x=0;x<this.Terrain_Map.Width;x++)
 		for(let y=0;y<this.Terrain_Map.Height;y++)
+		{
+			if(!this.Terrain_Map.At(x, y).Hidden)
+				Weather_Data.Fade("fog show", t, 15, true);
 			this.Terrain_Map.At(x, y).Hidden = true;
-	};
-	this.Player_Visibility = function(_player)
-	{
-		if(!global_weather[0])return;
-		if(_player!=client)return;
-
-		this.Hide_Terrain();
-
-		let u, _amt = _player.Total_Units();
-		for(let i=0;i<_amt;i++)
-		{
-			u = _player.Get_Unit(i);
-			this.Unit_Visibility(u);
-		}
-		_amt = _player.Building_Amount();
-		for(let i=0;i<_amt;i++)
-		{
-			u = _player.Get_Building(i);
-			this.City_Visibility(u);
 		}
 	};
-	this.Unit_Visibility = function(_unit)
+	function Unit_Visibility(_unit)
 	{
 		if(!global_weather[0])return;
 		if(_unit.Player!=client)return;
@@ -872,12 +856,18 @@ var Engine_Class = function(input, is_sample)
 			if(t==null)continue;
 			if(l<5)
 			{	// can see tile next to unit no matter what
+				Weather_Data.Remove_Fade("fog show", t);
+				if(t.Hidden)
+					Weather_Data.Fade("fog hide", t, 15, true);
 				t.Hidden = false;
 				continue;
 			}
 
 			if(_unit.Radar() || _unit.Unit_Type==1)
 			{	// radar units can see thru high/dense terrain
+				Weather_Data.Remove_Fade("fog show", t);
+				if(t.Hidden)
+					Weather_Data.Fade("fog hide", t, 15, true);
 				t.Hidden = false;
 				continue;
 			}
@@ -944,11 +934,13 @@ var Engine_Class = function(input, is_sample)
 					continue;
 				}
 			}
-
+			Weather_Data.Remove_Fade("fog show", t);
+			if(t.Hidden)
+				Weather_Data.Fade("fog hide", t, 15, true);
 			t.Hidden = false;
 		}
 	};
-	this.City_Visibility = function(_city)
+	function City_Visibility(_city)
 	{
 		if(!global_weather[0])return;
 		if(_city.Owner!=client)return;
@@ -967,14 +959,38 @@ var Engine_Class = function(input, is_sample)
 						if(Math.abs(list[l][0])+Math.abs(list[l][1])>1)
 							continue;
 					}
+				Weather_Data.Remove_Fade("fog show", t);
+				if(t.Hidden)
+					Weather_Data.Fade("fog hide", t, 15, true);
 				t.Hidden = false;
 			}
 			return;
 		}
 
-		if(_city.Owner==client)
-			_city.Terrain.Hidden = false;
-		else _city.Terrain.Hidden = true;
+		Weather_Data.Remove_Fade("fog show", _city.Terrain);
+		if(_city.Terrain.Hidden)
+			Weather_Data.Fade("fog hide", _city.Terrain, 15, true);
+		_city.Terrain.Hidden = false;
+	};
+	this.Player_Visibility = function(_player)
+	{
+		if(!global_weather[0])return;
+		if(_player!=client)return;
+
+		this.Hide_Terrain();
+
+		let u, _amt = _player.Total_Units();
+		for(let i=0;i<_amt;i++)
+		{
+			u = _player.Get_Unit(i);
+			Unit_Visibility(u);
+		}
+		_amt = _player.Building_Amount();
+		for(let i=0;i<_amt;i++)
+		{
+			u = _player.Get_Building(i);
+			City_Visibility(u);
+		}
 	};
 	this.Move = function(unit, x, y, path, whenFinished, scrollTo)
 	{

@@ -137,8 +137,9 @@ body{
 	display:none;
 }#gameLogo{
 	position:absolute;
-	top:-40px;
-	left:270px;
+	top: 0px;
+	left: 110%;
+	width: 100%;
 	cursor:pointer;
 	text-align:right;
 }#levelSelect{
@@ -191,6 +192,7 @@ body{
 	border-radius:6px;
 	border:1px solid #dcdcdc;
 	display:inline-block;
+	width:70%;
 	color:#777777;
 	font-family:arial;
 	cursor:pointer;

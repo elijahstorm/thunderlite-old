@@ -165,16 +165,27 @@ body{
 
 #mainMenu{
 	position:absolute;
-	top:100px;
-	left:100px;
+	overflow:hidden;
+	padding: 0px;
+	top: 7%;
+	left: 20%;
+	width: 60%;
+	height: 93%;
 	display:none;
-}#gameLogo{
-	position:absolute;
-	top:-40px;
-	left:270px;
+}
+#gameLogo{
+	position:relative;
+	left: 25%;
+	width: 50%;
+	max-height: 200px;
 	cursor:pointer;
 	text-align:right;
-}#levelSelect{
+}
+#listHandler{
+	position: relative;
+	top: 20px;
+}
+#levelSelect{
 	position:relative;
 	top:-150px;
 	left:-30px;
@@ -204,9 +215,9 @@ body{
 	top:80px;
 	display:none;
 }.btnBack{
-	position:relative;
+	position:absolute;
 	top:40px;
-	left:20px;
+	left: 0px;
 	height:20px;
 	width:50px;
 }
