@@ -841,7 +841,7 @@ var Engine_Class = function(input, is_sample)
 			this.Terrain_Map.At(x, y).Hidden = true;
 		}
 	};
-	function Unit_Visibility(_unit)
+	this.Unit_Visibility = function(_unit)
 	{
 		if(!global_weather[0])return;
 		if(_unit.Player!=client)return;
@@ -940,7 +940,7 @@ var Engine_Class = function(input, is_sample)
 			t.Hidden = false;
 		}
 	};
-	function City_Visibility(_city)
+	this.City_Visibility = function(_city)
 	{
 		if(!global_weather[0])return;
 		if(_city.Owner!=client)return;
@@ -983,13 +983,13 @@ var Engine_Class = function(input, is_sample)
 		for(let i=0;i<_amt;i++)
 		{
 			u = _player.Get_Unit(i);
-			Unit_Visibility(u);
+			this.Unit_Visibility(u);
 		}
 		_amt = _player.Building_Amount();
 		for(let i=0;i<_amt;i++)
 		{
 			u = _player.Get_Building(i);
-			City_Visibility(u);
+			this.City_Visibility(u);
 		}
 	};
 	this.Move = function(unit, x, y, path, whenFinished, scrollTo)
@@ -1091,7 +1091,7 @@ var Engine_Class = function(input, is_sample)
 		{
 			available[i].Do(input);
 		}
-		Unit_Visibility(input);
+		this.Unit_Visibility(input);
 		return input;
 	};
 	this.Add_Building = function(input, x, y, team)
