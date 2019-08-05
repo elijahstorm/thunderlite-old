@@ -20,6 +20,8 @@ var Weather_Data = {
 	WEATHER:[],
 	Global_Amount:3,
 	GlobalToStr:["Fog","Rain","Snow"],
+	Rain:new Weather("Rain"),
+	Snow:new Weather("Snow"),
 	Connnection_Images:function(type)
 	{
 		if(type==1) // roll into

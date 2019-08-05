@@ -1091,7 +1091,7 @@ var Engine_Class = function(input, is_sample)
 		{
 			available[i].Do(input);
 		}
-		this.Unit_Visibility(input);
+		Unit_Visibility(input);
 		return input;
 	};
 	this.Add_Building = function(input, x, y, team)
