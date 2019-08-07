@@ -544,7 +544,7 @@ var Terrain_Data = {
 		if(type==8)
 		{	// connector
 			if(y!=0)
-			if(Terrain_Data.TERRE[_map[x][y-1]].Type==type)
+			if(Terrain_Data.TERRE[_map[x][y-1]].Terrain==Terrain_Data.TERRE[index].Terrain)
 			{	// connection upwards
 				__img = Terrain_Data.TERRE[index].Sprite[0];
 				imageHolderCanvas.save();
@@ -558,7 +558,7 @@ var Terrain_Data = {
 				return __sprite;
 			}
 			if(y!=_map[x].length-1)
-			if(Terrain_Data.TERRE[_map[x][y+1]].Type==type)
+			if(Terrain_Data.TERRE[_map[x][y+1]].Terrain==Terrain_Data.TERRE[index].Terrain)
 			{	// connection downwards
 				__img = Terrain_Data.TERRE[index].Sprite[0];
 				imageHolderCanvas.save();
@@ -597,6 +597,7 @@ var Terrain_Data = {
 			return false;
 		return true;
 	},
+	Fog:Images.Retrieve("fog tile"),
 	Get:function(check)
 	{
 		for(var i=0;i<Terrain_Data.TERRE.length;i++)
@@ -894,7 +895,7 @@ Terrain_Data.TERRE[CURTERRE++] = {
 Terrain_Data.TERRE[CURTERRE++] = {
 	Name:"High Bridge",
 	Description:"Connects two islands, and allows ships to pass, but provides no defense",
-	Terrain:2,
+	Terrain:0,
 	Type:8,
 	Protection:0,
 	Damage:0,

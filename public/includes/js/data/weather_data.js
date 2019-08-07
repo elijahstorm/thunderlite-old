@@ -20,8 +20,14 @@ var Weather_Data = {
 	WEATHER:[],
 	Global_Amount:3,
 	GlobalToStr:["Fog","Rain","Snow"],
-	Rain:new Weather("Rain"),
-	Snow:new Weather("Snow"),
+	Get_Global:function(index)
+	{
+		if(index==1)
+			return Weather_Data.Rain;
+		if(index==2)
+			return Weather_Data.Snow;
+		return null;
+	},
 	Connnection_Images:function(type)
 	{
 		if(type==1) // roll into
@@ -515,16 +521,23 @@ var Weather_Data = {
 		if(check_dup)
 		for(var i in Weather_Data.Change_Queue)
 		{
-			if(Weather_Data.Change_Queue[i][1]==t)
+			if(Weather_Data.Change_Queue[i][1]==tile)
+			{
+				Weather_Data.Change_Queue[i] = [state, tile, rate];
 				return;
+			}
 		}
+		if(tile.Hidden)
+		if(state=="fog show")return;
+		if(!tile.Hidden)
+		if(state=="fog hide")return;
 		Weather_Data.Change_Queue.push([state, tile, rate]);
 	},
-	Remove_Fade:function(state, tile)
+	Remove_Fade:function(tile)
 	{
 		for(var i in Weather_Data.Change_Queue)
 		{
-			if(Weather_Data.Change_Queue[i][1]==t)
+			if(Weather_Data.Change_Queue[i][1]==tile)
 			{
 				Weather_Data.Change_Queue.splice(i, 1);
 				return;
@@ -535,13 +548,26 @@ var Weather_Data = {
 	{
 		// fog show -> on
 		// fog hide -> off
+		let t;
 		for(var i in Weather_Data.Change_Queue)
 		{
-			// execute
-			// 0 state
-			// 1 tile
-			// 2 rate
+			t = Weather_Data.Change_Queue[i][1];
+			if(Weather_Data.Change_Queue[i][0]=="fog hide")
+			{
+				t.Alpha.data = 1;
+				Core.Fade_Drawable(t, 0, Weather_Data.Change_Queue[i][2], function(t){
+					t.Hidden = false;
+					INTERFACE.Draw();
+				});
+			}
+			else if(Weather_Data.Change_Queue[i][0]=="fog show")
+			{
+				t.Alpha.data = 0;
+				Core.Fade_Drawable(t, 1, Weather_Data.Change_Queue[i][2]);
+				t.Hidden = true;
+			}
 		}
+		Weather_Data.Change_Queue = [];
 	},
 	Get:function(check)
 	{

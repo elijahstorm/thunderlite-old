@@ -62,6 +62,7 @@ body{
 	position:absolute;
 	bottom:70px;
 	right:140px;
+	width: 40px;
 	font-size:80%;
 	padding:.5vh 1vw;
 }#endTurn{

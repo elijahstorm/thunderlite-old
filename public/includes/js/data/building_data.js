@@ -43,7 +43,7 @@ var Building_Data = {
 				c.Set_Active(false);
 				c.Idle = true;
 				game.Add_Unit(c, building.X, building.Y, player.Team);
-				building.Set_Active(false);
+				building.End_Turn();
 				Core.Fade_Drawable(c, 255, 7, function(){
 					c.Alpha.data = 255;
 					if(callback!=null)callback(building);
@@ -64,7 +64,7 @@ var Building_Data = {
 		c.Set_Active(false);
 		c.Idle = true;
 		game.Add_Unit(c, building.X, building.Y, player.Team);
-		building.Set_Active(false);
+		building.End_Turn();
 		Core.Fade_Drawable(c, 255, 7, function(){
 			c.Alpha.data = 255;
 			if(callback!=null)callback(building);

@@ -40,6 +40,9 @@ function Animation_Display_Class()
 		var places = [];
 		let callback;
 
+		this.Width = imgs[0].Width;
+		this.Height = imgs[0].Height;
+
 		this.onEnd = function(_cb)
 		{
 			callback = _cb;
@@ -103,6 +106,10 @@ function Animation_Display_Class()
 
 		this.New = function(C,X,Y,W,H,S)
 		{
+			if(W==null)
+				W = imgs[0].Width;
+			if(H==null)
+				W = imgs[0].Height;
 			var i = places.length;
 			places[i] = new places_class(this,C,X,Y,W,H,S,i);
 			if(S)this.Draw(C,X,Y,W,H);
@@ -154,32 +161,36 @@ function Animation_Display_Class()
 	};
 	function Sprite_Sheet_Handler(sheet, name, delay, auto_repeat)
 	{
+		let self = this;
 		var _name = name;
 		var _delay = delay;
 		var _auto = auto_repeat;
 		var loop_index=0,delay_index=0;
 		var places = [];
 		let frame_w, frame_h;
-		let _length, _height;
+		let _width, _height;
 		let callback;
 
-		this.onEnd = function(_cb)
+		self.Width = frame_w;
+		self.Height = frame_h;
+
+		self.onEnd = function(_cb)
 		{
 			callback = _cb;
 		};
 
-		this.Stop = true;
+		self.Stop = true;
 
-		this.Draw = function(canvas,x,y,w,h)
+		self.Draw = function(canvas,x,y,w,h)
 		{
-			sheet.Crop(canvas,x,y,(loop_index%_length)*frame_w,Math.floor(loop_index/_length)*frame_h,frame_w,frame_h,w,h);
+			sheet.Crop(canvas,x,y,(loop_index%_width)*frame_w,Math.floor(loop_index/_width)*frame_h,frame_w,frame_h,w,h);
 		};
-		this.Clear = function(canvas,x,y,w,h)
+		self.Clear = function(canvas,x,y,w,h)
 		{
 			canvas.clearRect(x,y,w,h);
 		};
 
-		this.Increment = function()
+		self.Increment = function()
 		{
 			delay_index++;
 			var changed = false;
@@ -189,11 +200,11 @@ function Animation_Display_Class()
 				changed = true;
 				delay_index = 0;
 			}
-			if(loop_index>=this.Length)
+			if(loop_index>=self.Length)
 			{
 				if(!_auto)
 				{
-					this.Stop = true;
+					self.Stop = true;
 				}
 				loop_index = 0;
 			}
@@ -203,24 +214,28 @@ function Animation_Display_Class()
 				{
 					if(places[i].values.show)
 					{
-						this.Clear(places[i].values.canvas, places[i].values.x, places[i].values.y, places[i].values.width, places[i].values.height);
-						if(!this.Stop)this.Draw(places[i].values.canvas, places[i].values.x, places[i].values.y, places[i].values.width, places[i].values.height);
+						self.Clear(places[i].values.canvas, places[i].values.x, places[i].values.y, places[i].values.width, places[i].values.height);
+						if(!self.Stop)self.Draw(places[i].values.canvas, places[i].values.x, places[i].values.y, places[i].values.width, places[i].values.height);
 					}
 				}
 			}
-			if(this.Stop)
+			if(self.Stop)
 			if(callback)
-				callback();
+				callback(self);
 		};
 
-		this.New = function(C,X,Y,W,H,S)
+		self.New = function(C,X,Y,W,H,S)
 		{
+			if(W==null)
+				W = frame_w;
+			if(H==null)
+				H = frame_h;
 			var i = places.length;
-			places[i] = new places_class(this,C,X,Y,W,H,S,i);
-			if(S)this.Draw(C,X,Y,W,H);
+			places[i] = new places_class(self,C,X,Y,W,H,S,i);
+			if(S)self.Draw(C,X,Y,W,H);
 			return places[i];
 		};
-		this.Remove = function(index)
+		self.Remove = function(index)
 		{
 			if(places[index])
 			{
@@ -231,20 +246,20 @@ function Animation_Display_Class()
 				}
 			}
 		};
-		this.Remove_All = function()
+		self.Remove_All = function()
 		{
 			places = [];
 		};
 
-		this.Name = function()
+		self.Name = function()
 		{
 			return _name;
 		};
-		this.Delay = function()
+		self.Delay = function()
 		{
 			return _delay;
 		};
-		this.Autoplay = function(value)
+		self.Autoplay = function(value)
 		{
 			if(value==null)
 			{
@@ -253,18 +268,27 @@ function Animation_Display_Class()
 			_auto = value;
 		};
 
-		this.Frame_Size = function(_w, _h)
+		self.Frame_Size = function(_w, _h)
 		{
-			_length = _w;
-			_height = _h;
-			frame_w = Math.floor(sheet.Image().width/_w);
-			frame_h = Math.floor(sheet.Image().height/_h);
-			this.Length = _length*_height;
-			return this;
-		};
-		this.Frame_Size(10, 10);
+			if(_w!=null)
+				_width = _w;
+			if(_h!=null)
+				_height = _h;
 
-		this.Loaded = function()
+			if(!sheet.Loaded())
+			{
+				sheet.targeter.OnLoad = self.Frame_Size;
+				return self;
+			}
+			frame_w = Math.floor(sheet.Image().width/_width);
+			frame_h = Math.floor(sheet.Image().height/_height);
+			self.Length = _width*_height;
+			self.Width = frame_w;
+			self.Height = frame_h;
+			return self;
+		};
+
+		self.Loaded = function()
 		{
 			return sheet.Loaded();
 		};

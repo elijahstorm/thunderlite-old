@@ -1624,7 +1624,7 @@ console.log(__target.X, __target.Y);
 				}
 			}
 		}
-
+		
 		return false;
 	};
 	var Run_Away = function(__game, aiPlayer, currentUnit)

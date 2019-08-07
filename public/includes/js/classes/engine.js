@@ -12,11 +12,12 @@ var Engine_Data = function(data)
 		this.Map = data.map;
 		this.Name = data.name;
 		let turn = data.turn;
+		this.Active_Weather = Weather_Data.Normal;
 		this.Turn = function(){
 			return turn;
 		};
 		this.Active_Player = data.cur_player;
-		this.Weather = [false,false,false];
+		this.Weather = [false];
 		this.Terrain_Map = data.Terrain;
 		this.Units_Map = new Map_Holder(Blank_Map(this.Terrain_Map.Width, this.Terrain_Map.Height));
 		this.Cities_Map = new Map_Holder(Blank_Map(this.Terrain_Map.Width, this.Terrain_Map.Height));
@@ -114,6 +115,16 @@ var Engine_Data = function(data)
 			{
 				cur_player = 0;
 				turn++;
+				this.Active_Weather.Stop(UI);
+				this.Active_Weather = Weather_Data.Normal;
+				for(let i=1;i<global_weather.length;i++)
+				if(turn+1>=global_weather[i][1])
+				if((turn+1-global_weather[i][1])%global_weather[i][2]==0)
+				{
+					this.Active_Weather = Weather_Data.Get_Global(global_weather[i][0]);
+					break;
+				}
+				this.Active_Weather.Start(UI);
 			}
 		};
 		this.Request_Connections = function()
@@ -465,6 +476,7 @@ var Engine_Class = function(input, is_sample)
 	this.End_Game = function(client_won)
 	{
 		this.Game_Over = true;
+		this.Active_Weather.Stop(UI);
 		if(UI!=Fast_Fake_Interface)
 		{
 			Select_Animation.Remove_All();
@@ -833,19 +845,19 @@ var Engine_Class = function(input, is_sample)
 	this.Hide_Terrain = function()
 	{
 		if(!global_weather[0])return;
+		let t;
 		for(let x=0;x<this.Terrain_Map.Width;x++)
 		for(let y=0;y<this.Terrain_Map.Height;y++)
 		{
-			if(!this.Terrain_Map.At(x, y).Hidden)
-				Weather_Data.Fade("fog show", t, 15, true);
-			this.Terrain_Map.At(x, y).Hidden = true;
+			t = this.Terrain_Map.At(x, y);
+			Weather_Data.Fade("fog show", t, 8, true);
 		}
 	};
 	this.Unit_Visibility = function(_unit)
 	{
 		if(!global_weather[0])return;
 		if(_unit.Player!=client)return;
-		let t, list = Core.Target.Diamond(_unit.Sight);
+		let t, list = Core.Target.Diamond(Math.max(_unit.Sight, 1));
 
 		let tile_height = this.Terrain_Map.At(_unit.X, _unit.Y).Height,
 			impeded_tiles = [];
@@ -856,19 +868,13 @@ var Engine_Class = function(input, is_sample)
 			if(t==null)continue;
 			if(l<5)
 			{	// can see tile next to unit no matter what
-				Weather_Data.Remove_Fade("fog show", t);
-				if(t.Hidden)
-					Weather_Data.Fade("fog hide", t, 15, true);
-				t.Hidden = false;
+				Weather_Data.Fade("fog hide", t, 8, true);
 				continue;
 			}
 
 			if(_unit.Radar() || _unit.Unit_Type==1)
 			{	// radar units can see thru high/dense terrain
-				Weather_Data.Remove_Fade("fog show", t);
-				if(t.Hidden)
-					Weather_Data.Fade("fog hide", t, 15, true);
-				t.Hidden = false;
+				Weather_Data.Fade("fog hide", t, 8, true);
 				continue;
 			}
 
@@ -934,10 +940,7 @@ var Engine_Class = function(input, is_sample)
 					continue;
 				}
 			}
-			Weather_Data.Remove_Fade("fog show", t);
-			if(t.Hidden)
-				Weather_Data.Fade("fog hide", t, 15, true);
-			t.Hidden = false;
+			Weather_Data.Fade("fog hide", t, 8, true);
 		}
 	};
 	this.City_Visibility = function(_city)
@@ -955,27 +958,21 @@ var Engine_Class = function(input, is_sample)
 					t.Source == 4 ||
 					t.Source == 14 ||
 					t.Source == 15)
-					{	// you need to be one space away to see these in fog
-						if(Math.abs(list[l][0])+Math.abs(list[l][1])>1)
-							continue;
-					}
-				Weather_Data.Remove_Fade("fog show", t);
-				if(t.Hidden)
-					Weather_Data.Fade("fog hide", t, 15, true);
-				t.Hidden = false;
+				{	// you need to be one space away to see these in fog
+					if(Math.abs(list[l][0])+Math.abs(list[l][1])>1)
+						continue;
+				}
+				Weather_Data.Fade("fog hide", t, 8, true);
 			}
 			return;
 		}
-
-		Weather_Data.Remove_Fade("fog show", _city.Terrain);
-		if(_city.Terrain.Hidden)
-			Weather_Data.Fade("fog hide", _city.Terrain, 15, true);
-		_city.Terrain.Hidden = false;
+		Weather_Data.Fade("fog hide", _city.Terrain, 8, true);
 	};
-	this.Player_Visibility = function(_player)
+	this.Player_Visibility = function()
 	{
 		if(!global_weather[0])return;
-		if(_player!=client)return;
+		if(client==null)return;
+		let _player = client;
 
 		this.Hide_Terrain();
 
@@ -991,6 +988,7 @@ var Engine_Class = function(input, is_sample)
 			u = _player.Get_Building(i);
 			this.City_Visibility(u);
 		}
+		Weather_Data.Execute_Change();
 	};
 	this.Move = function(unit, x, y, path, whenFinished, scrollTo)
 	{
@@ -1180,7 +1178,7 @@ var Engine_Class = function(input, is_sample)
 		if(is_client)
 		{
 			client = Players[index];
-			this.Player_Visibility(client);
+			this.Player_Visibility();
 		}
 		for(var i in Connected_Players)
 		{
@@ -1397,6 +1395,16 @@ var Engine_Class = function(input, is_sample)
 		{
 			cur_player = 0;
 			turn++;
+			this.Active_Weather.Stop(UI);
+			this.Active_Weather = Weather_Data.Normal;
+			for(let i=1;i<global_weather.length;i++)
+			if(turn+1>=global_weather[i][1])
+			if((turn+1-global_weather[i][1])%global_weather[i][2]==0)
+			{
+				this.Active_Weather = Weather_Data.Get_Global(global_weather[i][0]);
+				break;
+			}
+			this.Active_Weather.Start(UI);
 		}
 
 		if(UI!=Fast_Fake_Interface)
@@ -1427,6 +1435,7 @@ var Engine_Class = function(input, is_sample)
 		}
 		return nameList;
 	};
+	this.Active_Weather = Weather_Data.Normal;
 	this.Turn = function()
 	{
 		return turn;
@@ -1580,7 +1589,13 @@ var Engine_Class = function(input, is_sample)
 					_sprite_id = Terrain_Data.Connnection_Decision(index, paint_off_map, x+xtra_size, y+xtra_size);
 					map[x][y] = new Terrain.Terre_Class(self,index,"Terrain("+x+","+y+")",x,y,_sprite_id);
 					if(global_weather[0])	// if foggy, hide everything
+					{
 						map[x][y].Hidden = true;
+						map[x][y].Alpha = new Info(1, map[x][y], function(index,info,input){
+							info.data = input;
+							INTERFACE.Draw();
+						}); // for animating fog of war visuals
+					}
 					if(Terrain_Data.TERRE[index].Connnection==5)
 						Terrain_Animations.push(map[x][y]);
 				}

@@ -216,14 +216,7 @@ var Buildings = {
 				if(this.Owner==null)return;
 				this.Owner.Add_Income(amt);
 				if(game.Interface.Fake)return;
-				var risingTxt = HUD_Display.Add_Drawable(new Text_Class("18pt Times New Roman","#919399"), "Income "+this.X+","+this.Y,
-							this.X*TILESIZE-game.Interface.X_Offset(), (this.Y+0.6)*TILESIZE-game.Interface.Y_Offset(), 100, 30, "$"+amt);
-				Core.Slide_Drawable_Y(risingTxt, -30, 20, function(){
-					Core.Fade_Drawable(risingTxt, 0, 20);
-					Core.Slide_Drawable_Y(risingTxt, -30, 20, function(){
-						HUD_Display.Delete_Drawable(risingTxt);
-					});
-				});
+				game.Interface.Income_Draw(this.X, this.Y, amt);
 			}
 		};
 		this.End_Turn = function(stop_auto_check)

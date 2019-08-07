@@ -96,8 +96,10 @@ var Terrain = {
 			{
 				canvas.save();
 				canvas.translate(x, y);
-				canvas.globalAlpha = .3;
-				Shape.Rectangle.Draw(canvas, 0, 0, TILESIZE, TILESIZE, "#000");
+				canvas.globalAlpha = this.Alpha.data;
+				Terrain_Data.Fog.Draw(canvas, 0, 0, TILESIZE, TILESIZE);
+				// canvas.globalAlpha = 0.1;
+				// Weather_Data.WEATHER[1].Sprite[Math.floor(Math.random()*5)].Draw(canvas, 0, 0, TILESIZE, TILESIZE);
 				canvas.restore();
 			}
 			// devCanvas.save();

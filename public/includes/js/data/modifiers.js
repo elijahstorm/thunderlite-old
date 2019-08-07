@@ -291,15 +291,8 @@ var Mod_List = {
 
 				if(Map.At(x, y).Hidden)
 					return;
+				game.Interface.Income_Draw(unit.X, unit.Y, 500);
 
-				var risingTxt = HUD_Display.Add_Drawable(new Text_Class("18pt Times New Roman","#919399"), "Income "+x+","+y,
-							x*TILESIZE-unit.Game.Interface.X_Offset(), (y+0.6)*TILESIZE-unit.Game.Interface.Y_Offset(), 100, 30, "$"+500);
-				Core.Slide_Drawable_Y(risingTxt, -TILESIZE, 20, function(){
-					Core.Fade_Drawable(risingTxt, 0, 20);
-					Core.Slide_Drawable_Y(risingTxt, -TILESIZE, 20, function(){
-						HUD_Display.Delete_Drawable(risingTxt);
-					});
-				});
 			},"Self Action",[""],"Can mine ore", true, function(unit){
 				var ground = unit.Game.Terrain_Map.At(unit.X, unit.Y).Source;
 				var mine = Terrain_Data.Get("Ore Deposit");

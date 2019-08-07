@@ -7,7 +7,6 @@ var Canvas_Handler_Class = function(canvas, name)
 	this.Height = canvas.height;
 	var draw_que = [];
 	var Drawables = [];
-	var draw_counter = 0;
 
 	var Game;
 	var kill = true;
@@ -85,7 +84,6 @@ var Canvas_Handler_Class = function(canvas, name)
 			Additional = function(){};
 			Drawables = [];
 			draw_que = [];
-			draw_counter = 0;
 			self.Background = self.Add_Drawable(self.Background);
 			wipe = false;
 			self.X_Offset = 0;
@@ -108,16 +106,16 @@ var Canvas_Handler_Class = function(canvas, name)
 			if(Canvas.errReport)console.error("No drawable data present.");
 			return;
 		}
-		var draw_index = draw_counter++;
+		var draw_index = Drawables.length;
 		if(src.drawable_class)
 		{
 			src.Redraw = function()
 			{
 				Queue(draw_index);
 			};
-			Drawables[draw_index] = src;
+			Drawables.push(src);
 			Queue(draw_index);
-			return Drawables[draw_index++];
+			return src;
 		}
 		if(sty==null)sty=0;
 		if(al==null)al=1;
@@ -145,13 +143,13 @@ var Canvas_Handler_Class = function(canvas, name)
 		{
 			Queue(draw_index);
 		};
-		Drawables[draw_index] = drawable;
+		Drawables.push(drawable);
 		Queue(draw_index);
 		return drawable;
 	};
 	this.Get_Drawable = function(i)
 	{
-		if(i>=draw_counter)
+		if(i>=Drawables.length)
 		{
 			if(Canvas.errReport)console.error("Drawable index of "+i+" does not exist.");
 			return null;
@@ -160,7 +158,7 @@ var Canvas_Handler_Class = function(canvas, name)
 	};
 	this.Get_Drawable_by_Name = function(name)
 	{
-		for(var i=0;i<draw_counter;i++)
+		for(var i=0;i<Drawables.length;i++)
 		{
 			if(Drawables[i].Name()==name)
 			{
@@ -177,16 +175,16 @@ var Canvas_Handler_Class = function(canvas, name)
 			{
 				if(Drawables[i]==index)
 				{
-					canvas.clearRect(Drawables[i].X.Get(), Drawables[i].Y.Get(), Drawables[i].Width.Get(), Drawables[i].Height.Get());
-					Drawables[i] = Drawables[--draw_counter];
+					canvas.clearRect(index.X.Get(), index.Y.Get(), index.Width.Get(), index.Height.Get());
+					Drawables.splice(i, 1);
 					return true;
 				}
 			}
 		}
-		else if(index>=0&&index<draw_counter)
+		else if(index>=0&&index<Drawables.length)
 		{
 			canvas.clearRect(Drawables[i].X.Get(), Drawables[i].Y.Get(), Drawables[i].Width.Get(), Drawables[i].Height.Get());
-			Drawables[index] = Drawables[--draw_counter];
+			Drawables.splice(index, 1);
 			return true;
 		}
 		else
@@ -196,7 +194,7 @@ var Canvas_Handler_Class = function(canvas, name)
 				if(Drawables[i].Name==index)
 				{
 					canvas.clearRect(Drawables[i].X.Get(), Drawables[i].Y.Get(), Drawables[i].Width.Get(), Drawables[i].Height.Get());
-					Drawables[index] = Drawables[--draw_counter];
+					Drawables.splice(i, 1);
 					return true;
 				}
 			}
@@ -222,7 +220,7 @@ var Canvas_Handler_Class = function(canvas, name)
 		var copy = canvas.getImageData(0, amt, canvas.width, canvas.height);
 		canvas.putImageData(copy, 0, 0);
 	};
-	
+
 	this.Redraw = function()
 	{
 		for(var i in Drawables)

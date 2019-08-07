@@ -60,10 +60,10 @@ Menu.MapEditor.Open = function()
 			for(var i=0;i<cities.length;i++)
 				str+=cities[i]+":";
 			str+=";";
-			for(let j=0;j<Weather_Data.Global_Amount;j++)
+			str+=(weather[0] ? "1" : "0");
+			for(let j=1;j<weather.length;j++)
 			{
-				if(weather[j])
-					str+=""+j;
+				str+=""+weather[j][0]+""+weather[j][1]+"-"+weather[j][2]+":";
 			}
 			str+=";";
 			return str;
@@ -106,10 +106,9 @@ Menu.MapEditor.Open = function()
 			/// 1) make special conditions
 			/// 2) limit units that can be built
 			/// 3) add script options
+
+
 			/// 4) fog of war option
-			/// 5) weather changes
-
-
 
 			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 155, 245, 130, 25, "Fog of War"));
 			POPUP_ADDER(new Canvas.Drawable({							// down one player
@@ -121,6 +120,7 @@ Menu.MapEditor.Open = function()
 				}
 			}, null, 155, 265, 75, 25, weather), function(text){
 				weather[0] = (weather[0]) ? false : true;
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h,value){
@@ -130,6 +130,11 @@ Menu.MapEditor.Open = function()
 					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,text);
 				}
 			});
+
+
+
+
+			/// 5) weather changes
 
 
 
@@ -151,6 +156,7 @@ Menu.MapEditor.Open = function()
 			}, null, 355, 265, 25, 25, Player_Text), function(text){
 				if(max_players>2)
 					max_players--;
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h, s){
@@ -168,6 +174,7 @@ Menu.MapEditor.Open = function()
 			}, null, 405, 265, 25, 25, Player_Text), function(text){
 				if(max_players<4)
 					max_players++;
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h, s){
@@ -192,6 +199,7 @@ Menu.MapEditor.Open = function()
 				POPUP_CLOSER();
 				Map_Size(width+1, height, 0, 0);
 				MAP_OPTION_ADDER();
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h, s){
@@ -210,6 +218,7 @@ Menu.MapEditor.Open = function()
 				POPUP_CLOSER();
 				Map_Size(width+1, height, 1, 0);
 				MAP_OPTION_ADDER();
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h, s){
@@ -228,6 +237,7 @@ Menu.MapEditor.Open = function()
 				POPUP_CLOSER();
 				Map_Size(width, height+1, 0, 1);
 				MAP_OPTION_ADDER();
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h, s){
@@ -246,6 +256,7 @@ Menu.MapEditor.Open = function()
 				POPUP_CLOSER();
 				Map_Size(width, height+1, 0, 0);
 				MAP_OPTION_ADDER();
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h, s){
@@ -266,6 +277,7 @@ Menu.MapEditor.Open = function()
 				POPUP_CLOSER();
 				Map_Size(width-1, height, 1, 0);
 				MAP_OPTION_ADDER();
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h, s){
@@ -284,6 +296,7 @@ Menu.MapEditor.Open = function()
 				POPUP_CLOSER();
 				Map_Size(width-1, height, 0, 0);
 				MAP_OPTION_ADDER();
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h, s){
@@ -302,6 +315,7 @@ Menu.MapEditor.Open = function()
 				POPUP_CLOSER();
 				Map_Size(width, height-1, 0, 0);
 				MAP_OPTION_ADDER();
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h, s){
@@ -320,6 +334,7 @@ Menu.MapEditor.Open = function()
 				POPUP_CLOSER();
 				Map_Size(width, height-1, 0, 1);
 				MAP_OPTION_ADDER();
+				data_saved = false;
 				Draw();
 			}, {
 				Draw:function(c, x, y, w, h, s){
@@ -446,7 +461,7 @@ Menu.MapEditor.Open = function()
 		};
 		var units;
 		var cities;
-		var weather = [false, false, false];
+		var weather = [false];
 		var data_saved = true;
 		var beaten_game = false;
 		var TYPES = {
@@ -487,6 +502,8 @@ Menu.MapEditor.Open = function()
 						return;
 					}
 					img.Draw(c,x,y,w,h);
+					if(index==Terrain_Data.TERRE && s==Terrain_Data.Get("Shore"))
+						index[s].Borders[10].Draw(c,x,y,w,h);
 				}
 			},
 			ACTIVE_CLICKABLE = function(_index){
@@ -515,10 +532,11 @@ Menu.MapEditor.Open = function()
 					{
 						var xtra_height = (img.Image().height-60)*(y_scale/60);
 						img.Draw(c,_x,_y-xtra_height,w,h+xtra_height);
-						/* maybe do this later, idk */
 						return;
 					}
 					img.Draw(c,_x,_y,w,h);
+					if(map_list[s]==Terrain_Data.Get("Shore"))
+						Terrain_Data.TERRE[map_list[s]].Borders[10].Draw(c,_x,_y,w,h);
 					for(var j in cities)
 					{
 						if(cities[j][1]==tile_x && cities[j][2]==tile_y)
@@ -683,6 +701,7 @@ Menu.MapEditor.Open = function()
 				Draw();
 			};
 
+		Add(new Canvas.Drawable(Images.Retrieve("map editor border"), null, 0, 0, 805, 660)); // border img
 		Add(new Canvas.Drawable(Shape.Box, null, 9, 29, 602, 602, "#F2EFDE", null, 1));			// map border
 
 		Add(new Canvas.Drawable(Shape.Rectangle, null, 611, 29, 3, 602, "#BFACAA", null, 1));	// divider
@@ -734,6 +753,7 @@ Menu.MapEditor.Open = function()
 
 			var color = "#fff";
 			send_map_data_to_server(SERVER.PUBLISH, id);
+			alert("Successfully uploaded.");
 		}, {
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(beaten_game && data_saved) ? 1:4]);
@@ -761,6 +781,8 @@ Menu.MapEditor.Open = function()
 				index:id==-1 ? local_saved_map : id,
 				map:encrypt_game_data(Map_Data_To_Str())
 			});
+			data_saved = true;
+			Draw();
 		}, {
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(!data_saved) ? 1:4]);
@@ -1428,6 +1450,11 @@ Menu.MapEditor.Open = function()
 			units = data.u_list;
 			cities = data.c_list;
 			weather = data.w_data;
+
+
+			// erase this quick
+			weather = [true, [1, 2, 3], [2, 3, 3]];
+
 
 			Update_Active_List(TYPES.TERRAIN);
 		};

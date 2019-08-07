@@ -262,7 +262,7 @@ var Interface_Class = function()
 		terrainCanvas.clearRect(0,0,600,600);
 		buildingCanvas.clearRect(0,0,600,600);
 		charCanvas.clearRect(0,0,600,600);
-		weatherCanvas.clearRect(0,0,600,600);
+		// weatherCanvas.clearRect(0,0,600,600);
 		dialogCanvas.clearRect(0,0,600,600);
 		devCanvas.clearRect(0,0,600,600);
 		// animationCanvas.clearRect(0,0,600,600);
@@ -1042,6 +1042,8 @@ var Interface_Class = function()
 	self.reflow = function(w, h){
 		gameWidth = w-(window.parent.mobilecheck()?130:210);
 		gameHeight = h-(window.parent.mobilecheck()?60:70);
+		self.gameWidth = gameWidth;
+		self.gameHeight = gameHeight;
 		clientWidth = w;
 		clientHeight = h;
 		self.gameXScale = gameWidth/600;
@@ -1062,9 +1064,19 @@ var Interface_Class = function()
 	};
 
 	/** functions */
+	let _requested_update = true;
+	self.Next_Frame = function()
+	{
+		if(_requested_update)
+		{
+			scroller.repaint();
+			_requested_update = false;
+		}
+	};
+	Canvas.Add_Ticker(self.Next_Frame);
 	self.Draw = function(canvas, x, y, w, h, color)
 	{
-		scroller.repaint();
+		_requested_update = true;
 	};
 	self.Simple_Draw = function(canvas, x, y, w, h, color)
 	{
@@ -1097,6 +1109,19 @@ var Interface_Class = function()
 	self.Update_Player_Info = function()
 	{
 		Avatar.Display(game.Active_Player());
+	};
+	self.Income_Draw = function(tile_x, tile_y, amount)
+	{
+		let x = (tile_x*TILESIZE)+self.X_Offset(),
+			y = ((tile_y+0.6)*TILESIZE)-self.Y_Offset();
+		let risingTxt = HUD_Display.Add_Drawable(new Text_Class("20pt Times New Roman","#FF0800"), "Income "+x+","+y,
+				x, y, 100, 30, "$"+amount);
+		Core.Slide_Drawable_Y(risingTxt, -TILESIZE, 20, function(){
+			Core.Fade_Drawable(risingTxt, 0, 19);
+			Core.Slide_Drawable_Y(risingTxt, -TILESIZE, 20, function(){
+				HUD_Display.Delete_Drawable(risingTxt);
+			});
+		});
 	};
 	self.Resource_Draw = function(canvas, cash)
 	{

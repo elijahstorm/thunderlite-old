@@ -1045,6 +1045,7 @@ var Characters = {
 			{
 				bonus*=available[i].Do([this, defender]);
 			}
+			bonus*=game.Active_Weather.Damage(this.Weapon);
 			return Math.ceil(bonus*this.Power);
 		};
 		this.Calculate_Move_Cost = function(terrain)
@@ -1076,50 +1077,40 @@ var Characters = {
 				return 100; // if air is jammed
 			if(this.Move_Type==9)
 				return 100; //immoveable
-			if(terrain.Source==Terrain_Data.Get("Shore"))
-			{
-				if(this.Move_Type==8)
-					return 100;	// heavy boats
-				if(this.Move_Type==7)
-					return 2;	// wheel units
-				if(this.Move_Type==1)
-					return 2;	// submerged sea units
-				return 1;
-			}
 
 			var t_data = Terrain_Data.TERRE[terrain.Source];
-			var bonus = 1;
+			var bonus = 1*game.Active_Weather.Move_Cost();
 			//check modifiers path
 			if(t_data.Type==7)return 100;
 			if(t_data.Type==0)
 			{
 				if(this.Move_Type==1)bonus+=.5;
-				if(this.Unit_Type==1)return 1;
+				if(this.Unit_Type==1)return 1*bonus;
 				if(this.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==1)
 			{
 				if(this.Move_Type==0)bonus-=.5;
 				if(this.Move_Type==1)bonus+=.5;
-				if(this.Unit_Type==1)return 1;
+				if(this.Unit_Type==1)return 1*bonus;
 				if(this.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==2)
 			{
 				if(this.Move_Type==1||this.Move_Type==2)return 100;
-				if(this.Unit_Type==1)return 1;
+				if(this.Unit_Type==1)return 1*bonus;
 				if(this.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==3)
 			{
 				if(this.Move_Type==1)bonus-=.75;
-				if(this.Unit_Type==1)return 1;
+				if(this.Unit_Type==1)return 1*bonus;
 				if(this.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==4)
 			{
 				if(this.Move_Type==0)bonus+=.5;
-				if(this.Unit_Type==1)return 1;
+				if(this.Unit_Type==1)return 1*bonus;
 				if(this.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==5)
@@ -1127,12 +1118,12 @@ var Characters = {
 				if(this.Move_Type==0)bonus+=1;
 				if(this.Move_Type==1)bonus+=1.5;
 				if(this.Move_Type==2)bonus+=.5;
-				if(this.Unit_Type==1)return 1;
+				if(this.Unit_Type==1)return 1*bonus;
 				if(this.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==6)
 			{
-				if(this.Unit_Type==1)return 1;
+				if(this.Unit_Type==1)return 1*bonus;
 				if(this.Unit_Type==0)return 100;
 			}
 			else if(t_data.Type==7)
@@ -1144,9 +1135,12 @@ var Characters = {
 				if(t_data.Name=="Shore")
 				{
 					if(this.Move_Type==8)
-						return 100;
-					if(this.Move_Type==7 || this.Move_Type==1)
-						bonus+=1;
+						return 100;	// heavy boats
+					if(this.Move_Type==7)
+						return 2*bonus;	// wheel units
+					if(this.Move_Type==1)
+						return 2;	// submerged sea units
+					return 1*bonus;
 				}
 				else if(t_data.Name=="Bridge")
 				{

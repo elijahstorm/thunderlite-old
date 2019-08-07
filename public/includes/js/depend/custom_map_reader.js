@@ -7,7 +7,7 @@ var Map_Reader_Class = function(){
 		this.Valid = false;
 		this.id = __id;
 		this.Source = __source;
-		
+
 		if(__t_data.length<10)
 		{
 			return;
@@ -16,17 +16,13 @@ var Map_Reader_Class = function(){
 		{
 			return;
 		}
-		
+
 		var players = [],
 			terrain_data = __t_data,
 			units = [],
 			cities = [],
-			weather = new Array(Weather_Data.Global_Amount);
-		for(let i=0;i<weather.length;i++)
-		{
-			weather[i] = false;
-		}
-			
+			weather = [false];
+
 		this.Data = {
 			Get:function(){
 				return {
@@ -43,12 +39,12 @@ var Map_Reader_Class = function(){
 				};
 			}
 		};
-		
+
 		this.Player_Amount = function()
 		{
 			return players.length;
 		};
-		
+
 		this.Add_Player = function(__player)
 		{
 			if(players.length>=8)return;
@@ -71,12 +67,21 @@ var Map_Reader_Class = function(){
 		this.Add_Weather = function(__weather)
 		{
 			if(__weather.length==0)return;
-			for(let number,i=0;i<__weather.length;i++)
+			weather[0] = (__weather.charAt(0)=='1') ? true : false;
+			for(let number,i=1;i<__weather.length;i++)
 			{
 				number = parseInt(__weather.charAt(i));
-				if(number>=weather.length || number<0 || number==NaN)
+				if(number>=Weather_Data.Global_Amount || number<0 || number==NaN)
+				{
+					i = __weather.indexOf(":", i);
 					continue;
-				weather[number] = true;
+				}
+				let start = parseInt(__weather.substring(i+1, __weather.indexOf("-", i)));
+				let rate = parseInt(__weather.substring(__weather.indexOf("-", i)+1, __weather.indexOf(":", i)));
+				i = __weather.indexOf(":", i);
+				if(start==NaN || rate==NaN)
+					continue;
+				weather.push([number,start,rate]);
 			}
 		};
 		this.Start = function(Game)
@@ -86,11 +91,11 @@ var Map_Reader_Class = function(){
 			{
 				Game.Add_Player(players[i], i+1);
 			}
-			
+
 			return [terrain_data, units, cities, weather];
 		};
 	};
-	
+
 	this.Read = function(__input)
 	{
 		var ELEMENTS = 9;
@@ -115,21 +120,21 @@ var Map_Reader_Class = function(){
 			temp_len = __data[2]*__data[3];
 		var temp_array = new Array(temp_len),
 			temp_last_loc = 0, temp_next_loc;
-		
+
 		for(var i=0;i<temp_len;i++)
 		{
 			temp_next_loc = temp_str.indexOf(":", temp_last_loc);
 			temp_array[i] = parseInt(temp_str.substring(temp_last_loc, temp_next_loc));
 			temp_last_loc = temp_next_loc+1;
 		}
-		
+
 		__data[4] = temp_array;
 			// terrain values (x,y pattern)
-		
+
 		temp_str = __input.substring(dividers[4]+1, dividers[5]);
 		temp_array = new Array();
 		temp_last_loc = 0;
-		
+
 		while(true)
 		{
 			temp_next_loc = temp_str.indexOf(":", temp_last_loc);
@@ -137,22 +142,22 @@ var Map_Reader_Class = function(){
 			temp_array.push(temp_str.substring(temp_last_loc, temp_next_loc));
 			temp_last_loc = temp_next_loc+1;
 		}
-		
+
 		__data[5] = temp_array;
 			// players [name]
-		
+
 		temp_str = __input.substring(dividers[5]+1, dividers[6]);
 		temp_array = new Array();
 		temp_last_loc = 0;
 		var temp_data_str,temp_data_value;
-		
+
 		while(true)
 		{
 			temp_next_loc = temp_str.indexOf(":", temp_last_loc);
 			if(temp_next_loc==-1)break;
 			temp_data_value = new Array(4);
 			temp_data_str = temp_str.substring(temp_last_loc, temp_next_loc);
-			
+
 			var __NEXT_LOC = temp_data_str.indexOf(","),
 				__LAST_LOC = 0;
 			temp_data_value[0] = parseInt(temp_data_str.substring(0, __NEXT_LOC));
@@ -165,25 +170,25 @@ var Map_Reader_Class = function(){
 			__LAST_LOC = __NEXT_LOC+1;
 			__NEXT_LOC = temp_data_str.length;
 			temp_data_value[3] = parseInt(temp_data_str.substring(__LAST_LOC, __NEXT_LOC));
-			
+
 			temp_array.push(temp_data_value);
 			temp_last_loc = temp_next_loc+1;
 		}
-		
+
 		__data[6] = temp_array;
 			// units [id, x, y, player]
-		
+
 		temp_str = __input.substring(dividers[6]+1, dividers[7]);
 		temp_array = new Array();
 		temp_last_loc = 0;
-		
+
 		while(true)
 		{
 			temp_next_loc = temp_str.indexOf(":", temp_last_loc);
 			if(temp_next_loc==-1)break;
 			temp_data_value = new Array(4);
 			temp_data_str = temp_str.substring(temp_last_loc, temp_next_loc);
-			
+
 			var __NEXT_LOC = temp_data_str.indexOf(","),
 				__LAST_LOC = 0;
 			temp_data_value[0] = parseInt(temp_data_str.substring(0, __NEXT_LOC));
@@ -196,17 +201,17 @@ var Map_Reader_Class = function(){
 			__LAST_LOC = __NEXT_LOC+1;
 			__NEXT_LOC = temp_data_str.length;
 			temp_data_value[3] = parseInt(temp_data_str.substring(__LAST_LOC, __NEXT_LOC));
-			
+
 			temp_array.push(temp_data_value);
 			temp_last_loc = temp_next_loc+1;
 		}
-		
+
 		__data[7] = temp_array;
 			// cities [id, x, y, player]
-		
+
 		__data[8] = __input.substring(dividers[7]+1, dividers[8]);
 			// weather
-		
+
 			/// set map
 		var _map_data = new Array(__data[2]);
 		for(var x=0,i=0;x<__data[2];x++)
@@ -217,10 +222,10 @@ var Map_Reader_Class = function(){
 				_map_data[x][y] = __data[4][i++];
 			}
 		}
-		
+
 		// ad id when synching to server
 		var cur_map = new Map_Data(_map_data, __data[1], __data[0], __input);
-		
+
 		for(var i=0;i<__data[5].length;i++)
 		{	/// go thru and set players
 			cur_map.Add_Player(__data[5][i]);
@@ -234,10 +239,9 @@ var Map_Reader_Class = function(){
 			cur_map.Add_City(__data[7][i]);
 		}
 		cur_map.Add_Weather(__data[8]);
-		
-		
+
+
 		return cur_map;
 	};
 };
 var Map_Reader = new Map_Reader_Class();
-

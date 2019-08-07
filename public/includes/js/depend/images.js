@@ -6,6 +6,9 @@ function Image_list_class()
 		var img;
 		var loaded;
 		var stretchable = true;
+
+		this.targeter = this;
+
 		if(src.Draw)
 		{
 			loaded = true;
@@ -17,10 +20,13 @@ function Image_list_class()
 			loaded = false;
 			img = new Image();
 			img.src = IMG_LOC+src;
+			let self = this;
 			img.onload = function()
 			{
 				loaded = true;
 				callback();
+				if(self.OnLoad!=null)
+					self.OnLoad();
 			};
 		}
 		this.Draw = function(canvas,x,y,w,h)
@@ -77,10 +83,12 @@ function Image_list_class()
 				return;
 			}
 		}
-		total_images++;Images[name] = new Image_Class(src,name,function(){
+		total_images++;
+		let IMG = new Image_Class(src,name,function(){
 			loaded_images++;
 		});
-		return Images[name];
+		Images[name] = IMG;
+		return IMG;
 	};
 	this.Delete = function(name)
 	{
