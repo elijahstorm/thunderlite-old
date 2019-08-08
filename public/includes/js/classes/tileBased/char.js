@@ -99,7 +99,7 @@ var Characters = {
 			for(let i=0;i<mods.length;i++)
 			{
 				if(!CharData.Modifiers.includes(mods[i]))
-					extra_mods.push(mods[i]);
+					extra_mods.push(mods[i].toStr());
 			}
 			if(extra_mods.length>0)
 				data.mods = extra_mods;
@@ -1079,6 +1079,23 @@ var Characters = {
 				return 100; //immoveable
 
 			var t_data = Terrain_Data.TERRE[terrain.Source];
+
+			if(t_data.Name=="Shore")
+			{
+				if(this.Move_Type==8)
+					return 100;	// heavy boats
+				if(this.Move_Type==7)
+					return 2;	// wheel units
+				if(this.Move_Type==1)
+					return 2;	// submerged sea units
+				return 1;
+			}
+			else if(t_data.Name=="Bridge")
+			{
+				if(this.Unit_Type==2)
+					return 100;
+			}
+
 			var bonus = 1*game.Active_Weather.Move_Cost(this, terrain);
 			//check modifiers path
 			if(t_data.Type==7)return 100;
@@ -1132,21 +1149,6 @@ var Characters = {
 			}
 			else if(t_data.Type==8)
 			{
-				if(t_data.Name=="Shore")
-				{
-					if(this.Move_Type==8)
-						return 100;	// heavy boats
-					if(this.Move_Type==7)
-						return 2*bonus;	// wheel units
-					if(this.Move_Type==1)
-						return 2;	// submerged sea units
-					return 1*bonus;
-				}
-				else if(t_data.Name=="Bridge")
-				{
-					if(this.Unit_Type==2)
-						return 100;
-				}
 			}
 			return Math.ceil(bonus*terrain.Drag);
 		};

@@ -303,15 +303,13 @@ window.onload = function(){
 			/** loading published games */
 		else if(data.type==500)
 		{	// error requesting mapdata
-			console.error(data);
 		}
 		else if(data.type==501)
 		{	// map index does not exist
-			console.error(data);
+			console.error("Caught error that returned map index does not exsist.");
 		}
 		else if(data.type==502)
 		{	// recieved game data
-			console.error(data);
 			let name = "";
 			while(name!="")
 			{
@@ -321,7 +319,6 @@ window.onload = function(){
 		}
 		else if(data.type==503)
 		{	// recieved a list of game data that matched the query
-			console.error(data);
 			game.Menu.LevelSelect.Update_Map_Search(data.data);
 		}
 
@@ -329,8 +326,6 @@ window.onload = function(){
 		else if(data.type==700)
 		{	// error requesting mapdata
 			if(game.Menu.MapEditor.Server_Response==null)return;
-
-			console.error(data);
 		}
 		else if(data.type==701)
 		{	// download existing maps
@@ -341,26 +336,18 @@ window.onload = function(){
 		else if(data.type==702)
 		{	// UNUSED
 			if(game.Menu.MapEditor.Server_Response==null)return;
-
-			console.error(data);
 		}
 		else if(data.type==703)
 		{	// delete existing map
 			if(game.Menu.MapEditor.Server_Response==null)return;
-
-			console.error(data);
 		}
 		else if(data.type==704)
 		{	// report map playtested
 			if(game.Menu.MapEditor.Server_Response==null)return;
-
-			console.error(data);
 		}
 		else if(data.type==705)
 		{	// publish playtested map
 			if(game.Menu.MapEditor.Server_Response==null)return;
-
-			console.error(data);
 		}
 		else if(data.type==706)
 		{	// report newly uploaded map's unique Identification\
@@ -370,20 +357,14 @@ window.onload = function(){
 		else if(data.type==707)
 		{	// report faulty map upload -- try again?
 			if(game.Menu.MapEditor.Server_Response==null)return;
-
-			console.error(data);
 		}
 		else if(data.type==708)
 		{	// user has too many maps saved, delete old map or update exsisting map
 			if(game.Menu.MapEditor.Server_Response==null)return;
-
-			console.error(data);
 		}
 		else if(data.type==709)
 		{	// cannot find map with that ID on server... if you think this is an accident on our part, please report the incident to us
 			if(game.Menu.MapEditor.Server_Response==null)return;
-
-			console.error(data);
 		}
 		else if(data.type==710)
 		{	// map succesfully updated / deleted / renammed
@@ -394,8 +375,6 @@ window.onload = function(){
 		else if(data.type==777)
 		{	// unlucky general error -- don't know what caused error here
 			if(game.Menu.MapEditor.Server_Response==null)return;
-
-			console.error(data);
 		}
 
 			/** in-game error messages */

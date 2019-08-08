@@ -233,7 +233,7 @@ var Interface_Class = function()
 
 		at = game.Units_Map.At(y,x);
 		if(at==moving_unit&&at!=null)
-		if(!game.Terrain_Map.At(at.X,at.Y).Hidden)
+		if(!game.Terrain_Map.At(at.X,at.Y).Hidden || game.Client_Player()==at.Player)
 			at.UI_Draw(moveUnitCanvas, left, top);
 	};
 	var render = function(left, top, zoom, simple){
@@ -484,7 +484,7 @@ var Interface_Class = function()
 			Standings_Border2:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border2", 20, 105, 150, 2, "#000", Canvas.Background),
 			Current_Player:Avatar_Display.Add_Drawable(new Text_Class("25pt Times New Roman", "#000"), "Player Name", 10, 130, 200, 35, null, Canvas.Background),
 			Info:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Info", 15, 165, 200, 20, null, Canvas.Background),
-			IconBG:Avatar_Display.Add_Drawable(Shape.Box, "IconBG", 110, 167, 80, 80, "#000", Canvas.Background),
+			// IconBG:Avatar_Display.Add_Drawable(Shape.Box, "IconBG", 110, 167, 80, 80, "#000", Canvas.Background),
 			Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 110, 170, 80, 80, null, Canvas.Background),
 
 			All_Threaths:Avatar_Display.Add_Drawable({Draw:function(){}}, "Threats", 605, 242, 80, 30, "#EE6352", Canvas.Background),

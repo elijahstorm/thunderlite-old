@@ -1,13 +1,17 @@
-var Mod_Class = function(name, act, type, arguments, desc, icon, test_func)
+var Mod_Class = function(index, name, act, type, arguments, desc, icon, test_func)
 {
 	if(test_func==null)
 		test_func = function(){return true;};
+	this.Index = index;
 	this.Name = name;
 	this.Type = type;
 	this.Description = desc;
 	this.Args = arguments;
 	this.Sprite = ERRORIMG;
 	this.Active = true;
+	this.toStr = function(){
+		return "M."+index;
+	};
 	this.Do = function(args)
 	{
 		if(!this.Active)return false;
@@ -45,22 +49,43 @@ var Mod_Class = function(name, act, type, arguments, desc, icon, test_func)
 };
 
 // search for '//check modifiers' in all docs
+let CURMOD = 0;
 var Mod_List = {
+	From_Index:function(input)
+	{
+		let DECISION = null;
+		let LIST = [Mod_List.Units, Mod_List.Buildings, Mod_List.Terrain, Mod_List.Weather];
+		for(let l in LIST)
+		{
+			Object.keys(LIST[l]).forEach(function(type){
+				if(DECISION!=null)return;
+				Object.keys(LIST[l][type]).forEach(function(mod){
+					if(DECISION!=null)return;
+					if(LIST[l][type][mod].Index==input)
+					{
+						DECISION = LIST[l][type][mod];
+					}
+				});
+			});
+			if(DECISION!=null)break;
+		}
+		return DECISION;
+	},
 	Units:{
 		Idle:{
-			Jamming:new Mod_Class("Jamming",function(){
+			Jamming:new Mod_Class(CURMOD++, "Jamming",function(){
 			},"Idle",[""],"Enemy planes cannot enter and detects hidden stealth units within area")
 		},
 		Move:{
-			Tracking:new Mod_Class("Tracking",function(){
+			Tracking:new Mod_Class(CURMOD++, "Tracking",function(){
 
 			},"Move",[""],"Attack a cloaked stealth unit, if ran into"),
-			Radar:new Mod_Class("Radar",function(){
+			Radar:new Mod_Class(CURMOD++, "Radar",function(){
 
 			},"Move",[""],"Detects stealth units at start of turn")
 		},
 		Attack:{
-			Lance:new Mod_Class("Lance",function(unit){
+			Lance:new Mod_Class(CURMOD++, "Lance",function(unit){
 				var lanced;
 				if(unit.State==0)lanced = unit.Game.Units_Map.At(unit.X+2, unit.Y);
 				else if(unit.State==1)lanced = unit.Game.Units_Map.At(unit.X, unit.Y-2);
@@ -68,13 +93,13 @@ var Mod_List = {
 				else if(unit.State==3)lanced = unit.Game.Units_Map.At(unit.X-2, unit.Y);
 				if(lanced!=null)unit.Attack(lanced);
 			},"Attack","current unit","Can attack area directly behind the unit attacked when it initiates attack"),
-			Stun:new Mod_Class("Stun",function(unit){
+			Stun:new Mod_Class(CURMOD++, "Stun",function(unit){
 				if(unit.Attacking!=null)
 					unit.Attacking.Stunned = true;
 			},"Attack","current unit","Enemy cannot counter attack")
 		},
 		Death:{
-			Insta_Lose:new Mod_Class("Intsa Lose",function(unit){
+			Insta_Lose:new Mod_Class(CURMOD++, "Intsa Lose",function(unit){
 				var player = unit.Owner;
 				var amount = player.Units_Amount();
 				for(var i=0;i<amount;i++)
@@ -93,7 +118,7 @@ var Mod_List = {
 			},"Death","current unit","If all command units die, and player has no more command centers, instantly lose")
 		},
 		Start_Turn:{
-			Capture:new Mod_Class("Capture",function(unit){
+			Capture:new Mod_Class(CURMOD++, "Capture",function(unit){
 				var on_building = unit.Terrain().Building;
 				if(on_building==null)return false;
 				if(on_building.Owner==unit.Player)return false;
@@ -102,7 +127,7 @@ var Mod_List = {
 				on_building.Raid(unit,bonus*10);
 				return true;
 			},"Start Turn","unit","Can capture buildings"),
-			Repair:new Mod_Class("Repair",function(unit){
+			Repair:new Mod_Class(CURMOD++, "Repair",function(unit){
 				unit.Hurt(-Math.round(unit.Max_Health/4));
 				if(unit.Health>unit.Max_Health)
 					unit.Health = unit.Max_Health;
@@ -110,7 +135,7 @@ var Mod_List = {
 			},"Start Turn","current unit","Heals self a little bit at the start of it's turn")
 		},
 		End_Turn:{
-			Vulture:new Mod_Class("Vulture",function(unit){
+			Vulture:new Mod_Class(CURMOD++, "Vulture",function(unit){
 				if(unit.Killed!=null)
 				{
 					unit.Killed = null;
@@ -118,7 +143,7 @@ var Mod_List = {
 					unit.Set_Active(true);
 				}
 			},"End Turn","current unit","Can move again if it kills an enemy unit"),
-			Cloak:new Mod_Class("Cloak",function(unit){
+			Cloak:new Mod_Class(CURMOD++, "Cloak",function(unit){
 				var _game = unit.Game;
 				if(_game.Detected_By_Enemy(unit))
 				{
@@ -134,7 +159,7 @@ var Mod_List = {
 			},"End Turn",[""],"Can use cloak if not by enemy unit at end of turn")
 		},
 		Self_Action:{
-			Transport:new Mod_Class("Transport",function(unit){
+			Transport:new Mod_Class(CURMOD++, "Transport",function(unit){
 				var game = unit.Game;
 				var transport = new Characters.New(game, "Transporter");
 				transport.Alpha.Set(0);
@@ -153,7 +178,7 @@ var Mod_List = {
 			},"Self Action",["unit"],"Can move other units", true, function(unit){
 				return unit.Player.Air_Control();
 			}),
-			Ship_Out:new Mod_Class("Ship Out",function(unit){
+			Ship_Out:new Mod_Class(CURMOD++, "Ship Out",function(unit){
 				var game = unit.Game;
 				var transport = new Characters.New(game, "Loading Boat");
 				transport.Alpha.Set(0);
@@ -171,7 +196,7 @@ var Mod_List = {
 			},"Self Action",["unit"],"Set out for the sea!", true, function(unit){
 				return unit.Player.Sea_Control();
 			}),
-			Land:new Mod_Class("Land",function(transport){
+			Land:new Mod_Class(CURMOD++, "Land",function(transport){
 				var game = transport.Game;
 
 				var unit = transport.Rescued_Unit;
@@ -196,7 +221,7 @@ var Mod_List = {
 				return true;
 			}),
 
-			Builder:new Mod_Class("Builder",function(unit){
+			Builder:new Mod_Class(CURMOD++, "Builder",function(unit){
 				if(unit.Game.AI_Players(unit.Player))
 				{	// automate decision making with AI
 					console.error("Add AI Builder!");
@@ -276,7 +301,7 @@ var Mod_List = {
 					});
 				});
 			},"Self Action",[""],"Can build other units", true),
-			Miner:new Mod_Class("Miner",function(unit){
+			Miner:new Mod_Class(CURMOD++, "Miner",function(unit){
 				unit.Player.Data().data.money_gained+=500;
 				unit.Cash+=500;
 				unit.End_Turn();
@@ -299,43 +324,43 @@ var Mod_List = {
 				return ground==mine || ground==mine-1;
 			}),
 
-			Repairable:new Mod_Class("Repairable",function(unit){
+			Repairable:new Mod_Class(CURMOD++, "Repairable",function(unit){
 				unit.Repair();
 			},"Self Action",[""],"Spend turn fixing this unit for 25% health", true, function(unit){
 				if(unit.Health==unit.Max_Health)
 					return false;
 				return true;
 			}),
-			Irreparable:new Mod_Class("Irreparable",function(unit){
+			Irreparable:new Mod_Class(CURMOD++, "Irreparable",function(unit){
 			},"Self Action",[""],"Cannot repair unit--better look for a heal zone", false, function(unit){
 				return false;
 			})
 		},
 		Can_Attack:{
-			Counter_Range:new Mod_Class("Counter Range",function(args){
+			Counter_Range:new Mod_Class(CURMOD++, "Counter Range",function(args){
 			},"Can Attack",["attacker","defender"],"Can counter ranged attacks"),
-			Air_Raid:new Mod_Class("Air Raid",function(args){
+			Air_Raid:new Mod_Class(CURMOD++, "Air Raid",function(args){
 				if(args[1].Unit_Type==1)return true;
 			},"Can Attack",["attacker","defender"],"Can attack air units"),
-			Bombard:new Mod_Class("Bombard",function(args){
+			Bombard:new Mod_Class(CURMOD++, "Bombard",function(args){
 				if(args[1].Unit_Type==2)return true;
 			},"Can Attack",["attacker","defender"],"Can attack sea units"),
-			Ground_Assult:new Mod_Class("Ground Assult",function(args){
+			Ground_Assult:new Mod_Class(CURMOD++, "Ground Assult",function(args){
 				if(args[1].Unit_Type==0)return true;
 			},"Can Attack",["attacker","defender"],"Sea unit that can attack ground units")
 		},
 		Damage:{
-			Flak:new Mod_Class("Flak",function(args){
+			Flak:new Mod_Class(CURMOD++, "Flak",function(args){
 				if(args[1].Armor==0)
 					return 2;
 				return 1;
 			},"Damage",["attacker",["attacker","defender"]],"Deals 2x damage to light units"),
-			Fast_Attack:new Mod_Class("Fast Attack",function(args){
+			Fast_Attack:new Mod_Class(CURMOD++, "Fast Attack",function(args){
 				if(args[0].Attacking==args[1])
 					return 1.2;
 				return 1;
 			},"Damage",["attacker",["attacker","defender"]],"20% more damage if it initializes attack"),
-			Slow_Attack:new Mod_Class("Slow Attack",function(args){
+			Slow_Attack:new Mod_Class(CURMOD++, "Slow Attack",function(args){
 				if(args[0].Attacking!=args[1])
 					return 0.85;
 				return 1;
@@ -346,7 +371,7 @@ var Mod_List = {
 	},
 	Buildings:{
 		Capture:{
-			Insta_Lose:new Mod_Class("Instant Lose",function(args){
+			Insta_Lose:new Mod_Class(CURMOD++, "Instant Lose",function(args){
 				if(args[0].Owner==null)return;
 				var player = args[0].Owner;
 				var amount = player.Building_Amount();
@@ -358,32 +383,32 @@ var Mod_List = {
 				}
 				player.Lose();
 			},"Capture",["building","player capturing"],"If all command centers are lost, the owner automatically loses"),
-			Insta_Win:new Mod_Class("Instant Win",function(args){
+			Insta_Win:new Mod_Class(CURMOD++, "Instant Win",function(args){
 				args[1].Win();
 			},"Capture",["building","player capturing"],"If this building is captured, the capturing team automatically wins"),
-			Allow_Ground:new Mod_Class("Allow Ground",function(args){
+			Allow_Ground:new Mod_Class(CURMOD++, "Allow Ground",function(args){
 				if(args[0].Owner!=null)
 					args[0].Owner.Add_Control(0,false);
 				args[1].Add_Control(0,true);
 			},"Capture",["building","player capturing"],"Capturing this building allows for construction of ground units"),
-			Allow_Air:new Mod_Class("Allow Air",function(args){
+			Allow_Air:new Mod_Class(CURMOD++, "Allow Air",function(args){
 				if(args[0].Owner!=null)
 					args[0].Owner.Add_Control(1,false);
 				args[1].Add_Control(1,true);
 			},"Capture",["building","player capturing"],"Capturing this building allows for construction of air units"),
-			Allow_Sea:new Mod_Class("Allow Sea",function(args){
+			Allow_Sea:new Mod_Class(CURMOD++, "Allow Sea",function(args){
 				if(args[0].Owner!=null)
 					args[0].Owner.Add_Control(2,false);
 				args[1].Add_Control(2,true);
 			},"Capture",["building","player capturing"],"Capturing this building allows for construction of sea units")
 		},
 		Each_Turn:{
-			Supply_Income:new Mod_Class("Supply Income",function(args){
+			Supply_Income:new Mod_Class(CURMOD++, "Supply Income",function(args){
 				args[1].Income(args[0].Importance*12);
 			},"Each Turn",["building","player"],"Gives money to the owned player each turn")
 		},
 		Start_Turn:{
-			Heal_Team:new Mod_Class("Heal Ground",function(unit){
+			Heal_Team:new Mod_Class(CURMOD++, "Heal Ground",function(unit){
 				if(unit.Move_Type==3)return false;
 				if(unit.Move_Type==4)return false;
 				if(unit.Move_Type==5)return false;
@@ -391,7 +416,7 @@ var Mod_List = {
 				if(unit.Health>unit.Max_Health)
 					unit.Health = unit.Max_Health;
 			},"Start Turn","unit on med center","Heals units that start their turn on this building"),
-			Heal_Air:new Mod_Class("Heal Air",function(unit){
+			Heal_Air:new Mod_Class(CURMOD++, "Heal Air",function(unit){
 				if(unit.Move_Type==0)return false;
 				if(unit.Move_Type==1)return false;
 				if(unit.Move_Type==2)return false;
@@ -399,7 +424,7 @@ var Mod_List = {
 				if(unit.Health>unit.Max_Health)
 					unit.Health = unit.Max_Health;
 			},"Start Turn","unit on med center","Heals units that start their turn on this building"),
-			Heal_Sea:new Mod_Class("Heal Sea",function(unit){
+			Heal_Sea:new Mod_Class(CURMOD++, "Heal Sea",function(unit){
 				if(unit.Move_Type==0)return false;
 				if(unit.Move_Type==1)return false;
 				if(unit.Move_Type==2)return false;
@@ -417,7 +442,7 @@ var Mod_List = {
 	},
 	Terrain:{
 		Properties:{
-			Extra_Sight:new Mod_Class("Extra Sight",function(unit){
+			Extra_Sight:new Mod_Class(CURMOD++, "Extra Sight",function(unit){
 				if(unit.Unit_Type!=0)return;
 				if(unit.Range[1]>1)
 				{
@@ -438,14 +463,14 @@ var Mod_List = {
 					};
 				}
 			},"Properties","unit","Gives ranged units 1 extra sight"),
-			Trench:new Mod_Class("Trench",function(unit){
+			Trench:new Mod_Class(CURMOD++, "Trench",function(unit){
 				if(unit.Unit_Type!=0)return;
 				unit.Trenched = true;
 				unit.On_Move = function(unit, move){
 					unit.Trenched = false;
 				}
 			},"Properties","unit","Gives ranged units 1 extra sight"),
-			Port:new Mod_Class("Port",function(unit){
+			Port:new Mod_Class(CURMOD++, "Port",function(unit){
 				if(unit.Unit_Type!=0)return;
 				unit.Add_Modifier(Mod_List.Units.Self_Action.Ship_Out);
 				unit.On_Move = function(unit, move){
@@ -456,10 +481,10 @@ var Mod_List = {
 	},
 	Weather:{
 		Properties:{
-			Hidden:new Mod_Class("Hidden",function(tile){
+			Hidden:new Mod_Class(CURMOD++, "Hidden",function(tile){
 
 			},"Properties","weather","Units in clouds cannot be seen unless with a radar unit or you have a unit at the tile next to it"),
-			Treacherous:new Mod_Class("Treacherous",function(tile){
+			Treacherous:new Mod_Class(CURMOD++, "Treacherous",function(tile){
 
 			},"Properties","weather","Unit passing thru will lose some health")
 		}
