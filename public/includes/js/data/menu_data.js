@@ -140,7 +140,7 @@ Menu.MapEditor.Open = function()
 			// POPUP_ADDER(new Canvas.Drawable());
 			POPUP_ADDER(new Canvas.Drawable({
 				Draw:function(c,x,y,w,h,s) {
-					POPUP_INPUT.render();
+					// POPUP_INPUT.render();
 				}}));
 			Canvas.Reflow();
 
@@ -163,14 +163,22 @@ Menu.MapEditor.Open = function()
 
 			let pallette = ["#EFCA8B", "#8BAFED", "#8AD7EA", "#E88888"];
 			let __weather = [Images.Retrieve("Sunny Icon"), Images.Retrieve("Rainy Icon"), Images.Retrieve("Snowy Icon"), Images.Retrieve("Heat Icon")];
-			let turn = 6;
+			let turn = weather.length-1;
 			const static_rate = 10;
 			let __weather_pie_data = new Array(turn), __cur_data = new Array(turn);
 			let __start_turn = 0;
 
-			for(let i=0;i<turn;i++)
+			if(turn==0)
 			{
-				__cur_data[i] = i%Weather_Data.Global_Amount;
+				turn = 1;
+				__cur_data.push(0);
+			}
+			else
+			{
+				for(let i=0;i<turn;i++)
+				{
+					__cur_data[i] = weather[i+1][0];
+				}
 			}
 
 			function updateWeather()
@@ -188,12 +196,12 @@ Menu.MapEditor.Open = function()
 				{
 					weather.push([__cur_data[i], __start_turn+i, turn]);
 				}
+				data_saved = false;
 				POPUP_CLOSER();
 				Draw();
 			}
 
-
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 100, 100, 70, 18, "Down"), function()
+			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Erase"), null, 100, 80, 50, 50, "Erase"), function()
 			{
 				if(turn<=1)return;
 				turn--;
@@ -201,18 +209,28 @@ Menu.MapEditor.Open = function()
 				__cur_data.pop();
 				Draw();
 			});
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 170, 100, 50, 18, "Up"), function()
-			{
-				if(turn>=12)return;
-				turn++;
-				__cur_data.push(__cur_data.length%Weather_Data.Global_Amount);
-				updateWeather();
-				Draw();
-			});
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 100, 600, 70, 18, "SAVE"), function()
+			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Save"), null, 175, 80, 50, 50, "SAVE"), function()
 			{
 				sendPatternToData();
 			});
+
+			for(let i=0;i<Weather_Data.Global_Amount;i++)
+			{
+				POPUP_ADDER(new Canvas.Drawable({
+					Draw:function(c,x,y,w,h,s)
+					{
+						Weather_Data.Get_Global(s).Icon.Draw(c,x,y,w,h);
+						// new Text_Class("15pt Verdana", "#fff").Draw(c,x,y,w,h,);
+					}
+				}, null, 410+(i*75), 80, 50, 50, i), function()
+				{
+					if(turn>=12)return;
+					turn++;
+					__cur_data.push(i);
+					updateWeather();
+					Draw();
+				});
+			}
 
 			updateWeather();
 			POPUP_ADDER(new Canvas.Drawable(Shape.Pie, null, 175, 150, 400, 400, __weather_pie_data));
