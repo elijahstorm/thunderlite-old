@@ -1,7 +1,7 @@
 var Weather = function(name, sightAffect, move_cost, damage, _aniW, _aniH)
 {
 	let sheetAni = Animations.Retrieve(name),
-		particleAni = Animations.Retrieve(name+" Droplets");
+		particleAni = Animations.Retrieve(name+" Particles");
 	if(_aniW==null)
 		_aniW = sheetAni.Width;
 	if(_aniH==null)
@@ -44,7 +44,7 @@ var Weather = function(name, sightAffect, move_cost, damage, _aniW, _aniH)
 				y = Math.floor(Math.random()*interface.gameHeight);
 			particleAni.New(hudCanvas,x,y,null,null,true);
 			particleAni.Stop = false;
-		}, 500);
+		}, 450*particleAni.Delay());
 		sheetAni.Stop = false;
 		particleAni.Stop = false;
 	};
@@ -76,12 +76,19 @@ Weather_Data.Normal = {
 	},
 	Stop:function(){}
 };
+Weather_Data.Normal.Icon = Images.Retrieve("Sunny Icon");
 Weather_Data.Rain = new Weather("Rain", 1, 1.15, function(type){
 	return (type==2) ? .5 : 1;
 });
+Weather_Data.Rain.Icon = Images.Retrieve("Rainy Icon");
 Weather_Data.Snow = new Weather("Snow", 2, 1.5, function(type){
 	return (type==0) ? .5 : 1;
 }, TILESIZE*4, TILESIZE*4);
+Weather_Data.Snow.Icon = Images.Retrieve("Snowy Icon");
+Weather_Data.Heat = new Weather("Heat Wave", 2, 1, function(type){
+	return (type==2) ? 1.5 : 1;
+}, TILESIZE*4, TILESIZE*4);
+Weather_Data.Heat.Icon = Images.Retrieve("Heat Icon");
 Weather_Data.Get_Global = function(index)
 {
 	if(index==0)
@@ -90,4 +97,8 @@ Weather_Data.Get_Global = function(index)
 		return Weather_Data.Rain;
 	if(index==2)
 		return Weather_Data.Snow;
+	if(index==3)
+		return Weather_Data.Heat;
 };
+Weather_Data.Global_Amount = 4;
+Weather_Data.GlobalToStr = ["Fog","Rain","Snow"];

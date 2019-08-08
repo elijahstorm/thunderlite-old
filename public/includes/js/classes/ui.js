@@ -477,6 +477,7 @@ var Interface_Class = function()
 			TurnBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "TurnBG", 20, 15, 150, 55, "#73877B", Canvas.Background),
 			TurnBox:Avatar_Display.Add_Drawable(Shape.Box, "TurnBox", 20, 15, 150, 55, "#DFB2F4", Canvas.Merge),
 			Turn:Avatar_Display.Add_Drawable(new Text_Class("20pt Times New Roman", "#000"), "Turn", 30, 30, 50, 40, null, Canvas.Merge),
+			Weather:Avatar_Display.Add_Drawable(Shape.Rectangle, "Weather Icon", 10, 185, 50, 50, null, Canvas.Background),
 			Turn_Number:Avatar_Display.Add_Drawable(new Text_Class("40pt Times New Roman", "#000"), "Turn Number", 100, 20, 50, 45, null, Canvas.Merge),
 			Standings:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Standings", 20, 85, 200, 20, null, Canvas.Background),
 			Standings_Border1:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border1", 20, 80, 150, 2, "#000", Canvas.Background),
@@ -554,6 +555,7 @@ var Interface_Class = function()
 				this.TurnBG.Alpha.Set(255);
 				this.TurnBox.Alpha.Set(255);
 				this.Turn.State.Set("Day");
+				this.Weather.Source.Set(game.Active_Weather.Icon);
 				this.Turn_Number.State.Set(""+(game.Turn()+1));
 
 				var standing = game.Check_Player_Standing(player.Team),
@@ -778,6 +780,7 @@ var Interface_Class = function()
 		return false;
 	};
 	const ___mouseup = function(e){
+		if(e.which==3)return true;
 		self.Release(e.layerX,e.layerY);
 		if(!mousedown)return;
 		scroller.doTouchEnd(e.timeStamp);
@@ -1053,6 +1056,7 @@ var Interface_Class = function()
 		Avatar_Display.Scale(1, self.gameYScale);
 		Stats_Display.Scale(self.gameXScale, 1);
 		if(open_menu && menu_scale){
+			Menu.MapEditor.SCALE_INPUT(self.gameXScale, self.gameYScale);
 			open_menu.Scale(clientWidth/Canvas.MaxWidth, clientHeight/Canvas.MaxHeight);
 			return;
 		}
@@ -1131,7 +1135,7 @@ var Interface_Class = function()
 			Shape.Rectangle.Draw(canvas, 2, 35, 55, 25, "#4B5320");
 			Shape.Box.Draw(canvas, 2, 35, 55, 25, "#ccc");
 			canvas.globalAlpha = 1;
-			new Text_Class("16pt Verdana","#FFF").Draw(canvas, 2, 39, 55, 25, (cash>999 ? "" : "$")+cash);
+			new Text_Class("16pt Verdana","#FFF").Draw(canvas, 4, 39, 55, 25, (cash>999 ? "" : "$")+cash);
 		}
 		else
 		{

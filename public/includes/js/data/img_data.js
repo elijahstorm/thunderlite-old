@@ -15,18 +15,30 @@ Images.Declare("Icons/moves/tile_attack.png","tile attack");
 Images.Declare("Icons/moves/tile_danger.png","tile danger");
 var ERRORIMG = Images.Declare("Misc/ERROR.png","ERROR");
 
+Images.Declare("Weather/Icons/sunny.png","Sunny Icon");
+Images.Declare("Weather/Icons/rainy.png","Rainy Icon");
+Images.Declare("Weather/Icons/snowy.png","Snowy Icon");
+Images.Declare("Weather/Icons/heat wave.png","Heat Icon");
+
 Images.Declare("Weather/Fog/one tile.png","fog tile");
 Images.Declare("Icons/map editor border.png","map editor border");
 
 Animations.Declare(Images.Declare("Sheets/animations/ExplosionSheet.png", "Expl Sheet"), "Explosion", 2, false).Frame_Size(4, 3);
 
 Animations.Declare(Images.Declare("Weather/Rain/Sheet.png", "Rain"), "Rain", 3, true).Frame_Size(4, 1);
-Animations.Declare(Images.Declare("Weather/Rain/Droplets.png", "Droplets"), "Rain Droplets", 2, false).Frame_Size(4, 1).onEnd(function(ani){
+Animations.Declare(Images.Declare("Weather/Rain/Particles.png", "Droplets"), "Rain Particles", 2, false).Frame_Size(4, 1).onEnd(function(ani){
 	ani.Remove_All();
 });
 
 Animations.Declare(Images.Declare("Weather/Snow/Sheet.png", "Snow"), "Snow", 7, true).Frame_Size(4, 3);
-Animations.Declare(Images.Declare("Weather/Snow/Droplets.png", "Snow Droplets"), "Snow Droplets", 7, false).Frame_Size(4, 1);
+Animations.Declare(Images.Declare("Weather/Snow/Particles.png", "Snow Droplets"), "Snow Particles", 7, false).Frame_Size(4, 1).onEnd(function(ani){
+	ani.Remove_All();
+});
+
+Animations.Declare(Images.Declare("Weather/Heat Wave/Sheet.png", "Heat Wave"), "Heat Wave", 24, true).Frame_Size(4, 3);
+Animations.Declare(Images.Declare("Weather/Heat Wave/Particles.png", "Heat Wave Particles"), "Heat Wave Particles", 6, false).Frame_Size(6, 1).onEnd(function(ani){
+	ani.Remove_All();
+});
 
 
 Images.Declare("Icons/attacks/great.png","Great Attack");

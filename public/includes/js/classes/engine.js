@@ -1204,6 +1204,8 @@ var Engine_Class = function(input, is_sample)
 			UI.Close_Menu();
 			Canvas.Reflow();
 			UI.Start();
+			this.Active_Weather = Weather_Data.Normal;
+			runWeather(this);
 			UI.Draw();
 			if(online)
 			{
@@ -1378,6 +1380,18 @@ var Engine_Class = function(input, is_sample)
 		}
 		return Connected_Players[_player.Team]==null;
 	};
+	function runWeather(self){
+		self.Active_Weather.Stop(UI);
+		self.Active_Weather = Weather_Data.Normal;
+		for(let i=1;i<global_weather.length;i++)
+		if(turn>=global_weather[i][1])
+		if((turn-global_weather[i][1])%global_weather[i][2]==0)
+		{
+			self.Active_Weather = Weather_Data.Get_Global(global_weather[i][0]);
+			break;
+		}
+		self.Active_Weather.Start(UI);
+	}
 	this.Next_Player = function(ignore_controls)
 	{
 		if(this.Game_Over)return;
@@ -1395,16 +1409,7 @@ var Engine_Class = function(input, is_sample)
 		{
 			cur_player = 0;
 			turn++;
-			this.Active_Weather.Stop(UI);
-			this.Active_Weather = Weather_Data.Normal;
-			for(let i=1;i<global_weather.length;i++)
-			if(turn+1>=global_weather[i][1])
-			if((turn+1-global_weather[i][1])%global_weather[i][2]==0)
-			{
-				this.Active_Weather = Weather_Data.Get_Global(global_weather[i][0]);
-				break;
-			}
-			this.Active_Weather.Start(UI);
+			runWeather(this);
 		}
 
 		if(UI!=Fast_Fake_Interface)

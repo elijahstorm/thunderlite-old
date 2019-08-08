@@ -1079,7 +1079,7 @@ var Characters = {
 				return 100; //immoveable
 
 			var t_data = Terrain_Data.TERRE[terrain.Source];
-			var bonus = 1*game.Active_Weather.Move_Cost();
+			var bonus = 1*game.Active_Weather.Move_Cost(this, terrain);
 			//check modifiers path
 			if(t_data.Type==7)return 100;
 			if(t_data.Type==0)

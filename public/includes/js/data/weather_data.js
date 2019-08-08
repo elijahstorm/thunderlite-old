@@ -18,8 +18,6 @@
 
 var Weather_Data = {
 	WEATHER:[],
-	Global_Amount:3,
-	GlobalToStr:["Fog","Rain","Snow"],
 	Get_Global:function(index)
 	{
 		if(index==1)

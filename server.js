@@ -840,7 +840,7 @@ io.on('connection', function(socket){
 					socket.send({type:709});
 					return;
 				}
-				db.gamedata.removeOne({Map_Id:mapid}, function(err, saved){
+				db.gamedata.remove({Map_Id:mapid}, function(err, saved){
 					if(err||!saved)socket.send({type:707});
 					else{
 						socket.send({type:710});

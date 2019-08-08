@@ -4,6 +4,7 @@ var hudCanvas,avatarCanvas,terrainCanvas;
 var statsCanvas,imageHolderCanvas;
 var overlayCanvas,animationCanvas;
 var menuCanvas,devCanvas;
+var inputHandler;
 var Background_Display,
 	Character_Display,
 	Tile_Display,
@@ -516,6 +517,7 @@ window.onload = function(){
 	overlayCanvas = initiateCanvas("overlayCanvas");
 	menuCanvas = initiateCanvas("menuCanvas");
 	devCanvas = initiateCanvas("devCanvas");
+	inputHandler = initiateCanvas("inputHandler");
 
 	hudCanvas = initiateCanvas("hudCanvas");
 	HUD_Display = Canvas.Create_Canvas(hudCanvas, "hud");

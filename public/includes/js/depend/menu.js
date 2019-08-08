@@ -130,6 +130,7 @@ var Menu = {
 					cur[0].Draw(menuCanvas);
 					menuCanvas.restore();
 					hovered = -1;
+					inputHandler.source.style.cursor = "default";
 				}
 				return;
 			}
@@ -145,6 +146,7 @@ var Menu = {
 					cur[0].Draw(menuCanvas);
 					menuCanvas.restore();
 					hovered = i;
+					inputHandler.source.style.cursor = "pointer";
 					return;
 				}
 			}

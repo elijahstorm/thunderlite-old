@@ -78,17 +78,152 @@ Menu.MapEditor.Open = function()
 					Remove(POPUP_INDEX, POPUP_LENGTH);
 				POPUP_INDEX = -1;
 				POPUP_LENGTH = 0;
+				POPUP_INPUT._y = -45;
+				inputHandler.clearRect(0, 0, 900, 900);
 				Draw();
 			},
-			POPUP_ADDER = function(_drawer, _clicker, _hover){
+			POPUP_INPUT = new CanvasInput({
+			  canvas: inputHandler.source,
+				x: -1035,
+				y: -1015,
+			  fontSize: 18,
+			  fontFamily: 'Arial',
+			  fontColor: '#212121',
+			  fontWeight: 'bold',
+			  width: 600,
+			  padding: 8,
+			  borderWidth: 1,
+			  borderColor: '#000',
+			  borderRadius: 3,
+			  boxShadow: '1px 1px 0px #fff',
+			  innerShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)',
+			  placeHolder: 'Enter message here...',
+				onsubmit:function(e){
+					console.log("in",POPUP_INPUT._value);
+					POPUP_INPUT.blur();
+				}
+			}),
+			POPUP_ADDER = function(_drawer, _clicker, _hover, _right_click){
 				if(_drawer==null)
 				{
 					POPUP_CLOSER();
 					POPUP_INDEX = Add(POPUP_TINTER, POPUP_CLOSER, Shape.Box);
 				}
-				else Add(_drawer, _clicker, _hover);
+				else Add(_drawer, _clicker, _hover, _right_click);
 				POPUP_LENGTH++;
 			};
+		inputHandler.clearRect(0, 0, 900, 900);
+		Menu.MapEditor.SCALE_INPUT = function(x, y)
+		{
+			inputHandler.clearRect(0, 0, 900, 900);
+			POPUP_INPUT._x = 80*x;
+			POPUP_INPUT._y = 80*y;
+			POPUP_INPUT._width = 600*x;
+			// POPUP_INPUT._height = 400*y;
+		};
+		function open_script_editor()
+		{
+			POPUP_ADDER();									// declare popup about to be used
+
+			/// SETUP background and box
+
+			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, -10, -10, 900, 900, "#333", null, .7));
+			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 600, "#777", null, .75), function(){
+				Draw();
+				return false;
+			});
+			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 30, "#999", null, .5));
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("20pt Verdana", "#fff"), null, 60, 30, 400, 30, "Script Editor"));
+			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 725, 30, 20, 20, "#F49097"), POPUP_CLOSER);
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 727, 32, 20, 18, "X"), POPUP_CLOSER);
+
+			// POPUP_ADDER(new Canvas.Drawable());
+			POPUP_ADDER(new Canvas.Drawable({
+				Draw:function(c,x,y,w,h,s) {
+					POPUP_INPUT.render();
+				}}));
+			Canvas.Reflow();
+
+		}
+		function open_weather_editor()
+		{
+			POPUP_ADDER();									// declare popup about to be used
+
+			/// SETUP background and box
+
+			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, -10, -10, 900, 900, "#333", null, .7));
+			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 600, "#777", null, .75), function(){
+				Draw();
+				return false;
+			});
+			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 30, "#999", null, .5));
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("20pt Verdana", "#fff"), null, 60, 30, 400, 30, "Weather Editor"));
+			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 725, 30, 20, 20, "#F49097"), POPUP_CLOSER);
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 727, 32, 20, 18, "X"), POPUP_CLOSER);
+
+			let pallette = ["#EFCA8B", "#8BAFED", "#8AD7EA", "#E88888"];
+			let __weather = [Images.Retrieve("Sunny Icon"), Images.Retrieve("Rainy Icon"), Images.Retrieve("Snowy Icon"), Images.Retrieve("Heat Icon")];
+			let turn = 6;
+			const static_rate = 10;
+			let __weather_pie_data = new Array(turn), __cur_data = new Array(turn);
+			let __start_turn = 0;
+
+			for(let i=0;i<turn;i++)
+			{
+				__cur_data[i] = i%Weather_Data.Global_Amount;
+			}
+
+			function updateWeather()
+			{
+				for(let i=0;i<turn;i++)
+				{
+					__weather_pie_data[i] = [static_rate, pallette[__cur_data[i]], __weather[__cur_data[i]]];
+				}
+			}
+
+			function sendPatternToData()
+			{
+				weather = [weather[0]];
+				for(let i=0;i<turn;i++)
+				{
+					weather.push([__cur_data[i], __start_turn+i, turn]);
+				}
+				POPUP_CLOSER();
+				Draw();
+			}
+
+
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 100, 100, 70, 18, "Down"), function()
+			{
+				if(turn<=1)return;
+				turn--;
+				__weather_pie_data.pop();
+				__cur_data.pop();
+				Draw();
+			});
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 170, 100, 50, 18, "Up"), function()
+			{
+				if(turn>=12)return;
+				turn++;
+				__cur_data.push(__cur_data.length%Weather_Data.Global_Amount);
+				updateWeather();
+				Draw();
+			});
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 100, 600, 70, 18, "SAVE"), function()
+			{
+				sendPatternToData();
+			});
+
+			updateWeather();
+			POPUP_ADDER(new Canvas.Drawable(Shape.Pie, null, 175, 150, 400, 400, __weather_pie_data));
+
+		}
+
+
+
+
+
+
 		var MAP_OPTION_ADDER = function(){
 			POPUP_ADDER();									// declare popup about to be used
 
@@ -105,55 +240,72 @@ Menu.MapEditor.Open = function()
 
 			/// 1) make special conditions
 			/// 2) limit units that can be built
+
+
+
 			/// 3) add script options
+
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 175, 190, 130, 25, "Script Editor"));
+			POPUP_ADDER(new Canvas.Drawable({							// script addor
+				Draw:function(c, x, y, w, h, s){
+					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
+					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+12,y+3,260,20,s);
+				}
+			}, null, 190, 215, 85, 25, "Open"), function(text){
+				POPUP_CLOSER();
+				open_script_editor();
+				Draw();
+			});
 
 
 			/// 4) fog of war option
 
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 155, 245, 130, 25, "Fog of War"));
-			POPUP_ADDER(new Canvas.Drawable({							// down one player
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 182, 250, 130, 25, "Fog of War"));
+			POPUP_ADDER(new Canvas.Drawable({							// toggle on and off
 				Draw:function(c, x, y, w, h,value){
 					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
 					var text = (value[0]) ? "On" : "Off";;
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,text);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,text);
+					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+27,y+5,260,20,text);
+					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+26,y+4,260,20,text);
 				}
-			}, null, 155, 265, 75, 25, weather), function(text){
+			}, null, 190, 270, 85, 25, weather), function(text){
 				weather[0] = (weather[0]) ? false : true;
 				data_saved = false;
 				Draw();
-			}, {
-				Draw:function(c, x, y, w, h,value){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					var text = (value[0]) ? "On" : "Off";;
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,text);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,text);
-				}
 			});
-
-
 
 
 			/// 5) weather changes
 
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 420, 190, 130, 25, "Weather"));
+			POPUP_ADDER(new Canvas.Drawable({							// weather changes
+				Draw:function(c, x, y, w, h, s){
+					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
+					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+12,y+3,260,20,s);
+				}
+			}, null, 425, 215, 85, 25, "Open"), function(text){
+				POPUP_CLOSER();
+				open_weather_editor();
+				Draw();
+			});
 
 
 			/// 6) max player adjustments
 
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 335, 245, 130, 25, "Total Players"));
+			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 405, 250, 130, 25, "Total Players"));
 			POPUP_ADDER(new Canvas.Drawable({
 				Draw:function(c,x,y,w,h,s)
 				{
 					s.Draw(c,x,y,w,h,""+max_players);
 				}
-			}, null, 385, 265, 25, 25, new Text_Class("20pt Verdana", "#fff")));
+			}, null, 458, 270, 25, 25, new Text_Class("20pt Verdana", "#fff")));
 			POPUP_ADDER(new Canvas.Drawable({							// down one player
 				Draw:function(c, x, y, w, h, s){
 					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
 					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,"<");
 					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,"<");
 				}
-			}, null, 355, 265, 25, 25, Player_Text), function(text){
+			}, null, 425, 270, 25, 25, Player_Text), function(text){
 				if(max_players>2)
 					max_players--;
 				data_saved = false;
@@ -171,7 +323,7 @@ Menu.MapEditor.Open = function()
 					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,">");
 					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,">");
 				}
-			}, null, 405, 265, 25, 25, Player_Text), function(text){
+			}, null, 485, 270, 25, 25, Player_Text), function(text){
 				if(max_players<4)
 					max_players++;
 				data_saved = false;
@@ -183,7 +335,6 @@ Menu.MapEditor.Open = function()
 					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,">");
 				}
 			});
-
 
 
 			/// 7) map size change
@@ -733,6 +884,139 @@ Menu.MapEditor.Open = function()
 			}
 			// all players have to have at least one unit to play
 
+			if(local_saved_map==-1)
+			{	// ask to save, because user created a map before saving
+				POPUP_ADDER();									// declare popup about to be used
+
+				POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 150, 125, 400, 480, "#777"), function(){});
+				POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 150, 125, 400, 30, "#999"));
+				POPUP_ADDER(new Canvas.Drawable(new Text_Class("20pt Verdana", "#fff"), null, 160, 130, 400, 30, "Your Maps"));
+				POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 525, 130, 20, 20, "#F49097"), POPUP_CLOSER);
+				POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 527, 132, 20, 18, "X"), POPUP_CLOSER);
+
+
+					/// load saved data
+				var _read_game_data = new Array(9),
+					_data_text = new Array(9),
+					_game_imgs = new Array(9);
+
+				SERVER.onReportGameList(function(_list_data){
+						/// start load maps
+					for(let _m in _list_data)
+					{
+						let curMap = _list_data[_m];
+						var index = curMap.saveindex;
+						_data_text[index] = decrypt_game_data(curMap.map);
+						_read_game_data[index] = Map_Reader.Read(_data_text[index]);
+						_read_game_data[index].id = curMap.map_id;
+
+						if(_read_game_data[index].Valid)
+						{
+							setTimeout(function(index){
+								console.time('drawing map '+index+' sample');
+								var sampledGame = new Engine_Class(_read_game_data[index], true);
+								_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
+								sampledGame.End_Game();
+								Menu.MapEditor.Draw();
+								console.timeEnd('drawing map '+index+' sample');
+							}, 5, index);
+						}
+					}
+
+					for(var i=0;i<9;i++)
+					{
+						if(_read_game_data[i]!=null)
+						{
+							POPUP_ADDER(new Canvas.Drawable({
+								Draw:function(c,x,y,w,h,_load){
+									if(_game_imgs[_load]!=null)
+										Canvas.ScaleImageData(c, _game_imgs[_load], (x+2)*Menu.MapEditor.xScale, (y+2)*Menu.MapEditor.yScale, w/(_game_imgs[_load].width-4)*Menu.MapEditor.xScale, 100/(_game_imgs[_load].height-4)*Menu.MapEditor.yScale);
+									new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
+								}
+							}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), function(_load){
+								if(!confirm("This will delete the map "+_read_game_data[_load].Name+".\n\nDelete and Replace?"))return;
+
+								local_saved_map = _load;
+								POPUP_CLOSER();
+
+								while(name=="" || name=="Unnamed Custom Map")
+									name = prompt("Give your map a name", name);
+								if(name==null)
+									return;
+
+								send_map_data_to_server(SERVER.DELETE, _read_game_data[_load].id);
+
+								setTimeout(function(){
+									send_map_data_to_server(SERVER.SAVE, {
+										index:id==-1 ? local_saved_map : id,
+										map:encrypt_game_data(Map_Data_To_Str())
+									});
+								}, 500);
+								data_saved = true;
+								Draw();
+							}, {
+								Draw:function(c,x,y,w,h,_load){
+									Canvas.ScaleImageData(c, _game_imgs[_load], x+2, y+2, w/(_game_imgs[_load].width-4), 100/(_game_imgs[_load].height-4));
+									new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
+									Shape.Box.Draw(c,x,y,w,h,"#F5E960");
+								}
+							});
+							continue;
+						}
+
+						// empty new game here
+
+						POPUP_ADDER(new Canvas.Drawable({
+							Draw:function(c,x,y,w,h){
+								Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
+								new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
+							}
+						}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), function(_new){
+							local_saved_map = _new;
+							POPUP_CLOSER();
+
+							while(name=="" || name=="Unnamed Custom Map")
+								name = prompt("Give your map a name", name);
+							if(name==null)
+								return;
+
+							send_map_data_to_server(SERVER.SAVE, {
+								index:id==-1 ? local_saved_map : id,
+								map:encrypt_game_data(Map_Data_To_Str())
+							});
+							data_saved = true;
+							Draw();
+						}, {
+							Draw:function(c,x,y,w,h){
+								Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
+								new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
+								Shape.Box.Draw(c,x,y,w,h,"#F5E960");
+							}
+						});
+					}
+						/// end load map
+
+					for(var x=1;x<Terrain_Data.TERRE.length;x++)
+					{
+						var _t = Terrain_Data.TERRE[x];
+
+						if(_t.Connnection==5 || _t.Connnection==3)
+						{
+							Animations.Retrieve(_t.Name+" Ani").Remove_All();
+						}
+					}
+					Select_Animation.Remove_All();
+					Repair_Animation.Remove_All();
+
+					Menu.MapEditor.Draw();
+				});
+
+				send_map_data_to_server(SERVER.LOAD);
+
+				Draw();
+				return;
+			}
+
 			new_custom_game(Map_Data_To_Str(), name, true, local_saved_map);
 		}, {
 			Draw:function(c, x, y, w, h, s){
@@ -769,13 +1053,144 @@ Menu.MapEditor.Open = function()
 			}
 		}, null, 625, 550, 70, 20, "SAVE"), function(){
 			if(data_saved)return;
-			while(name=="" || name=="Unnamed Custom Map")
-				name = prompt("Give your map a name", name);
 
 			if(local_saved_map==-1)
-			{
+			{	// ask to save, because user created a map before saving
+				POPUP_ADDER();									// declare popup about to be used
+
+				POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 150, 125, 400, 480, "#777"), function(){});
+				POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 150, 125, 400, 30, "#999"));
+				POPUP_ADDER(new Canvas.Drawable(new Text_Class("20pt Verdana", "#fff"), null, 160, 130, 400, 30, "Your Maps"));
+				POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 525, 130, 20, 20, "#F49097"), POPUP_CLOSER);
+				POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 527, 132, 20, 18, "X"), POPUP_CLOSER);
+
+
+					/// load saved data
+				var _read_game_data = new Array(9),
+					_data_text = new Array(9),
+					_game_imgs = new Array(9);
+
+				SERVER.onReportGameList(function(_list_data){
+						/// start load maps
+					for(let _m in _list_data)
+					{
+						let curMap = _list_data[_m];
+						var index = curMap.saveindex;
+						_data_text[index] = decrypt_game_data(curMap.map);
+						_read_game_data[index] = Map_Reader.Read(_data_text[index]);
+						_read_game_data[index].id = curMap.map_id;
+
+						if(_read_game_data[index].Valid)
+						{
+							setTimeout(function(index){
+								console.time('drawing map '+index+' sample');
+								var sampledGame = new Engine_Class(_read_game_data[index], true);
+								_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
+								sampledGame.End_Game();
+								Menu.MapEditor.Draw();
+								console.timeEnd('drawing map '+index+' sample');
+							}, 5, index);
+						}
+					}
+
+					for(var i=0;i<9;i++)
+					{
+						if(_read_game_data[i]!=null)
+						{
+							POPUP_ADDER(new Canvas.Drawable({
+								Draw:function(c,x,y,w,h,_load){
+									if(_game_imgs[_load]!=null)
+										Canvas.ScaleImageData(c, _game_imgs[_load], (x+2)*Menu.MapEditor.xScale, (y+2)*Menu.MapEditor.yScale, w/(_game_imgs[_load].width-4)*Menu.MapEditor.xScale, 100/(_game_imgs[_load].height-4)*Menu.MapEditor.yScale);
+									new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
+								}
+							}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), function(_load){
+								if(!confirm("This will delete the map "+_read_game_data[_load].Name+".\n\nDelete and Replace?"))return;
+
+								local_saved_map = _load;
+								POPUP_CLOSER();
+
+								while(name=="" || name=="Unnamed Custom Map")
+									name = prompt("Give your map a name", name);
+								if(name==null)
+									return;
+
+								send_map_data_to_server(SERVER.DELETE, _read_game_data[_load].id);
+
+								setTimeout(function(){
+									send_map_data_to_server(SERVER.SAVE, {
+										index:id==-1 ? local_saved_map : id,
+										map:encrypt_game_data(Map_Data_To_Str())
+									});
+								}, 500);
+								data_saved = true;
+								Draw();
+							}, {
+								Draw:function(c,x,y,w,h,_load){
+									Canvas.ScaleImageData(c, _game_imgs[_load], x+2, y+2, w/(_game_imgs[_load].width-4), 100/(_game_imgs[_load].height-4));
+									new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
+									Shape.Box.Draw(c,x,y,w,h,"#F5E960");
+								}
+							});
+							continue;
+						}
+
+						// empty new game here
+
+						POPUP_ADDER(new Canvas.Drawable({
+							Draw:function(c,x,y,w,h){
+								Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
+								new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
+							}
+						}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), function(_new){
+							local_saved_map = _new;
+							POPUP_CLOSER();
+
+							while(name=="" || name=="Unnamed Custom Map")
+								name = prompt("Give your map a name", name);
+							if(name==null)
+								return;
+
+							send_map_data_to_server(SERVER.SAVE, {
+								index:id==-1 ? local_saved_map : id,
+								map:encrypt_game_data(Map_Data_To_Str())
+							});
+							data_saved = true;
+							Draw();
+						}, {
+							Draw:function(c,x,y,w,h){
+								Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
+								new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
+								Shape.Box.Draw(c,x,y,w,h,"#F5E960");
+							}
+						});
+					}
+						/// end load map
+
+					for(var x=1;x<Terrain_Data.TERRE.length;x++)
+					{
+						var _t = Terrain_Data.TERRE[x];
+
+						if(_t.Connnection==5 || _t.Connnection==3)
+						{
+							Animations.Retrieve(_t.Name+" Ani").Remove_All();
+						}
+					}
+					Select_Animation.Remove_All();
+					Repair_Animation.Remove_All();
+
+					Menu.MapEditor.Draw();
+				});
+
+				send_map_data_to_server(SERVER.LOAD);
+
+				Draw();
 				return;
 			}
+
+			while(name=="" || name=="Unnamed Custom Map")
+				name = prompt("Give your map a name", name);
+			if(name==null)
+				return;
 
 			send_map_data_to_server(SERVER.SAVE, {
 				index:id==-1 ? local_saved_map : id,
@@ -796,7 +1211,8 @@ Menu.MapEditor.Open = function()
 				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+12,y+5,260,20,s);
 				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+11,y+3,260,20,s);
 			}
-		}, null, 625, 575, 70, 20, "LOAD"), function(){
+		}, null, 625, 575, 70, 20, "LOAD"),
+		function(){
 			POPUP_ADDER();									// declare popup about to be used
 
 			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 150, 125, 400, 480, "#777"), function(){});
@@ -856,17 +1272,12 @@ Menu.MapEditor.Open = function()
 								Shape.Box.Draw(c,x,y,w,h,"#F5E960");
 							}
 						}, function(_delete){
-							var ask = confirm("Do you really want to delete "+_read_game_data[_delete].Name+"?");
-							if(!ask)
-							{
-								Erase();
-								Open();
-								Menu.MapEditor.New(_delete);
-								console.error("new map",local_saved_map);
-								Draw();
-								return;
-							}
+							if(!confirm("Do you really want to delete "+_read_game_data[_delete].Name+"?"))return;
 
+							send_map_data_to_server(SERVER.DELETE, _read_game_data[_delete].id);
+
+							POPUP_CLOSER();
+							Draw();
 						});
 						continue;
 					}
@@ -1450,11 +1861,6 @@ Menu.MapEditor.Open = function()
 			units = data.u_list;
 			cities = data.c_list;
 			weather = data.w_data;
-
-
-			// erase this quick
-			weather = [true, [1, 2, 3], [2, 3, 3]];
-
 
 			Update_Active_List(TYPES.TERRAIN);
 		};
