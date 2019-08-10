@@ -21,7 +21,8 @@ var Map_Reader_Class = function(){
 			terrain_data = __t_data,
 			units = [],
 			cities = [],
-			weather = [false];
+			weather = [false],
+			script = "";
 
 		this.Data = {
 			Get:function(){
@@ -35,7 +36,8 @@ var Map_Reader_Class = function(){
 					p_list:players,
 					u_list:units,
 					c_list:cities,
-					w_data:weather
+					w_data:weather,
+					__script:script
 				};
 			}
 		};
@@ -83,6 +85,10 @@ var Map_Reader_Class = function(){
 					continue;
 				weather.push([number,start,rate]);
 			}
+		};
+		this.Script = function(str)
+		{
+			script = str;
 		};
 		this.Start = function(Game)
 		{
@@ -212,6 +218,9 @@ var Map_Reader_Class = function(){
 		__data[8] = __input.substring(dividers[7]+1, dividers[8]);
 			// weather
 
+		__data[9] = __input.substring(dividers[8]+1, dividers[9]);
+			// script
+
 			/// set map
 		var _map_data = new Array(__data[2]);
 		for(var x=0,i=0;x<__data[2];x++)
@@ -240,6 +249,7 @@ var Map_Reader_Class = function(){
 		}
 		cur_map.Add_Weather(__data[8]);
 
+		cur_map.Script(__data[9]);
 
 		return cur_map;
 	};

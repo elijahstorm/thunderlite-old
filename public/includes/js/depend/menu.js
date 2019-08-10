@@ -63,10 +63,13 @@ var Menu = {
 			}
 			menuCanvas.restore();
 		};
+		self.Current_Scale;
 		self.Scale = function(x, y)
 		{
 			self.xScale = x;
 			self.yScale = y;
+			if(self.Current_Scale!=null)
+				self.Current_Scale(x, y);
 			self.Draw();
 		};
 		self.Close = function()

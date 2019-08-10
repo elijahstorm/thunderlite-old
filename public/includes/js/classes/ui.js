@@ -1056,7 +1056,6 @@ var Interface_Class = function()
 		Avatar_Display.Scale(1, self.gameYScale);
 		Stats_Display.Scale(self.gameXScale, 1);
 		if(open_menu && menu_scale){
-			Menu.MapEditor.SCALE_INPUT(self.gameXScale, self.gameYScale);
 			open_menu.Scale(clientWidth/Canvas.MaxWidth, clientHeight/Canvas.MaxHeight);
 			return;
 		}

@@ -16,6 +16,7 @@ Images.Declare("Icons/moves/tile_danger.png","tile danger");
 var ERRORIMG = Images.Declare("Misc/ERROR.png","ERROR");
 
 Images.Declare("Icons/erase.png","Erase");
+Images.Declare("Icons/close.png","Close");
 Images.Declare("Icons/save.png","Save");
 Images.Declare("Weather/Icons/sunny.png","Sunny Icon");
 Images.Declare("Weather/Icons/rainy.png","Rainy Icon");

@@ -66,7 +66,8 @@ Menu.MapEditor.Open = function()
 				str+=""+weather[j][0]+""+weather[j][1]+"-"+weather[j][2]+":";
 			}
 			str+=";";
-			return str;
+
+			return str+__script__+";";
 		}
 
 		var POPUP_TINTER = new Canvas.Drawable(Shape.Box, null,
@@ -78,31 +79,15 @@ Menu.MapEditor.Open = function()
 					Remove(POPUP_INDEX, POPUP_LENGTH);
 				POPUP_INDEX = -1;
 				POPUP_LENGTH = 0;
-				POPUP_INPUT._y = -45;
+				if(	Menu.MapEditor.Current_Scale!=null)
+				{
+					document.getElementById('inputHandler').removeChild(document.getElementById('canvasScriptInput'));
+					document.getElementById('inputHandler').removeChild(document.getElementById('learnScriptLink'));
+				}
+				Menu.MapEditor.Current_Scale = null;
 				inputHandler.clearRect(0, 0, 900, 900);
 				Draw();
 			},
-			POPUP_INPUT = new CanvasInput({
-			  canvas: inputHandler.source,
-				x: -1035,
-				y: -1015,
-			  fontSize: 18,
-			  fontFamily: 'Arial',
-			  fontColor: '#212121',
-			  fontWeight: 'bold',
-			  width: 600,
-			  padding: 8,
-			  borderWidth: 1,
-			  borderColor: '#000',
-			  borderRadius: 3,
-			  boxShadow: '1px 1px 0px #fff',
-			  innerShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)',
-			  placeHolder: 'Enter message here...',
-				onsubmit:function(e){
-					console.log("in",POPUP_INPUT._value);
-					POPUP_INPUT.blur();
-				}
-			}),
 			POPUP_ADDER = function(_drawer, _clicker, _hover, _right_click){
 				if(_drawer==null)
 				{
@@ -112,15 +97,7 @@ Menu.MapEditor.Open = function()
 				else Add(_drawer, _clicker, _hover, _right_click);
 				POPUP_LENGTH++;
 			};
-		inputHandler.clearRect(0, 0, 900, 900);
-		Menu.MapEditor.SCALE_INPUT = function(x, y)
-		{
-			inputHandler.clearRect(0, 0, 900, 900);
-			POPUP_INPUT._x = 80*x;
-			POPUP_INPUT._y = 80*y;
-			POPUP_INPUT._width = 600*x;
-			// POPUP_INPUT._height = 400*y;
-		};
+
 		function open_script_editor()
 		{
 			POPUP_ADDER();									// declare popup about to be used
@@ -137,12 +114,59 @@ Menu.MapEditor.Open = function()
 			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 725, 30, 20, 20, "#F49097"), POPUP_CLOSER);
 			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 727, 32, 20, 18, "X"), POPUP_CLOSER);
 
-			// POPUP_ADDER(new Canvas.Drawable());
-			POPUP_ADDER(new Canvas.Drawable({
-				Draw:function(c,x,y,w,h,s) {
-					// POPUP_INPUT.render();
-				}}));
-			Canvas.Reflow();
+			var doc = new Document(__script__),
+          editor = new CanvasTextEditor(doc, {width:645, height:480, left:70, top:100});
+
+      document.getElementById('inputHandler').appendChild(editor.getEl());
+			editor.getEl().id = "canvasScriptInput";
+
+			let learnMoreLink = document.createElement('a');
+			learnMoreLink.href = "/about/script";
+			learnMoreLink.innerHTML = "Learn ThunderLite scripting";
+			learnMoreLink.target = "_blank";
+			learnMoreLink.id = "learnScriptLink";
+			learnMoreLink.style.color = "#28C5D3";
+			learnMoreLink.style.position = "absolute";
+			learnMoreLink.style.left = "500px";
+			learnMoreLink.style.bottom = "45px";
+			document.getElementById('inputHandler').appendChild(learnMoreLink);
+
+			Menu.MapEditor.Current_Scale = function(x, y)
+			{
+				learnMoreLink.style.left = (500*x)+"px";
+				editor.reflow(x, y);
+			};
+
+			Menu.MapEditor.Current_Scale(Menu.MapEditor.xScale, Menu.MapEditor.yScale);
+      editor.focus();
+
+			Menu.MapEditor.Script = editor;
+
+			function scriptIsValid(_script){
+				if(_script.charAt(0)=='.')
+				{	// test error
+					return 10;
+				}
+				return 0;
+			}
+			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Close"), null, 100, 65, 25, 25, "Erase"), function()
+			{
+				POPUP_CLOSER();
+				Draw();
+			});
+			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Save"), null, 175, 65, 25, 25, "SAVE"), function()
+			{
+				let err = scriptIsValid(editor._document.storage[0]);
+				if(err!=0)
+				{
+					console.error("Invalid error",err);
+					return;
+				}
+				__script__ = editor._document.storage[0];
+				data_saved = false;
+
+				Draw();
+			});
 
 		}
 		function open_weather_editor()
@@ -631,6 +655,7 @@ Menu.MapEditor.Open = function()
 		var units;
 		var cities;
 		var weather = [false];
+		let __script__ = "";
 		var data_saved = true;
 		var beaten_game = false;
 		var TYPES = {
@@ -1879,6 +1904,7 @@ Menu.MapEditor.Open = function()
 			units = data.u_list;
 			cities = data.c_list;
 			weather = data.w_data;
+			__script__ = data.__script;
 
 			Update_Active_List(TYPES.TERRAIN);
 		};
