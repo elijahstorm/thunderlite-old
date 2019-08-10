@@ -104,11 +104,8 @@ Menu.MapEditor.Open = function()
 
 			/// SETUP background and box
 
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, -10, -10, 900, 900, "#333", null, .7));
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 600, "#777", null, .75), function(){
-				Draw();
-				return false;
-			});
+			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, -10, -10, 900, 900, "#333", null, .7), function(){});
+			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 600, "#777", null, .75), function(){});
 			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 30, "#999", null, .5));
 			POPUP_ADDER(new Canvas.Drawable(new Text_Class("20pt Verdana", "#fff"), null, 60, 30, 400, 30, "Script Editor"));
 			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 725, 30, 20, 20, "#F49097"), POPUP_CLOSER);
@@ -128,12 +125,13 @@ Menu.MapEditor.Open = function()
 			learnMoreLink.style.color = "#28C5D3";
 			learnMoreLink.style.position = "absolute";
 			learnMoreLink.style.left = "500px";
-			learnMoreLink.style.bottom = "45px";
+			learnMoreLink.style.top = "600px";
 			document.getElementById('inputHandler').appendChild(learnMoreLink);
 
 			Menu.MapEditor.Current_Scale = function(x, y)
 			{
 				learnMoreLink.style.left = (500*x)+"px";
+				learnMoreLink.style.top = (600*x)+"px";
 				editor.reflow(x, y);
 			};
 
@@ -149,12 +147,7 @@ Menu.MapEditor.Open = function()
 				}
 				return 0;
 			}
-			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Close"), null, 100, 65, 25, 25, "Erase"), function()
-			{
-				POPUP_CLOSER();
-				Draw();
-			});
-			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Save"), null, 175, 65, 25, 25, "SAVE"), function()
+			function save_fnc()
 			{
 				let err = scriptIsValid(editor._document.storage[0]);
 				if(err!=0)
@@ -162,11 +155,21 @@ Menu.MapEditor.Open = function()
 					console.error("Invalid error",err);
 					return;
 				}
-				__script__ = editor._document.storage[0];
+				__script__ = "";
+				for(let i=0;i<editor._document.storage.length;i++)
+					__script__+=editor._document.storage[i];
+	console.log(__script__);
 				data_saved = false;
 
 				Draw();
+			}
+			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Close"), null, 100, 65, 25, 25, "Erase"), function()
+			{
+				POPUP_CLOSER();
+				Draw();
 			});
+			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Save"), null, 175, 65, 25, 25, "SAVE"), save_fnc);
+			editor.save = save_fnc;
 
 		}
 		function open_weather_editor()

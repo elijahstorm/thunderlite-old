@@ -331,7 +331,6 @@ var Interface_Class = function()
 			Standings_Border2:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border2", 20, 105, 150, 2, "#000", Canvas.Background),
 			Current_Player:Avatar_Display.Add_Drawable(new Text_Class("25pt Times New Roman", "#000"), "Player Name", 10, 130, 200, 35, null, Canvas.Background),
 			Info:Avatar_Display.Add_Drawable(new Text_Class("15pt Times New Roman", "#000"), "Info", 15, 165, 200, 20, null, Canvas.Background),
-			IconBG:Avatar_Display.Add_Drawable(Shape.Box, "IconBG", 110, 167, 80, 80, "#000", Canvas.Background),
 			Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 110, 170, 80, 80, null, Canvas.Background),
 
 			All_Threaths:Avatar_Display.Add_Drawable({Draw:function(){}}, "Threats", 605, 242, 80, 30, "#EE6352", Canvas.Background),
@@ -390,7 +389,6 @@ var Interface_Class = function()
 				if(player==null||game.Game_Over)
 				{
 					this.Icon.Alpha.Set(0);
-					this.IconBG.Alpha.Set(0);
 					this.Standings.State.Set("");
 					this.Info.State.Set("");
 					this.Current_Player.State.Set("");
@@ -418,7 +416,6 @@ var Interface_Class = function()
 
 				this.Info.State.Set("$"+player.Cash_Money());
 				this.Current_Player.State.Set(player.Name);
-				this.IconBG.Alpha.Set(255);
 				this.Icon.Source.Set(player.Icon);
 				this.Update_Player_List();
 			}
@@ -543,7 +540,6 @@ var Interface_Class = function()
 				if(player==null||game.Game_Over)
 				{
 					this.Icon.Alpha.Set(0);
-					this.IconBG.Alpha.Set(0);
 					this.Standings.State.Set("");
 					this.Info.State.Set("");
 					this.Current_Player.State.Set("");
@@ -572,7 +568,6 @@ var Interface_Class = function()
 
 				this.Info.State.Set("$"+player.Cash_Money());
 				this.Current_Player.State.Set(player.Name);
-				this.IconBG.Alpha.Set(255);
 				this.Icon.Source.Set(player.Icon);
 				this.Update_Player_List();
 			}

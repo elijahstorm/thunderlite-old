@@ -104,7 +104,7 @@ var Map_Reader_Class = function(){
 
 	this.Read = function(__input)
 	{
-		var ELEMENTS = 9;
+		var ELEMENTS = 10;
 		var dividers = new Array(ELEMENTS);
 		for(var i=0,x=0;i<ELEMENTS;i++)
 		{	// break if not enough data elements

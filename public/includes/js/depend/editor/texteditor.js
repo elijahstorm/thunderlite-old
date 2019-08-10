@@ -987,6 +987,11 @@ CanvasTextEditor.prototype.resize = function(width, height) {
  * Main keydown handler
  * @param  {Event} e
  */
+CanvasTextEditor.prototype.sendSaveCode = function()
+{
+  if(this.save!=null)
+    this.save();
+};
 CanvasTextEditor.prototype.keydown = function(e) {
   var handled = true;
   switch(e.keyCode) {
@@ -998,6 +1003,10 @@ CanvasTextEditor.prototype.keydown = function(e) {
       break;
     case 13: // Enter
       this.insertTextAtCurrentPosition('\n');
+      break;
+    case 83: // s
+      if(!e.ctrlKey)break;
+      this.sendSaveCode();
       break;
     case 37: // Left arrow
       this._selection.moveLeft(1, this.shiftPressed);
