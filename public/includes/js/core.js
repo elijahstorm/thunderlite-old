@@ -566,6 +566,10 @@ window.onload = function(){
 	};
 	Canvas.Reflow();
 	Canvas.Next_Tick();
+
+		/// LOAD FREE MAPS DATA
+	socket.emit('gamedata get', {username:'freemaps'}, 0, 5);
+	socket.emit('gamedata get', {}, 0, 5, true);
 };
 
 var INTERFACE;
@@ -702,7 +706,6 @@ function load_game(gameData){
 }
 
 function openLevelSelect(){
-	socket.emit('gamedata get', 'sort_by', 0, 4);
 
 	document.getElementById("mainMenu").style.display="none";
 	INTERFACE.Close_Menu();

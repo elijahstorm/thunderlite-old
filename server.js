@@ -904,8 +904,10 @@ io.on('connection', function(socket){
 			socket.send({type:502, data:data[0].mapdata});
 		});
 	});
-	socket.on('gamedata get', function(sort_by, start_index, end_amt){
-		db.gamedata.find({PUBLISHED:true}, function(err, data){
+	socket.on('gamedata get', function(sort_by, start_index, end_amt, userSearch){
+		sort_by.PUBLISHED = true;
+		let returnNum = (userSearch) ? 504 : 503;
+		db.gamedata.find(sort_by, function(err, data){
 			if(err){
 				socket.send({type:500});
 				return;
@@ -921,7 +923,7 @@ io.on('connection', function(socket){
 				arr.push(data[i].mapdata);
 			}
 
-			socket.send({type:503, data:arr});
+			socket.send({type:returnNum, data:arr});
 		});
 	});
 

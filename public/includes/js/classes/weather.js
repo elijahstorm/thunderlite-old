@@ -85,7 +85,7 @@ Weather_Data.Snow = new Weather("Snow", 2, 1.5, function(type){
 	return (type==0) ? .5 : 1;
 }, TILESIZE*4, TILESIZE*4);
 Weather_Data.Snow.Icon = Images.Retrieve("Snowy Icon");
-Weather_Data.Heat = new Weather("Heat Wave", 2, 1, function(type){
+Weather_Data.Heat = new Weather("Heat Wave", 0, 1, function(type){
 	return (type==2) ? 1.5 : 1;
 }, TILESIZE*4, TILESIZE*4);
 Weather_Data.Heat.Icon = Images.Retrieve("Heat Icon");

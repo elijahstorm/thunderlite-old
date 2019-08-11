@@ -268,7 +268,12 @@ var Interface_Class = function()
 		// animationCanvas.clearRect(0,0,600,600);
 		tileCanvas.clearRect(0,0,600,600);
 		hudCanvas.clearRect(0,0,600,600);
+
+		let t2, t = performance.now();
 		terrain_disp.render(left, top, zoom, paint);
+		t2 = performance.now();
+		if(t2-t>30)
+			console.log("took "+(Math.round((t2-t)*100)/100)+"ms");
 	};
 
 	var Avatar,Status;
@@ -651,6 +656,10 @@ var Interface_Class = function()
 		self.Release = release_fnc;
 		self.Right_Click = r_click_fnc;
 		self.Mouse_Move = m_move_fnc;
+	};
+	this.Open_Menu = function()
+	{
+		return open_menu;
 	};
 
 	/** input */
@@ -1324,14 +1333,13 @@ var Interface_Class = function()
 
 			var click_fnc = function(input)
 			{
-				console.log("ooh", input);
 				self.Close_Menu();
 				Menu.Game_Prompt.Erase();
 				self.Select_Tile();
 				onDecisionFnc(input);
 			};
-			var _x = unit.X*TILESIZE,
-				_y = unit.Y*TILESIZE;
+			var _x = unit.X*TILESIZE-self.X_Offset(),
+				_y = unit.Y*TILESIZE-self.Y_Offset();
 
 			for(var i in directions)
 			{
@@ -1419,6 +1427,8 @@ var Interface_Class = function()
 	};
 	self.End_Game = function(players, turns)
 	{
+		if(open_menu)
+			self.Close_Menu();
 		Animations.kill = true;
 		for(var x=1;x<Terrain_Data.TERRE.length;x++)
 		{

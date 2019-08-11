@@ -846,7 +846,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 				DECISION_MADE = true;
 				destination[0] = __unit.X;
 				destination[1] = __unit.Y;
-				unit.Repair();
+				__unit.Repair();
 				break;
 			}
 		}
@@ -1624,7 +1624,7 @@ console.log(__target.X, __target.Y);
 				}
 			}
 		}
-		
+
 		return false;
 	};
 	var Run_Away = function(__game, aiPlayer, currentUnit)

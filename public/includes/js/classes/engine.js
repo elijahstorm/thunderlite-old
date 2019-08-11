@@ -215,8 +215,16 @@ var Engine_Data = function(data)
 		{
 			if(units.At(x,y)!=null)
 			{
-				console.error("Map position ("+x+","+y+") already occupied with "+units.At(x,y));
-				return;
+				console.log(input.Rescued_Unit==units.At(x,y));
+				if(input.Rescued_Unit==units.At(x,y))
+				{
+					units.Set(x,y,null);
+				}
+				else
+				{
+					console.error("Map position ("+x+","+y+") already occupied with "+units.At(x,y));
+					return;
+				}
 			}
 			if(Players.length<=team)
 			{
@@ -1089,7 +1097,7 @@ var Engine_Class = function(input, is_sample)
 		{
 			available[i].Do(input);
 		}
-		this.Unit_Visibility(input);
+		this.Player_Visibility(input);
 		return input;
 	};
 	this.Add_Building = function(input, x, y, team)
@@ -1664,80 +1672,6 @@ var Engine_Class = function(input, is_sample)
 
 		}
 		else console.error("oh this is BAD",input);
-		/** else if(typeof(input)==='string')
-		{		/// when input is data from existing game -> load gamestate
-	console.time("parse data");
-			var data = JSON.parse(input);
-
-			//// run DATA CHANGE
-
-console.log(data);
-
-
-
-			this.id = data.id;
-			this.Map = data.map;
-			this.Name = data.name;
-			turn = data.turn;
-			cur_player = data.cur_player;
-			global_weather = [false,false,false];
-			this.Weather = global_weather;
-			var old_map = Clone_Map(Levels.Terrain.Data(data.map));
-
-	console.timeEnd("parse data");
-			if(old_map==null)return;
-
-	console.time("preparing map");
-			draw_map_data(this, old_map);
-	console.timeEnd("preparing map");
-
-	console.time("initalizing assets");
-			Connected_Players = data.connected;
-			var players = data.players;
-			for(var p in players)
-			{
-				var p_data = players[p];
-				var player = this.Add_Player(p_data.name, p_data.color);
-				player.data = p_data.data;
-				if(Connected_Players[p]==socket.index){
-					client = player;
-				}
-				var cur_units = p_data.units;
-				for(var u in cur_units)
-				{
-					var u_data = cur_units[u];
-					this.Add_Unit(new Characters.Char_Class(this, u_data.index), u_data.x, u_data.y, p).Health = u_data.health;
-				}
-				var cur_build = p_data.cities;
-				for(var b in cur_build)
-				{
-					var b_data = cur_build[b];
-					var cur_b = this.Add_Building(new Buildings.Build_Class(this, b_data.index), b_data.x, b_data.y, p);
-					cur_b.Stature.Set(b_data.stature);
-					cur_b.Resources = b_data.resources;
-				}
-			}
-	console.timeEnd("initalizing assets");
-		}
-		else if(input.Name==null)
-		{		/// input is a local map id
-	console.time("parse data");
-			this.Map = input;
-			this.id = -1;
-			var old_map = Clone_Map(Levels.Terrain.Data(input));
-			if(old_map==null)return;
-			global_weather = [false, false, false];
-			this.Weather = global_weather;
-	console.timeEnd("parse data");
-
-	console.time("preparing map");
-			draw_map_data(this, old_map);
-	console.timeEnd("preparing map");
-
-	console.time("initalizing assets");
-			Levels.Run(this, input);
-	console.timeEnd("initalizing assets");
-} */
 	}
 	else this.valid = false; // game does not have valid input to function
 	let t1 = performance.now();

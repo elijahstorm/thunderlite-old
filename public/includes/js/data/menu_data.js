@@ -1313,7 +1313,8 @@ Menu.MapEditor.Open = function()
 							Draw();
 						}, {
 							Draw:function(c,x,y,w,h,_load){
-								Canvas.ScaleImageData(c, _game_imgs[_load], x+2, y+2, w/(_game_imgs[_load].width-4), 100/(_game_imgs[_load].height-4));
+								if(_game_imgs[_load]!=null)
+									Canvas.ScaleImageData(c, _game_imgs[_load], (x+2)*Menu.MapEditor.xScale, (y+2)*Menu.MapEditor.yScale, w/(_game_imgs[_load].width-4)*Menu.MapEditor.xScale, 100/(_game_imgs[_load].height-4)*Menu.MapEditor.yScale);
 								new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
 								Shape.Box.Draw(c,x,y,w,h,"#F5E960");
 							}
@@ -1876,7 +1877,7 @@ Menu.MapEditor.Open = function()
 			units = new Array();
 			cities = new Array();
 			name = "Unnamed Custom Map";
-			players = ["Red","Blue","Yellow","Green"];
+			players = ["Red","Blue","Green","Yellow"];
 			max_players = 2;
 			id = -1;
 
@@ -1922,9 +1923,9 @@ Menu.Game_Prompt = new Menu.Menu_Class();
 Menu.LevelSelect = new Menu.Menu_Class("#77a8bc");
 with(Menu.LevelSelect){
 	Add(new Canvas.Drawable(new Text_Class("32pt Impact", "#A349A4"), null, 30, 10, 600, 45, "Level Select"));
-	Add(new Canvas.Drawable(new Text_Class("28pt Impact", "#642D64"), null, 50, 65, 600, 45, "Free maps"));
-	Add(new Canvas.Drawable(new Text_Class("28pt Impact", "#642D64"), null, 50, 300, 600, 45, "User Created Maps"));
-	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 280, 230, 3, "#000000", null, .6));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 65, 600, 45, "Free maps"));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 220, 600, 45, "User Created Maps"));
+	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 210, 230, 3, "#000000", null, .6));
 	Add(new Canvas.Drawable({ // back btn
 		Draw:function(c, x, y, w, h, s){
 			Shape.Rectangle.Draw(c,x,y,310,75,Menu.Button[0]);
@@ -1941,25 +1942,13 @@ with(Menu.LevelSelect){
 		}
 	});
 
-	var caption = new Text_Class("15pt Impact", "#642D64");
-	for(var i=0;i<Levels.Length();i++){
-		Add(new Canvas.Drawable({ // level display
-			Draw:function(c,x,y,w,h,s){
-				Levels.Terrain.Draw(c,x,y,w,h,s);
-				caption.Draw(c,x+5,y+153,w,h,Levels.Names(s));
-			}
-		}, null, 30+160*i, 100, 150, 150, i), function(level){
-			var gameName = "";
-			while(gameName=="")gameName = prompt("Name the game ");
-			if(!gameName)return;
-			new_game(level, gameName);
-		}, new Canvas.Drawable(Shape.Rectangle, null, 30+160*i, 100, 150, 150, "#666607", null, .5));
-	}
+	let caption = new Text_Class("15pt Impact", "#642D64");
 
-	Menu.LevelSelect.Update_Map_Search = function(_data_text)
-	{
+	Menu.LevelSelect.Update_Map_Search = function(_data_text, y_loc)
+	{	// data, y row index
 		var _read_game_data = new Array(_data_text.length),
 		_game_imgs = new Array(_data_text.length);
+		y_loc = (y_loc==null) ? 0 : y_loc*160;
 		let remove_index;
 			/// start load maps
 		for(let index in _data_text)
@@ -1974,7 +1963,6 @@ with(Menu.LevelSelect){
 					var sampledGame = new Engine_Class(_read_game_data[index], true);
 					_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
 					sampledGame.End_Game();
-					Menu.LevelSelect.Draw();
 					console.timeEnd('drawing map '+index+' sample');
 				}, 5, index);
 			}
@@ -1987,13 +1975,13 @@ with(Menu.LevelSelect){
 						Canvas.ScaleImageData(c, _game_imgs[_load], (x+2)*Menu.LevelSelect.xScale, (y+2)*Menu.LevelSelect.yScale, w/(_game_imgs[_load].width-4)*Menu.LevelSelect.xScale, h/(_game_imgs[_load].height-4)*Menu.LevelSelect.yScale);
 					caption.Draw(c,x+5,y+153,w,h,_read_game_data[_load].Name);
 				}
-			}, null, 30+160*i, 360, 150, 150, i), function(level){
+			}, null, 30+160*i, 100+y_loc, 150, 150, i), function(level){
 				var gameName = "";
 				while(gameName=="")gameName = prompt("Name the game ");
 				if(!gameName)return;
 				new_custom_game(_read_game_data[level], gameName);
 				Menu.LevelSelect.Remove(remove_index, _data_text.length);
-			}, new Canvas.Drawable(Shape.Rectangle, null, 30+160*i, 360, 150, 150, "#666607", null, .5));
+			}, new Canvas.Drawable(Shape.Rectangle, null, 30+160*i, 100+y_loc, 150, 150, "#666607", null, .5));
 			if(i==0)
 				remove_index = _index;
 		}

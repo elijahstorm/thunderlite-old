@@ -1150,7 +1150,7 @@ var Characters = {
 			else if(t_data.Type==8)
 			{
 			}
-			return Math.ceil(bonus*terrain.Drag);
+			return Math.round(bonus*terrain.Drag);
 		};
 
 		this.Clone = function(engine)
