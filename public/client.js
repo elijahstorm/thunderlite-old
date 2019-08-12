@@ -306,7 +306,7 @@ window.onload = function(){
 		}
 		else if(data.type==501)
 		{	// map index does not exist
-			console.error("Caught error that returned map index does not exist.");
+			console.error("No maps in that query exist.");
 		}
 		else if(data.type==502)
 		{	// recieved game data

@@ -1,9 +1,9 @@
 var backCanvas,charCanvas,moveUnitCanvas;
-var dialogCanvas,tileCanvas,worldCanvas;
+var dialogCanvas,tileCanvas,uiCanvas,worldCanvas;
 var hudCanvas,avatarCanvas,terrainCanvas;
 var statsCanvas,imageHolderCanvas;
 var overlayCanvas,animationCanvas;
-var menuCanvas,devCanvas;
+var menuCanvas,devCanvas,logCanvas;
 var inputHandler;
 var Background_Display,
 	Character_Display,
@@ -29,12 +29,17 @@ var LOG = {
 	list:[],
 	indexer:0,
 	display:function(){
-		if(!devCanvas)return;
-		devCanvas.clearRect(0, 0, Canvas.Width, Canvas.Height);
-		var level = 0;
+		if(!logCanvas)return;
+		logCanvas.clearRect(0, 0, Canvas.Width, Canvas.Height);
+		var level = 10;
 		for(var i in this.list)
 		{
-			this.list[i].txt.Draw(devCanvas, 10, (level++)*30, Canvas.Width-(window.parent.mobilecheck() ? 0 : 210), 15, this.list[i].index+": "+this.list[i].msg);
+			let size = Math.max((Canvas.Width/2)-(window.parent.mobilecheck() ? 100 : 400), TILESIZE*3);
+			height = 15*Math.ceil(this.list[i].msg.length/(size/16))+10;
+			Shape.Rectangle.Draw(logCanvas, 10, level, size, height, this.list[i].boxColor);
+			Shape.Box.Draw(logCanvas, 10, level, size, height, "#FFF");
+			this.list[i].txt.Draw(logCanvas, 15, level+3, size, height, this.list[i].index+": "+this.list[i].msg);
+			level+=height+10;
 		}
 	},
 	add:function(msg, color, time, callback){
@@ -43,8 +48,10 @@ var LOG = {
 		{
 			this.indexer = 0;
 		}
+		if(color==null)color = "#fff";
 		this.list.push({
-			txt:new Text_Class("20pt Times New Roman", color),
+			txt:new Text_Class("15pt Times New Roman", color),
+			boxColor: parseInt(color.charAt(1), 16)<=7 ? "#5B2838" : "#768280",
 			msg:msg,
 			index:this.indexer
 		});
@@ -512,20 +519,23 @@ window.onload = function(){
 
 	tileCanvas = initiateCanvas("tileCanvas");
 	Tile_Display = Canvas.Create_Canvas(tileCanvas, "tile");
+	uiCanvas = initiateCanvas("uiCanvas");
 
 	animationCanvas = initiateCanvas("animationCanvas");
 	overlayCanvas = initiateCanvas("overlayCanvas");
 	menuCanvas = initiateCanvas("menuCanvas");
 	devCanvas = initiateCanvas("devCanvas");
+	logCanvas = initiateCanvas("logCanvas");
 	inputHandler = initiateCanvas("inputHandler");
 
 	hudCanvas = initiateCanvas("hudCanvas");
 	HUD_Display = Canvas.Create_Canvas(hudCanvas, "hud");
 
-	document.getElementById("avatarCanvas").style.height = 600+"px";
+	document.getElementById("avatarCanvas").style.height = 200+"px";
+	document.getElementById("avatarCanvas").style.width = 60+"px";
 	avatarCanvas = initiateCanvas("avatarCanvas");
-	avatarCanvas.width = window.parent.mobilecheck() ? 130 : 210;
-	avatarCanvas.height = 600;
+	avatarCanvas.width = window.parent.mobilecheck() ? 60 : 210;
+	avatarCanvas.height = 200;
 	Avatar_Display = Canvas.Create_Canvas(avatarCanvas, "avatar");
 	Avatar_Display.Background.State.Set("#55D6C2");
 	Avatar_Display.Background.Alpha.Set(1);

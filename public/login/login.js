@@ -34,13 +34,20 @@ window.parent.onFinishedLoading(function(){
 	pass.onkeydown = LOGIN;
 	user.onkeydown = LOGIN;
 
-	window.addEventListener("resize", function(e){
-		if(container.clientHeight-logoStyle.clientHeight<270)
+	let reflow = function(e){
+		let valueCheck = 270;
+		if(window.parent.mobilecheck())
+		{
+			valueCheck = 220;
+		}
+		if(container.clientHeight-logoStyle.clientHeight<valueCheck)
 		{
 			btn.style.visibility = "hidden";
 		}
 		else btn.style.visibility = "visible";
-	}, false);
+	};
+	window.addEventListener("resize", reflow, false);
+	reflow();
 
 	if(document.cookie!=null)
 	if(document.cookie!=""){

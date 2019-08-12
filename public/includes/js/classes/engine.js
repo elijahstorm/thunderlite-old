@@ -1236,7 +1236,6 @@ var Engine_Class = function(input, is_sample)
 			if(!online)console.log("not online");
 		}
 		animationCanvas.clearRect(0, 0, 900, 900);
-		LOG.add("Game took " + Math.round(t1 - t0) + "ms to load", "#FFF", 8000);
 	};
 	this.Leave = function(slot)
 	{
@@ -1626,8 +1625,6 @@ var Engine_Class = function(input, is_sample)
 						continue;
 					}
 					index = paint_off_map[x][y];
-					if(index==null)
-						index = 1;
 					_sprite_id = Terrain_Data.Connnection_Decision(index, paint_off_map, x, y);
 					outside_map[x][y] = new Terrain.Terre_Class(self,index,"Outside("+x+","+y+")",-1,-1, _sprite_id);
 				}

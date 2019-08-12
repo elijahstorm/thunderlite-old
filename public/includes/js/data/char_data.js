@@ -363,7 +363,7 @@ Char_Data.CHARS[CURCHAR++] = {	// index = 12
 	Movement:3,
 	Move_Type:2,
 	Slow:true,
-	Range:[2,2],
+	Range:[2,3],
 	Sight:3,
 	Cost:525,
 	Cash:2000,

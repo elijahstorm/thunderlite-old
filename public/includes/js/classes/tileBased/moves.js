@@ -215,6 +215,10 @@ var Move_Class = function(unit, start_x, start_y, terrain, changed)
 	{
 		return squares;
 	};
+	this.Draw = function()
+	{
+		changed(unit, line_of_tiles);
+	};
 	function adjacent(x1,y1,x2,y2)
 	{
 		if(x1==x2&&Math.abs(y1-y2)==1)

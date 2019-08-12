@@ -115,15 +115,7 @@ var Buildings = {
 			}
 			else
 			{
-				x = Math.floor(x);
-				y = Math.floor(y);
-				var pic = this.Sprite;
-				var behind = canvas.getImageData(x, y, pic.width, pic.height);
-				behind = merge(behind, pic);
-				if(behind!=null)
-					pic = behind;
-
-				canvas.putImageData(pic, x, y);
+				canvas.putImageData(this.Sprite, x, y);
 			}
 		};
 		this.UI_Draw = function(canvas, x, y)
@@ -224,9 +216,7 @@ var Buildings = {
 			if(this.Active)
 			{
 				select_animation.set({
-					show:false,
-					x:-TILESIZE,
-					y:-TILESIZE
+					show:false
 				});
 			}
 			this.Set_Active(false);

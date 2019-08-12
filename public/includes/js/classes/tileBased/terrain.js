@@ -18,20 +18,10 @@ var Terrain = {
 		{
 			if(TerreData.Connnection==3)
 			{	// if has borders, then display it right
-				sprite = __sprite[0].New(imageHolderCanvas, x*TILESIZE, y*TILESIZE, TILESIZE, TILESIZE, true);
-				sprite.set({
-					canvas:worldCanvas,
-					width:TILESIZE,
-					height:TILESIZE
-				});
+				sprite = __sprite[0].New(worldCanvas, x*TILESIZE, y*TILESIZE, TILESIZE, TILESIZE, true);
 			}else if(TerreData.Connnection==5)
 			{
-				sprite = __sprite[0].New(imageHolderCanvas, x*TILESIZE, y*TILESIZE, TILESIZE, TILESIZE, true);
-				sprite.set({
-					canvas:worldCanvas,
-					width:TILESIZE,
-					height:TILESIZE
-				});
+				sprite = __sprite[0].New(worldCanvas, x*TILESIZE, y*TILESIZE, TILESIZE, TILESIZE, true);
 			}else sprite = __sprite;
 			if(sprite.Image!=null)
 			{
@@ -69,13 +59,17 @@ var Terrain = {
 				if(duplicate)
 				{
 					TerreData.Sprite[0].Draw(canvas, x, y, TILESIZE, TILESIZE);
+					if(__sprite[1]!=null)
+						canvas.putImageData(merge(canvas.getImageData(x, y, __sprite[1].width, __sprite[1].height), __sprite[1]), x, y);
+					return;
 				}
-				else sprite.set({
+				sprite.set({
+					show:true,
 					x:x,
 					y:y
 				});
 				if(__sprite[1]!=null)
-					canvas.putImageData(merge(canvas.getImageData(x, y, __sprite[1].width, __sprite[1].height), __sprite[1]), x, y);
+					canvas.putImageData(__sprite[1], x, y);
 				return;
 			}
 			if(draw_image)
@@ -90,7 +84,6 @@ var Terrain = {
 			this.Draw(canvas,x+this.X_Offset(),y+this.Y_Offset()*(TILESIZE/60),duplicate);
 
 			if(duplicate)return;
-				/// show tile location
 
 			if(this.Hidden)
 			{
@@ -98,10 +91,9 @@ var Terrain = {
 				canvas.translate(x, y);
 				canvas.globalAlpha = this.Alpha.data;
 				Terrain_Data.Fog.Draw(canvas, 0, 0, TILESIZE, TILESIZE);
-				// canvas.globalAlpha = 0.1;
-				// Weather_Data.WEATHER[1].Sprite[Math.floor(Math.random()*5)].Draw(canvas, 0, 0, TILESIZE, TILESIZE);
 				canvas.restore();
 			}
+				/// show tile location
 			// devCanvas.save();
 			// devCanvas.translate(x, y);
 			// new Text_Class("7pt Times New Roman","#ddd").Draw(devCanvas, 5, 3, 56, 10, "("+this.X+", "+this.Y+")");
@@ -111,8 +103,7 @@ var Terrain = {
 		{
 			if(sprite.set==null)return;
 			sprite.set({
-				x:-100,
-				y:-100
+				show:false
 			});
 		};
 

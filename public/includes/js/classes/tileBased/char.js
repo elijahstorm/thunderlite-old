@@ -127,12 +127,6 @@ var Characters = {
 			{
 				pic = opacity(pic, this.Alpha.data);
 			}
-			var behind = canvas.getImageData(x, y, pic.width, pic.height);
-			behind = merge(behind, pic);
-			if(behind!=null)
-				pic = behind;
-			else console.log(pic,behind);
-
 			canvas.putImageData(_scale==null ? pic : scale(pic, _scale, _scale), x, y);
 		};
 		this.UI_Draw = function(canvas, x, y)
@@ -163,6 +157,7 @@ var Characters = {
 			if(this.Active)
 			{
 				select_animation.set({
+					show:true,
 					x:x,
 					y:y
 				});
@@ -219,6 +214,7 @@ var Characters = {
 			if(repair_ani.values.show)
 			{
 				repair_ani.set({
+					show:true,
 					x:x,
 					y:y+40
 				});
@@ -352,12 +348,10 @@ var Characters = {
 		this.Hide_Animation_Display = function()
 		{
 			select_animation.set({
-				x:-100,
-				y:-100
+				show:false
 			});
 			repair_ani.set({
-				x:-100,
-				y:-100
+				show:false
 			});
 		};
 
@@ -505,9 +499,7 @@ var Characters = {
 			if(this.Active)
 			{
 				select_animation.set({
-					show:false,
-					x:-TILESIZE,
-					y:-TILESIZE
+					show:false
 				});
 			}
 			this.Set_Active(false);
@@ -766,7 +758,7 @@ var Characters = {
 			if(!game.Interface.Fake)
 			{
 				game.Interface.Set_Moving_Unit(this);
-				game.Interface.Draw();
+				game.Interface.Simple_Draw();
 			}
 			this.On_Move(this, mover);
 			this.display_health = false;

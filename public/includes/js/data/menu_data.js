@@ -264,6 +264,11 @@ Menu.MapEditor.Open = function()
 
 		}
 
+
+			/// load saved data
+		let _read_game_data = new Array(9),
+			_data_text = new Array(9),
+			_game_imgs = new Array(9);
 		function display_server_saved_maps(fnc1, fnc2, fnc3)
 		{
 			if(fnc1==null)
@@ -310,6 +315,9 @@ Menu.MapEditor.Open = function()
 					Draw();
 				};
 			}
+			_read_game_data = new Array(9);
+			_data_text = new Array(9);
+			_game_imgs = new Array(9);
 
 			POPUP_ADDER();									// declare popup about to be used
 
@@ -319,11 +327,6 @@ Menu.MapEditor.Open = function()
 			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 525, 130, 20, 20, "#F49097"), POPUP_CLOSER);
 			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 527, 132, 20, 18, "X"), POPUP_CLOSER);
 
-
-				/// load saved data
-			var _read_game_data = new Array(9),
-				_data_text = new Array(9),
-				_game_imgs = new Array(9);
 			let uploadImg = Images.Retrieve("Uploaded");
 
 			SERVER.onReportGameList(function(_list_data){
@@ -336,12 +339,13 @@ Menu.MapEditor.Open = function()
 					_read_game_data[index] = Map_Reader.Read(_data_text[index]);
 					_read_game_data[index].id = curMap.map_id;
 					_read_game_data[index].uploaded = curMap.uploaded;
-					
+
 					if(_read_game_data[index].Valid)
 					{
 						setTimeout(function(index){
 							console.time('drawing map '+index+' sample');
 							var sampledGame = new Engine_Class(_read_game_data[index], true);
+							sampledGame.Set_Interface(INTERFACE);
 							_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
 							sampledGame.End_Game();
 							Menu.MapEditor.Draw();
@@ -363,15 +367,7 @@ Menu.MapEditor.Open = function()
 								if(_read_game_data[_load].uploaded)
 									uploadImg.Draw(c,x+5,y+5,w/4,h/4);
 							}
-						}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), fnc1, {
-							Draw:function(c,x,y,w,h,_load){
-								Canvas.ScaleImageData(c, _game_imgs[_load], x+2, y+2, w/(_game_imgs[_load].width-4), 100/(_game_imgs[_load].height-4));
-								new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
-								if(_read_game_data[_load].uploaded)
-									uploadImg.Draw(c,x+5,y+5,w/4,h/4);
-								Shape.Box.Draw(c,x,y,w,h,"#F5E960");
-							}
-						}, fnc3);
+						}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), fnc1, null, fnc3);
 						continue;
 					}
 
@@ -382,13 +378,7 @@ Menu.MapEditor.Open = function()
 							Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
 							new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
 						}
-					}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), fnc2, {
-						Draw:function(c,x,y,w,h){
-							Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
-							new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
-							Shape.Box.Draw(c,x,y,w,h,"#F5E960");
-						}
-					});
+					}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), fnc2);
 				}
 					/// end load map
 
@@ -1038,7 +1028,7 @@ Menu.MapEditor.Open = function()
 				}
 				else if(ACTIVE_TYPE==TYPES.WEATHER)
 				{
-					console.error("weather not implemented");
+					LOG.add("weather not implemented");
 					// map_list[tile] = ACTIVE_INDEX;
 				}
 				Menu.MapEditor.Mouse_Move(0, 0);
@@ -1762,6 +1752,7 @@ with(Menu.LevelSelect){
 				setTimeout(function(index){
 					console.time('drawing map '+index+' sample');
 					var sampledGame = new Engine_Class(_read_game_data[index], true);
+					sampledGame.Set_Interface(INTERFACE);
 					_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
 					sampledGame.End_Game();
 					console.timeEnd('drawing map '+index+' sample');

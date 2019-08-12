@@ -35,13 +35,16 @@ body{
 #avatarCanvas{
 	position:absolute;
 	right:0px;
-	width:130px;
-	min-width:130px;
-	max-width:130px;
-	height:600px;
-	min-height:600px;
-	max-height:600px;
+	width:60px;
+	max-width: 60px;
+	bottom: 0px;
+	min-width:60px;
+	max-width:60px;
+	height:200px;
+	min-height:200px;
+	max-height:200px;
 }#statsCanvas{
+	opacity: .7;
 	position:absolute;
 	bottom:0px;
 	height:60px;

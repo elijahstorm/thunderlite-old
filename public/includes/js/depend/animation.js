@@ -2,21 +2,26 @@ function Animation_Display_Class()
 {
 	let places_class = function(holder,C,X,Y,W,H,S,i)
 	{
+		let runTick = false;
+		let newLoc;
+		this.tick = function()
+		{
+			if(!runTick)return;
+			runTick = false;
+			let ani = this.values;
+			if(ani.show)
+				holder.Clear(ani.canvas, ani.x, ani.y, ani.width, ani.height);
+			for(var i in newLoc)
+			{
+				ani[i] = newLoc[i];
+			}
+			if(ani.show)
+				holder.Draw(ani.canvas, ani.x, ani.y, ani.width, ani.height);
+		};
 		this.set = function(update)
 		{
-			var ani = this.values;
-			if(ani.show)
-			{
-				holder.Clear(ani.canvas, ani.x, ani.y, ani.width, ani.height);
-			}
-			for(var i in update)
-			{
-				ani[i] = update[i];
-			}
-			if(ani.show)
-			{
-				holder.Draw(ani.canvas, ani.x, ani.y, ani.width, ani.height);
-			}
+			newLoc = update;
+			runTick = true;
 		};
 		this.values = {
 			canvas:C,
@@ -27,6 +32,14 @@ function Animation_Display_Class()
 			show:S,
 			index:i
 		};
+	};
+	let __PLACES = [];
+	this.Tick = function()
+	{
+		for(let i in __PLACES)
+		{
+			__PLACES[i].tick();
+		}
 	};
 
 	function Animation_Class(images,name,delay,auto_repeat)
@@ -112,6 +125,7 @@ function Animation_Display_Class()
 				W = imgs[0].Height;
 			var i = places.length;
 			places[i] = new places_class(this,C,X,Y,W,H,S,i);
+			__PLACES.push(places[i]);
 			if(S)this.Draw(C,X,Y,W,H);
 			return places[i];
 		};
@@ -119,7 +133,8 @@ function Animation_Display_Class()
 		{
 			if(places[index])
 			{
-				places.splice(index,1);
+				let value = places.splice(index,1)[0];
+				__PLACES.splice(__PLACES.indexOf(value),1);
 				for(var i=index;i<places.length;i++)
 				{
 					places[i].values.index--;
@@ -127,8 +142,13 @@ function Animation_Display_Class()
 			}
 			return this;
 		};
-		this.Remove_All = function()
+		this.Remove_All = function(stopper)
 		{
+			if(!stopper)
+			for(let i=0;i<places.length;i++)
+			{
+				__PLACES.splice(__PLACES.indexOf(places[i]), 1);
+			}
 			places = [];
 		};
 
@@ -232,6 +252,7 @@ function Animation_Display_Class()
 				H = frame_h;
 			var i = places.length;
 			places[i] = new places_class(self,C,X,Y,W,H,S,i);
+			__PLACES.push(places[i]);
 			if(S)self.Draw(C,X,Y,W,H);
 			return places[i];
 		};
@@ -239,15 +260,21 @@ function Animation_Display_Class()
 		{
 			if(places[index])
 			{
-				places.splice(index,1);
+				let value = places.splice(index,1)[0];
+				__PLACES.splice(__PLACES.indexOf(value),1);
 				for(var i=index;i<places.length;i++)
 				{
 					places[i].values.index--;
 				}
 			}
 		};
-		self.Remove_All = function()
+		self.Remove_All = function(stopper)
 		{
+			if(!stopper)
+			for(let i=0;i<places.length;i++)
+			{
+				__PLACES.splice(__PLACES.indexOf(places[i]), 1);
+			}
 			places = [];
 		};
 
@@ -309,9 +336,10 @@ function Animation_Display_Class()
 	};
 	this.Remove_All = function()
 	{
+		__PLACES = [];
 		for(var i in Animations)
 		{
-			Animations[i].Remove_All();
+			Animations[i].Remove_All(true);
 		}
 	};
 
