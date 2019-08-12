@@ -8,6 +8,8 @@ var pass = document.getElementById('pass');
 var btn = document.getElementById('signupBtn');
 var error = document.getElementById('error');
 var stayCheck = document.getElementById('staySignedOn');
+let container = window.parent.document.getElementById("container");
+let logoStyle = document.getElementById('loginLogo');
 
 document.getElementById('loginLogo').src = "Login "+(window.parent.mobilecheck() ? "Mobile" : "Desktop")+".png";
 
@@ -22,6 +24,24 @@ function eraseCookie(){
 }
 
 window.parent.onFinishedLoading(function(){
+	let LOGIN = function(e){
+		if(e.keyCode==13)
+		{
+			login();
+			return false;
+		}
+	};
+	pass.onkeydown = LOGIN;
+	user.onkeydown = LOGIN;
+
+	window.addEventListener("resize", function(e){
+		if(container.clientHeight-logoStyle.clientHeight<270)
+		{
+			btn.style.visibility = "hidden";
+		}
+		else btn.style.visibility = "visible";
+	}, false);
+
 	if(document.cookie!=null)
 	if(document.cookie!=""){
 		var cookies = document.cookie.split("; ");

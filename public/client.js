@@ -231,7 +231,7 @@ window.onload = function(){
 			CHECK_CONNECTION();
 			if(gameFrame.src!="includes/game.html")
 				gameFrame.src = "includes/game.html";
-			document.title = socket.username+" playing Battalion";
+			document.title = socket.username+" playing ThunderLite";
 			openLobby();
 		}
 		else if(data.type==21)

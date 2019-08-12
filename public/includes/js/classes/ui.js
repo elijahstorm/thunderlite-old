@@ -202,6 +202,18 @@ var Interface_Class = function()
 			}
 		}
 	}
+
+let perfTile = [], indexTile = [];
+function performaceText(t, t1, t2) {
+	if(perfTile[t]==null){
+		perfTile[t] = 0;
+		indexTile[t] = 0;
+	}
+	perfTile[t]+=(Math.round((t2-t1)*100)/100);
+	indexTile[t]++;
+	return (Math.round((t2-t1)*100)/100);
+}
+
 	var paint = function(x, y, left, top, w, h, zoom){
 		if(game==null)return;
 		/// y and x are flipped when called from scroller, due to nature of canvas data
@@ -209,8 +221,12 @@ var Interface_Class = function()
 		var at = game.Terrain_Map.At(y,x);
 		if(at==null)return;
 
+let t1,t2,t = at;
+
+		t1 = performance.now();
+
 		at.UI_Draw(terrainCanvas, left, top);
-		paintOffMap(y,x,left,top);
+		// paintOffMap(y,x,left,top);
 
 		if(at.Hidden)
 		{
@@ -227,6 +243,11 @@ var Interface_Class = function()
 		if(at!=null&&at!=moving_unit)at.UI_Draw(charCanvas, left, top);
 		at = self.Tiles.At(y,x);
 		if(at!=null)at.Draw(tileCanvas, left, top, w, h);
+
+
+		t2 = performance.now();
+		let txt = performaceText(t.Source,t1,t2);
+		// console.log("drawing terrain",y,x,"took",txt,"ms");
 	};
 	var simplePaint = function(x, y, left, top, w, h, zoom){
 		if(game==null)return;
@@ -242,6 +263,7 @@ var Interface_Class = function()
 
 		left = Math.round(left);
 		top = Math.round(top);
+
 		moveUnitCanvas.clearRect(0,0,600,600);
 		overlayCanvas.clearRect(0,0,600,600);
 		// hide offscreen active display
@@ -258,22 +280,30 @@ var Interface_Class = function()
 		// backCanvas.clearRect(0,0,600,600);
 		backCanvas.fillStyle = "#3C6BBE";
 		backCanvas.fillRect(0, 0, 600, 600);
+		devCanvas.clearRect(0,0,600,600);
+		// animationCanvas.clearRect(0,0,600,600);
+		hudCanvas.clearRect(0,0,600,600);
+		tileCanvas.clearRect(0,0,600,600);
 		worldCanvas.clearRect(0,0,600,600);
 		terrainCanvas.clearRect(0,0,600,600);
 		buildingCanvas.clearRect(0,0,600,600);
 		charCanvas.clearRect(0,0,600,600);
 		// weatherCanvas.clearRect(0,0,600,600);
 		dialogCanvas.clearRect(0,0,600,600);
-		devCanvas.clearRect(0,0,600,600);
-		// animationCanvas.clearRect(0,0,600,600);
-		tileCanvas.clearRect(0,0,600,600);
-		hudCanvas.clearRect(0,0,600,600);
 
-		let t2, t = performance.now();
+indexTile = [];
+perfTile = [];
+let t2, t = performance.now();
+
 		terrain_disp.render(left, top, zoom, paint);
-		t2 = performance.now();
-		if(t2-t>30)
-			console.log("took "+(Math.round((t2-t)*100)/100)+"ms");
+
+t2 = performance.now();
+if(t2-t>30)
+	console.log("took "+(Math.round((t2-t)*100)/100)+"ms");
+for(let i in indexTile)
+{
+	console.log("tile index",Terrain_Data.Reverse_Get(i).Name,"took",(Math.round((perfTile[i]/indexTile[i])*100)/100)+"ms");
+}
 	};
 
 	var Avatar,Status;

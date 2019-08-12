@@ -677,6 +677,7 @@ io.on('connection', function(socket){
 				report_data.push({
 					saveindex:data[i].saveindex,
 					map:data[i].mapdata,
+					uploaded:data[i].PUBLISHED,
 					map_id:data[i].Map_Id
 				});
 			}

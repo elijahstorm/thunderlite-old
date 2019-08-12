@@ -21,10 +21,8 @@ setInterval(function() {
 	zoomLevelField.value = values.zoom.toFixed(2);
 }, 500);
 
-
 var rect = container.getBoundingClientRect();
 scroller.setPosition(rect.left + container.clientLeft, rect.top + container.clientTop);
-
 
 // Reflow handling
 var reflow = function() {
@@ -108,7 +106,7 @@ if ('ontouchstart' in window) {
 		if (e.target.tagName.match(/input|textarea|select/i)) {
 			return;
 		}
-		
+
 		scroller.doTouchStart([{
 			pageX: e.pageX,
 			pageY: e.pageY
@@ -121,7 +119,7 @@ if ('ontouchstart' in window) {
 		if (!mousedown) {
 			return;
 		}
-		
+
 		scroller.doTouchMove([{
 			pageX: e.pageX,
 			pageY: e.pageY
@@ -134,7 +132,7 @@ if ('ontouchstart' in window) {
 		if (!mousedown) {
 			return;
 		}
-		
+
 		scroller.doTouchEnd(e.timeStamp);
 
 		mousedown = false;
