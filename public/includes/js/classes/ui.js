@@ -290,6 +290,7 @@ let t1,t2,t = at;
 		terrainCanvas.clearRect(0,0,600,600);
 		buildingCanvas.clearRect(0,0,600,600);
 		charCanvas.clearRect(0,0,600,600);
+		// weatherCanvas.clearRect(0,0,600,600);
 		dialogCanvas.clearRect(0,0,600,600);
 
 // indexTile = [];
@@ -691,6 +692,7 @@ let t1,t2,t = at;
 		//** Add the game event handler interactions */
 	let current_interactions = new Array(8);
 	const ___touchstart = function(e){
+		HUD_Avoid_Mouse.interact();
 		e.preventDefault();
 
 		var x = Math.round(e.touches[0].clientX);
@@ -1274,7 +1276,7 @@ let t1,t2,t = at;
 	};
 	self.Income_Draw = function(tile_x, tile_y, amount)
 	{
-		let x = (tile_x*TILESIZE)+self.X_Offset(),
+		let x = (tile_x*TILESIZE)-self.X_Offset(),
 			y = ((tile_y+0.6)*TILESIZE)-self.Y_Offset();
 		let risingTxt = HUD_Display.Add_Drawable(new Text_Class("20pt Arial","#FF0800"), "Income "+x+","+y,
 				x, y, 100, 30, "$"+amount);

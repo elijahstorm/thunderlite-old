@@ -512,7 +512,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Sprite:[],
 	AttackSFX:null,
 	MoveSFX:SFXs.Retrieve('air'),
-	X:[15,15,15],
+	X:[15,10,10],
 	Y:[10,10,10]
 };
 

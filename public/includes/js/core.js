@@ -38,7 +38,7 @@ var LOG = {
 			height = 15*Math.ceil(this.list[i].msg.length/(size/16))+10;
 			Shape.Rectangle.Draw(logCanvas, 10, level, size, height, this.list[i].boxColor);
 			Shape.Box.Draw(logCanvas, 10, level, size, height, "#FFF");
-			this.list[i].txt.Draw(logCanvas, 15, level+3, size, height, this.list[i].index+": "+this.list[i].msg);
+			this.list[i].txt.Draw(logCanvas, 15, level+3, size, height, this.list[i].msg);
 			level+=height+10;
 		}
 	},
@@ -304,13 +304,13 @@ var Core = {
 	{
 		let ani = Animations.Retrieve("Explosion");
 		ani.Stop = false;
-		Core.Fade_Drawable(selectable, 0, 6);
 		let d = ani.New(HUD_Display.Context,
 			selectable.X*TILESIZE-INTERFACE.X_Offset()+2,
 			(selectable.Y-.7)*TILESIZE-INTERFACE.Y_Offset(), null, null, true);
 		ani.onEnd(function(){
 			selectable.Remove_From_Game();
 			ani.Remove(d.values.index);
+			Core.Fade_Drawable(selectable, 0, 6);
 		});
 	},
 	Array:{
@@ -531,19 +531,33 @@ window.onload = function(){
 	hudCanvas = initiateCanvas("hudCanvas");
 	HUD_Display = Canvas.Create_Canvas(hudCanvas, "hud");
 
-	document.getElementById("avatarCanvas").style.height = 200+"px";
-	document.getElementById("avatarCanvas").style.width = 60+"px";
-	avatarCanvas = initiateCanvas("avatarCanvas");
-	avatarCanvas.width = window.parent.mobilecheck() ? 60 : 210;
-	avatarCanvas.height = 200;
+	if(window.parent.mobilecheck())
+	{
+		document.getElementById("avatarCanvas").style.height = 200+"px";
+		document.getElementById("avatarCanvas").style.width = 60+"px";
+		avatarCanvas = initiateCanvas("avatarCanvas");
+		avatarCanvas.width = 60;
+		avatarCanvas.height = 200;
+		document.getElementById("statsCanvas").style.width = 600+"px";
+		statsCanvas = initiateCanvas("statsCanvas");
+		statsCanvas.width = 600;
+		statsCanvas.height = 60;
+	}
+	else
+	{
+		document.getElementById("avatarCanvas").style.height = 600+"px";
+		document.getElementById("avatarCanvas").style.width = 210+"px";
+		avatarCanvas = initiateCanvas("avatarCanvas");
+		avatarCanvas.width = 210;
+		avatarCanvas.height = 600;
+		document.getElementById("statsCanvas").style.width = 600+"px";
+		statsCanvas = initiateCanvas("statsCanvas");
+		statsCanvas.width = 600;
+		statsCanvas.height = 70;
+	}
 	Avatar_Display = Canvas.Create_Canvas(avatarCanvas, "avatar");
 	Avatar_Display.Background.State.Set("#55D6C2");
 	Avatar_Display.Background.Alpha.Set(1);
-
-	document.getElementById("statsCanvas").style.width = 600+"px";
-	statsCanvas = initiateCanvas("statsCanvas");
-	statsCanvas.width = 600;
-	statsCanvas.height = window.parent.mobilecheck() ? 60 : 70;
 	Stats_Display = Canvas.Create_Canvas(statsCanvas, "stat");
 	Stats_Display.Background.State.Set("#F49097");
 	Stats_Display.Background.Alpha.Set(1);
@@ -624,6 +638,7 @@ function init_map(map, players, game_id, skip_pregame, test_game){
 	Canvas.Redraw();
 	Canvas.Start_All();
 	gameInProgress = true;
+	window.parent.setConnection(2);
 
 	if(skip_pregame)
 	{
@@ -728,6 +743,7 @@ function openMapEditor(game_data, data_index, testing_won){
 	INTERFACE.Close_Menu();
 	INTERFACE.Set_Controls(document.getElementById("inputHandler"));
 	INTERFACE.Allow_Controls(true);
+	window.parent.setConnection(1);
 
 	Menu.MapEditor.Open();
 	Menu.MapEditor.New(data_index, game_data, testing_won);

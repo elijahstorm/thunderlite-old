@@ -421,6 +421,49 @@ function CONNECT(name, pass, report){
 	socket.password = pass;
 	socket.emit('connect user', name, pass);
 }
+
+const CONNECTION = function(){
+	let CONNECTION = {
+		FAST:3000,
+		SLOW:20000,
+		NONE:-1
+	};
+	let time = CONNECTION.SLOW;
+	this.GET = function(){
+		return time;
+	};
+	this.SET = function(val){
+		switch (val) {
+			case 0:
+				time = CONNECTION.NONE;
+				break;
+			case 1:
+				if(time==CONNECTION.NONE)
+				{
+					time = CONNECTION.SLOW;
+					CHECK_CONNECTION();
+					return;
+				}
+				time = CONNECTION.SLOW;
+				break;
+			case 1:
+				if(time==CONNECTION.NONE)
+				{
+					time = CONNECTION.FAST;
+					CHECK_CONNECTION();
+					return;
+				}
+				time = CONNECTION.FAST;
+				break;
+		}
+	};
+};
+const CONNECTION_ACTIVE = new CONNECTION;
+
+function setConnection(val){
+	CONNECTION_ACTIVE.SET(val);
+}
+
 function CHECK_CONNECTION(){
 	if(CONNECTION_TIMEOUT>5)
 	{
@@ -440,7 +483,8 @@ function CHECK_CONNECTION(){
 		CONNECTION_TIMEOUT++;
 	}
 	socket.emit('check');
-	setTimeout(function(){CHECK_CONNECTION()}, 3000);
+	if(CONNECTION_ACTIVE.GET()==-1)return;
+	setTimeout(function(){CHECK_CONNECTION()}, CONNECTION_ACTIVE.GET());
 }
 function LOST_CONNECTION(){
 	var time = new Date().toLocaleTimeString();

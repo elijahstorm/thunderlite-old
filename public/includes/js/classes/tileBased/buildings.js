@@ -130,6 +130,7 @@ var Buildings = {
 			if(this.Active)
 			{
 				select_animation.set({
+					show:true,
 					x:x,
 					y:y
 				});
@@ -151,8 +152,7 @@ var Buildings = {
 		this.Hide_Animation_Display = function()
 		{
 			select_animation.set({
-				x:-100,
-				y:-100
+				show:false
 			});
 		};
 
@@ -208,6 +208,7 @@ var Buildings = {
 				if(this.Owner==null)return;
 				this.Owner.Add_Income(amt);
 				if(game.Interface.Fake)return;
+				if(this.Terrain.Hidden)return;
 				game.Interface.Income_Draw(this.X, this.Y, amt);
 			}
 		};

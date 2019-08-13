@@ -171,6 +171,8 @@ var Mod_List = {
 				Core.Fade_Drawable(unit, 0, 7, function(){
 					game.Remove_Unit(unit);
 					unit.Set_Active(false);
+					unit.Alpha.data = 255;
+					unit.Hide_Animation_Display();
 					game.Add_Unit(transport, unit.X, unit.Y, unit.Player.Team);
 					Core.Fade_Drawable(transport, 255, 15);
 				});
@@ -189,6 +191,8 @@ var Mod_List = {
 
 				Core.Fade_Drawable(unit, 0, 7, function(){
 					game.Remove_Unit(unit);
+					unit.Alpha.data = 255;
+					unit.Hide_Animation_Display();
 					game.Add_Unit(transport, unit.X, unit.Y, unit.Player.Team);
 					Core.Fade_Drawable(transport, 255, 15);
 				});
@@ -198,7 +202,6 @@ var Mod_List = {
 			}),
 			Land:new Mod_Class(CURMOD++, "Land",function(transport){
 				var game = transport.Game;
-
 				var unit = transport.Rescued_Unit;
 
 				unit.Health = unit.Max_Health*transport.Health/transport.Max_Health;
@@ -216,7 +219,7 @@ var Mod_List = {
 				if(transport.Rescued_Unit==null)
 					return false;
 				var game = transport.Game;
-				if(transport.Rescued_Unit.Calculate_Move_Cost(game.Terrain_Map.At(transport.X, transport.Y))<transport.Rescued_Unit.Movement)
+				if(transport.Rescued_Unit.Calculate_Move_Cost(game.Terrain_Map.At(transport.X, transport.Y))>transport.Rescued_Unit.Movement)
 					return false;
 				return true;
 			}),
@@ -316,7 +319,7 @@ var Mod_List = {
 
 				if(Map.At(x, y).Hidden)
 					return;
-				game.Interface.Income_Draw(unit.X, unit.Y, 500);
+				unit.Game.Interface.Income_Draw(unit.X, unit.Y, 500);
 
 			},"Self Action",[""],"Can mine ore", true, function(unit){
 				var ground = unit.Game.Terrain_Map.At(unit.X, unit.Y).Source;

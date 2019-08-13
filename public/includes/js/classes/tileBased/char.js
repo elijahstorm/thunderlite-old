@@ -7,11 +7,12 @@ var Characters = {
 	StrongDanger:Images.Retrieve("Danger2"),
 	Char_Class:function(game, char_index)
 	{
+		let self = this;
 		function err(txt)
 		{
-			console.error(name,this.Index,"->",txt);
+			console.error(name,self.Index,"->",txt);
 		}
-		this.SELECTABLE = 1;
+		self.SELECTABLE = 1;
 
 		var CharData = Char_Data.CHARS[char_index];
 		var name = CharData.Name;
@@ -20,79 +21,80 @@ var Characters = {
 		var repair_ani = Repair_Animation.New(animationCanvas, -TILESIZE, -TILESIZE, TILESIZE/3, TILESIZE/3, false);
 		var select_animation = Select_Animation.New(animationCanvas, -TILESIZE, -TILESIZE, TILESIZE, TILESIZE, false);
 		var mods = Core.Array.Clone(CharData.Modifiers);
-		this.Description = function()
+		self.Description = function()
 		{
 			return CharData.Description;
 		};
-		this.Index = null;
+		self.Index = null;
 
-		this.Terrain = function()
+		self.Terrain = function()
 		{
-			return game.Terrain_Map.At(this.X, this.Y);
+			return game.Terrain_Map.At(self.X, self.Y);
 		};
 
-		this.Game = game;
-		this.Name = name;
-		this.Source = char_index;
-		this.Unit_Type = CharData.Type;
-		this.Max_Health = CharData.Max_Health;
-		this.Health = CharData.Max_Health;
-		this.Armor = CharData.Armor;
-		this.Power = CharData.Power;
-		this.Weapon = CharData.Weapon;
-		this.Movement = CharData.Movement;
-		this.Radar = function(){
+		self.Game = game;
+		self.Name = name;
+		self.Source = char_index;
+		self.Unit_Type = CharData.Type;
+		self.Max_Health = CharData.Max_Health;
+		self.Health = CharData.Max_Health;
+		self.Armor = CharData.Armor;
+		self.Power = CharData.Power;
+		self.Weapon = CharData.Weapon;
+		self.Movement = CharData.Movement;
+		self.Radar = function(){
 			return CharData.Modifiers.includes(CURMODS.Move.Radar);
 		};
-		this.Resources = function(){
+		self.Resources = function(){
 			return CharData.Modifiers.includes(CURMODS.Self_Action.Miner);
 		};
 		if(CharData.Cash)
-			this.Cash = CharData.Cash;
-		this.Tracking = function(){
+			self.Cash = CharData.Cash;
+		self.Tracking = function(){
 			return CharData.Modifiers.includes(CURMODS.Move.Tracking);
 		};
-		this.Move_Type = CharData.Move_Type;
-		this.Slow_Attack = CharData.Slow; // can or can't move and attack on the same turn
-		this.Range = Core.Array.Clone(CharData.Range);
-		this.Sight = CharData.Sight;
+		self.Move_Type = CharData.Move_Type;
+		self.Slow_Attack = CharData.Slow; // can or can't move and attack on the same turn
+		self.Range = Core.Array.Clone(CharData.Range);
+		self.Sight = CharData.Sight;
 		var Additional_Display = null;
 		var WEAKNESSTEXT = new Text_Class("15pt Verdana", "#000");
 		var STRENGTHTEXT = new Text_Class("15pt Verdana", "#000");
-		this.Trenched = false;
-		this.Player = null;
-		this.Attacking = null;
-		this.Killed = null;
-		this.Idle = false;
-		this.Stunned = false;
-		this.State = 0;
-		this.Sprites = [];
-		this.Rescued_Unit = null;
-		this.X;
-		this.Y;
-		this.Alpha = new Info(255, this, function(index,info,input){
+		self.Trenched = false;
+		self.Player = null;
+		self.Attacking = null;
+		self.Killed = null;
+		self.Idle = false;
+		self.Stunned = false;
+		self.State = 0;
+		self.Sprites = [];
+		self.Rescued_Unit = null;
+		self.X;
+		self.Y;
+		self.Alpha = new Info(255, self, function(index,info,input){
 			info.data = input;
 			game.Interface.Draw();
 		}); // for STEALTH and building new unit
 		var tileXOff = 0;
 		var tileYOff = 0;
-		this.X_Offset = function()
+		self.X_Offset = function()
 		{
-			return CharData.X[this.State]+tileXOff;
+			return CharData.X[self.State]+tileXOff;
 		};
-		this.Y_Offset = function()
+		self.Y_Offset = function()
 		{
-			return CharData.Y[this.State]+tileYOff;
+			return CharData.Y[self.State]+tileYOff;
 		};
-		this.Data = function()
+		self.Data = function()
 		{	// returns a clone of the data
-			var self = this;
 			let data = {
 				index:char_index,
 				x:self.X,
 				y:self.Y,
 				health:self.Health
 			};
+			if(self.Rescued_Unit!=null)
+				data.rescued = self.Rescued_Unit.Data();
 			if(self.Cash!=null)
 				data.cash = self.Cash;
 			let extra_mods = [];
@@ -106,41 +108,40 @@ var Characters = {
 			return data;
 		};
 
-		this.display_health = true;
+		self.display_health = true;
 		var showAttackWeakness = 0,
 			showCounterStrength = 0;
-		this.Active = false;
-		this.Set_Active = function(value)
+		self.Active = false;
+		self.Set_Active = function(value)
 		{
 			if(!CharData.Actable)return;
-			this.Active = value;
-			select_animation.set({show:value});
+			self.Active = value;
 		};
-		this.Draw = function(canvas, x, y, _scale)
+		self.Draw = function(canvas, x, y, _scale)
 		{
-			var pic = this.Sprites[this.State];
-			if(this.Idle)
+			var pic = self.Sprites[self.State];
+			if(self.Idle)
 			{
 				pic = darken(pic);
 			}
-			if(this.Alpha.data!=255)
+			if(self.Alpha.data!=255)
 			{
-				pic = opacity(pic, this.Alpha.data);
+				pic = opacity(pic, self.Alpha.data);
 			}
 			canvas.putImageData(_scale==null ? pic : scale(pic, _scale, _scale), x, y);
 		};
-		this.UI_Draw = function(canvas, x, y)
+		self.UI_Draw = function(canvas, x, y)
 		{
-			this.Draw(canvas,x+(TILESIZE/60*this.X_Offset()),y+(TILESIZE/60*this.Y_Offset()));
-			if(this.Health<=0)return;
-			if(this.Alpha.Get()==0)return;
-			if(!this.display_health)return;
+			self.Draw(canvas,x+(TILESIZE/60*self.X_Offset()),y+(TILESIZE/60*self.Y_Offset()));
+			if(self.Health<=0)return;
+			if(self.Alpha.Get()==0)return;
+			if(!self.display_health)return;
 			canvas.save();
 			canvas.translate(x,y);
 			canvas.scale(TILESIZE/60,TILESIZE/60);
-			if(this.Health!=this.Max_Health)
+			if(self.Health!=self.Max_Health)
 			{
-				var percent = this.Health/this.Max_Health;
+				var percent = self.Health/self.Max_Health;
 				Shape.Rectangle.Draw(canvas, 3, 54, 54, 5, "#000");
 				var width;
 				for(var i=0;i<4;i++)
@@ -153,8 +154,16 @@ var Characters = {
 					Shape.Rectangle.Draw(canvas, 4+13*i, 55, width, 3, Team_Colors.Health_Display[i]);
 					if(width<13)break;
 				}
+				if(self.Repairing())
+				{
+					repair_ani.set({
+						show:true,
+						x:x,
+						y:y+40
+					});
+				}
 			}
-			if(this.Active)
+			if(self.Active && self.Player==game.Client_Player())
 			{
 				select_animation.set({
 					show:true,
@@ -164,16 +173,16 @@ var Characters = {
 			}
 			if(Additional_Display!=null)
 			{
-				Additional_Display(canvas, 0, 0, this);
+				Additional_Display(canvas, 0, 0, self);
 			}
-			if(this.Rescued_Unit!=null)
+			if(self.Rescued_Unit!=null)
 			{
 				canvas.globalAlpha = .33;
 				Shape.Rectangle.Draw(canvas, 2, 33, 30, 30, "#000");
 				Shape.Rectangle.Draw(canvas, 3, 34, 30, 30, "#000");
 				canvas.globalAlpha = 1;
 				Shape.Rectangle.Draw(canvas, 0, 30, 30, 30, "#fff");
-				this.Rescued_Unit.Draw(canvas, x+5, y+35, .5);
+				self.Rescued_Unit.Draw(hudCanvas, x+10, y+36, .5);
 			}
 			if(showAttackWeakness!=0)
 			{
@@ -211,36 +220,28 @@ var Characters = {
 				}
 				canvas.restore();
 			}
-			if(repair_ani.values.show)
-			{
-				repair_ani.set({
-					show:true,
-					x:x,
-					y:y+40
-				});
-			}
 			canvas.restore();
 		};
 
-		this.Display_Additional = function()
+		self.Display_Additional = function()
 		{
-			if(this.Radar())
+			if(self.Radar())
 			{
 				Additional_Display = Char_Data.Radar_Display;
 				return;
 			}
 		};
-		this.Close_Additional = function()
+		self.Close_Additional = function()
 		{
 			Additional_Display = null;
-			if(this.Resources())
+			if(self.Resources())
 				Additional_Display = Char_Data.Resources;
 		};
-		this.Display_Danger = function(defender)
+		self.Display_Danger = function(defender)
 		{
-			if(this.Can_Attack(defender))
+			if(self.Can_Attack(defender))
 			{
-				damage = this.Calculate_Damage(defender);
+				damage = self.Calculate_Damage(defender);
 				percent_of_health = damage / defender.Health;
 				if(percent_of_health>0.6)
 				{
@@ -253,7 +254,7 @@ var Characters = {
 				else showCounterStrength = 1;
 			}
 		};
-		this.Update_Danger = function(x, y)
+		self.Update_Danger = function(x, y)
 		{
 			if(move_path==null)return;
 			if(!move_path.Can_Move(x, y))return;
@@ -261,12 +262,12 @@ var Characters = {
 			for(var i=game.Unit_Amount()-1;i>=0;i--)
 			{
 				check_unit = game.Get_Unit(i);
-				if(!check_unit.Can_Attack(this))continue;
+				if(!check_unit.Can_Attack(self))continue;
 				check_unit.Close_Danger_Hints();
 				if(check_unit.Slow_Attack)
 				{
 					if(check_unit.In_Range_From_Loc(check_unit.X, check_unit.Y, x, y))
-						check_unit.Display_Danger(this);
+						check_unit.Display_Danger(self);
 					else check_unit.Close_Danger_Hints();
 					continue;
 				}
@@ -276,16 +277,16 @@ var Characters = {
 				{
 					if(check_unit.In_Range_From_Loc(_spaces[j][0], _spaces[j][1], x, y))
 					{
-						check_unit.Display_Danger(this);
+						check_unit.Display_Danger(self);
 						break;
 					}
 				}
 			}
 		};
-		this.Display_Attack_Hints = function(source_unit)
+		self.Display_Attack_Hints = function(source_unit)
 		{
-			var damage = source_unit.Calculate_Damage(this);
-			var percent_of_health = damage / this.Health;
+			var damage = source_unit.Calculate_Damage(self);
+			var percent_of_health = damage / self.Health;
 			if(percent_of_health>0.6)
 			{
 				showAttackWeakness = 3;
@@ -296,28 +297,28 @@ var Characters = {
 			}
 			else showAttackWeakness = 1;
 		};
-		this.Close_Attack_Hints = function()
+		self.Close_Attack_Hints = function()
 		{
 			showAttackWeakness = 0;
 		};
-		this.Close_Danger_Hints = function()
+		self.Close_Danger_Hints = function()
 		{
 			showCounterStrength = 0;
 		};
 
-		this.Open_Selection = function()
+		self.Open_Selection = function()
 		{
 			if(move_path==null)return;
-			this.Display_Additional();
-			this.Update_Danger(this.X, this.Y);
+			self.Display_Additional();
+			self.Update_Danger(self.X, self.Y);
 			var unit_check;
-			if(this.Alpha.data<255 || this.Unit_Type==1)
+			if(self.Alpha.data<255 || self.Unit_Type==1)
 			{	// if cloaked or a flying unit
 				// display enemy radars
 				for(var i=game.Unit_Amount()-1;i>=0;i--)
 				{
 					unit_check = game.Get_Unit(i);
-					if(unit_check.Player==this.Player)continue;
+					if(unit_check.Player==self.Player)continue;
 					if(unit_check.Radar())
 						unit_check.Display_Additional();
 				}
@@ -327,15 +328,15 @@ var Characters = {
 			{
 				unit_check = game.Units_Map.At(_spaces[i][0], _spaces[i][1]);
 				if(unit_check==null)continue;
-				if(this.Can_Attack(unit_check))
+				if(self.Can_Attack(unit_check))
 				{
-					unit_check.Display_Attack_Hints(this);
+					unit_check.Display_Attack_Hints(self);
 				}
 			}
 		};
-		this.Close_Selection = function()
+		self.Close_Selection = function()
 		{
-			this.Close_Additional();
+			self.Close_Additional();
 			var unit_check;
 			for(var i=game.Unit_Amount()-1;i>=0;i--)
 			{
@@ -345,7 +346,7 @@ var Characters = {
 				unit_check.Close_Additional();
 			}
 		};
-		this.Hide_Animation_Display = function()
+		self.Hide_Animation_Display = function()
 		{
 			select_animation.set({
 				show:false
@@ -355,15 +356,15 @@ var Characters = {
 			});
 		};
 
-		this.Act = function(x, y, mover, whenFinished, scrollTo)
+		self.Act = function(x, y, mover, whenFinished, scrollTo)
 		{
 			if(mover==null)
 			{
 				err("move not defined");
-				if(whenFinished!=null)whenFinished(this);
+				if(whenFinished!=null)whenFinished(self);
 				return false;
 			}
-			var end = [this.X,this.Y];
+			var end = [self.X,self.Y];
 			for(var i=0;i<mover.length;i++)
 			{
 				if(mover[i]==0)
@@ -383,7 +384,7 @@ var Characters = {
 					end[0]--;
 				}
 			}
-			if(scrollTo)game.Interface.Scroll_To_Tile(this.X, this.Y);
+			if(scrollTo)game.Interface.Scroll_To_Tile(self.X, self.Y);
 
 			var callback = function(__unit)
 			{
@@ -407,8 +408,8 @@ var Characters = {
 			};
 			if(end[0]==x&&end[1]==y)
 			{	/// when just moving
-				if(this.X!=x || this.Y!=y)
-					this.Move_To(mover,end,function(unit){
+				if(self.X!=x || self.Y!=y)
+					self.Move_To(mover,end,function(unit){
 						if(unit.Stunned)
 						{	// got interupted
 							if(unit.Tracking())
@@ -420,110 +421,104 @@ var Characters = {
 						}
 						if(callback!=null)callback(unit);
 					});
-				else callback(this);
+				else callback(self);
 				return true;
 			}
 			/// when attacking
-		// this code has error when on server as sent move doesnt initialize path
-		// only put this back in if bug appears where unit can attack wherever even when not in range
+		// self code has error when on server as sent move doesnt initialize path
+		// only put self back in if bug appears where unit can attack wherever even when not in range
 			if(!game.Terrain_Map.At(x,y).Hidden) // cannot attack a hidden tile
 			var defender = game.Units_Map.At(x,y);
 			if(defender!=null)
 			if(defender.Alpha.data==255)
-			if(this.Can_Attack(defender))
+			if(self.Can_Attack(defender))
 			{
-				if(this.Slow_Attack)
+				if(self.Slow_Attack)
 				{
-					if(this.In_Range(this.X,this.Y,defender))
+					if(self.In_Range(self.X,self.Y,defender))
 					{
-						this.Setup_Attack(defender, null, null, callback);
+						self.Setup_Attack(defender, null, null, callback);
 						return true;
 					}
 				}
-				if(this.In_Range(end[0],end[1],defender))
+				if(self.In_Range(end[0],end[1],defender))
 				{
 					var place = game.Units_Map.At(end[0],end[1]);
-					if(place==null||place==this)
+					if(place==null||place==self)
 					{
-						this.Setup_Attack(defender, mover, end, callback);
+						self.Setup_Attack(defender, mover, end, callback);
 						return true;
 					}
 					else if(place.Alpha.Get()==0)
 					{	// go, although it will be interupted by hidden enemy
-						this.Setup_Attack(defender, mover, end, callback);
+						self.Setup_Attack(defender, mover, end, callback);
 						return true;
 					}
 				}
 			}
-			if(whenFinished!=null)whenFinished(this);
+			if(whenFinished!=null)whenFinished(self);
 			return false;
 		};
-		this.Start_Turn = function(client, callback)
+		self.Start_Turn = function(client, callback)
 		{
 			if(client)
 			{
 				if(CharData.Actable)
 				{
-					this.Set_Active(true);
+					self.Set_Active(true);
 				}
 			}
 			else
 			{
 				if(CharData.Actable)
 				{
-					this.Active = true;
+					self.Active = true;
 				}
 			}
-			this.Idle = false;
-			this.Movement = CharData.Movement;
+			self.Idle = false;
+			self.Movement = CharData.Movement;
 
 
-			var available = this.Mods_By_Type("Start Turn");
+			var available = self.Mods_By_Type("Start Turn");
 			var dead_weight = 0;
 			for(var i=0;i<available.length;i++)
 			{
-				if(available[i].Do(this))
+				if(available[i].Do(self))
 					dead_weight++;
 			}
 
-			this.Hurt(game.Terrain_Map.At(this.X, this.Y).Damage);
+			self.Hurt(game.Terrain_Map.At(self.X, self.Y).Damage);
 
 			setTimeout(function(){
 				callback();
 			}, dead_weight*10*fps);
 		};
-		this.End_Turn = function(act, stop_auto_check)
+		self.End_Turn = function(act, stop_auto_check)
 		{
-			if(this.Idle)return;
+			if(self.Idle)return;
 			if(act==null)act = true;
-			if(this.Active)
-			{
-				select_animation.set({
-					show:false
-				});
-			}
-			this.Set_Active(false);
-			this.Attacking = null;
-			var curCity = game.Cities_Map.At(this.X,this.Y);
+			self.Set_Active(false);
+			self.Attacking = null;
+			var curCity = game.Cities_Map.At(self.X,self.Y);
 			if(curCity!=null)curCity.Set_Active(false);
-			this.Idle = true;
+			self.Idle = true;
 			if(act)
 			{
-				var available = this.Mods_By_Type("End Turn");
+				var available = self.Mods_By_Type("End Turn");
 				for(var i=0;i<available.length;i++)
 				{
-					available[i].Do(this);
+					available[i].Do(self);
 				}
 			}
 			if(!stop_auto_check)
-			if(!~this.Player.Next_Active_Unit())
-			if(!~this.Player.Next_Active_Building())
+			if(!~self.Player.Next_Active_Unit())
+			if(!~self.Player.Next_Active_Building())
 			{
-				this.Player.End_Turn();
+				self.Player.End_Turn();
 			}
 		};
 
-		this.On_Move = function(unit, mover){};
+		self.On_Move = function(unit, mover){};
 		function move_by_direction(unit, mover, done, i, dir)
 		{
 			if(dir==0)
@@ -681,90 +676,90 @@ var Characters = {
 			game.Interface.Simple_Draw();
 			setTimeout(function(){recur_slide(incFnc, frames-1, callback);},tpf);
 		}
-		this.Animate_Move = function(mover, done){
-			this.display_health = false;
-			recur_animation(this, mover, done, 0);
+		self.Animate_Move = function(mover, done){
+			self.display_health = false;
+			recur_animation(self, mover, done, 0);
 		};
-		this.Face = function(x, y){
-			x-=this.X;
-			y-=this.Y;
+		self.Face = function(x, y){
+			x-=self.X;
+			y-=self.Y;
 			var hyp = Math.sqrt(x*x+y*y);
 			var angle = Math.round(180/Math.PI*Math.acos(x/hyp));
-			if(angle<=45&&angle>=-45)this.Face_Right();
-			else if(angle>=135&&angle<=225)this.Face_Left();
+			if(angle<=45&&angle>=-45)self.Face_Right();
+			else if(angle>=135&&angle<=225)self.Face_Left();
 			else
 			{
 				angle = Math.round(180/Math.PI*Math.asin(y/hyp));
 				if(angle>45&&angle<135)
-					this.Face_Down();
-				else this.Face_Up();
+					self.Face_Down();
+				else self.Face_Up();
 			}
 		};
-		this.Face_Right = function(){
-			this.State = 0;
+		self.Face_Right = function(){
+			self.State = 0;
 		};
-		this.Face_Up = function(){
-			this.State = 1;
+		self.Face_Up = function(){
+			self.State = 1;
 		};
-		this.Face_Down = function(){
-			this.State = 2;
+		self.Face_Down = function(){
+			self.State = 2;
 		};
-		this.Face_Left = function(){
-			this.State = 3;
+		self.Face_Left = function(){
+			self.State = 3;
 		};
-		this.Up = function(callback){
-			this.Face_Up();
+		self.Up = function(callback){
+			self.Face_Up();
 			var amt = 10;
 			recur_slide(function(){
 				tileYOff-=amt;
 			},6,callback);
 		};
-		this.Down = function(callback){
-			this.Face_Down();
+		self.Down = function(callback){
+			self.Face_Down();
 			var amt = 10;
 			recur_slide(function(){
 				tileYOff+=amt;
 			},6,callback);
 		};
-		this.Left = function(callback){
-			this.Face_Left();
+		self.Left = function(callback){
+			self.Face_Left();
 			var amt = 10;
 			recur_slide(function(){
 				tileXOff-=amt;
 			},6,callback);
 		};
-		this.Right = function(callback){
-			this.Face_Right();
+		self.Right = function(callback){
+			self.Face_Right();
 			var amt = 10;
 			recur_slide(function(){
 				tileXOff+=amt;
 			},6,callback);
 		};
 
-		this.Move_From = function()
+		self.Move_From = function()
 		{
-			this.Terrain().Unit = null;
-			var b = this.Terrain().Building;
+			self.Terrain().Unit = null;
+			var b = self.Terrain().Building;
 			if(b==null)return;
 			if(!b.Owner!=null)return;
 			if(!b.Owner.Active)return;
 			if(b.Idle)return;
 			b.Set_Active(true);
 		};
-		this.Move_To = function(mover, end, callback)
-		{		// go to this next
+		self.Move_To = function(mover, end, callback)
+		{		// go to self next
 			moveSFX.Play();
-			this.Move_From();
+			self.Move_From();
 			if(!game.Interface.Fake)
 			{
-				game.Interface.Set_Moving_Unit(this);
+				game.Interface.Set_Moving_Unit(self);
 				game.Interface.Simple_Draw();
 			}
-			this.On_Move(this, mover);
-			this.display_health = false;
-			var oldX = this.X;
-			var oldY = this.Y;
-			this.Animate_Move(mover,function(unit){
+			self.On_Move(self, mover);
+			self.display_health = false;
+			var oldX = self.X;
+			var oldY = self.Y;
+			self.Animate_Move(mover,function(unit){
 				moveSFX.Stop();
 				setTimeout(function(){
 					moveSFX.Stop();
@@ -815,29 +810,28 @@ var Characters = {
 					callback(unit);
 			});
 		};
-		this.Hurt = function(amt)
+		self.Hurt = function(amt)
 		{
 			if(amt==0 || amt==null)return;
-			if(repair_ani.values.show)
+			if(self.Repairing())
 			{
-				this.Del_Modifier(CURMODS.Start_Turn.Repair);
-				repair_ani.set({show:false});
+				self.Del_Modifier(CURMODS.Start_Turn.Repair);
 			}
-			this.Health-=amt;
-			if(this.Health<=0)
+			self.Health-=amt;
+			if(self.Health<=0)
 			{
-				this.Die();
+				self.Die();
 				return;
 			}
-			if(this.Health>this.Max_Health)
+			if(self.Health>self.Max_Health)
 			{
-				this.Health = this.Max_Health;
+				self.Health = self.Max_Health;
 			}
 			game.Interface.Draw();
 		};
-		this.Setup_Attack = function(target, mover, end, callback)
+		self.Setup_Attack = function(target, mover, end, callback)
 		{
-			this.Attacking = target;
+			self.Attacking = target;
 			var after_attack_response = function(unit){
 				if(unit.Attacking==null)
 				{	// got stopped and can't intercept
@@ -880,7 +874,7 @@ var Characters = {
 			};
 			if(mover!=null)
 			{
-				this.Move_To(mover,end,function(unit){
+				self.Move_To(mover,end,function(unit){
 					if(unit.Stunned)
 					{	// got interupted
 						if(unit.Tracking())
@@ -896,96 +890,95 @@ var Characters = {
 				});
 				return;
 			}
-			if(this.Alpha.data<255)
-			if(game.Detected_By_Enemy(this))
-				this.Alpha.Set(255);
-			this.Attack(target,after_attack_response);
+			if(self.Alpha.data<255)
+			if(game.Detected_By_Enemy(self))
+				self.Alpha.Set(255);
+			self.Attack(target,after_attack_response);
 		};
-		this.Attack = function(defender, callback)
+		self.Attack = function(defender, callback)
 		{
-			if(this.Stunned)
+			if(self.Stunned)
 			{
-				this.Stunned = false;
-				if(callback!=null)callback(this);
+				self.Stunned = false;
+				if(callback!=null)callback(self);
 				return;
 			}
 			var sneak_attack = false;
-			if(this.Alpha.data<255)
+			if(self.Alpha.data<255)
 			{
 				sneak_attack = true;
-				this.Alpha.Set(255);
+				self.Alpha.Set(255);
 			}
 			if(attkSFX)attkSFX.Play(1000);
-			this.Killed = null;
-			this.Face(defender.X, defender.Y);
-			var damage = this.Calculate_Damage(defender);
+			self.Killed = null;
+			self.Face(defender.X, defender.Y);
+			var damage = self.Calculate_Damage(defender);
 			if(defender.Repairing())damage*=1.20;
 			damage*=(sneak_attack ? 2:1);
-			this.Player.data.damage_delt+=damage;
+			self.Player.data.damage_delt+=damage;
 			defender.Player.data.damage_received+=damage;
 			defender.Hurt(damage);
 			if(defender.Dead)
 			{
-				this.Player.data.units_killed++;
-				this.Killed = defender;
+				self.Player.data.units_killed++;
+				self.Killed = defender;
 			}
 			if(callback!=null)
-				callback(this);
+				callback(self);
 		}
-		this.In_Range = function(x, y, defender)
+		self.In_Range = function(x, y, defender)
 		{
 			var dis = Math.abs(defender.X-x)+Math.abs(defender.Y-y);
-			return (dis-this.Range[0]<this.Range[1]&&dis>=this.Range[0]);
+			return (dis-self.Range[0]<self.Range[1]&&dis>=self.Range[0]);
 		};
-		this.In_Range_From_Loc = function(x, y, d_x, d_y)
+		self.In_Range_From_Loc = function(x, y, d_x, d_y)
 		{
 			var dis = Math.abs(d_x-x)+Math.abs(d_y-y);
-			return (dis-this.Range[0]<this.Range[1]&&dis>=this.Range[0]);
+			return (dis-self.Range[0]<self.Range[1]&&dis>=self.Range[0]);
 		};
-		this.Can_Attack = function(defender)
+		self.Can_Attack = function(defender)
 		{
-			if(defender.Player==this.Player)return false;
-			var available = this.Mods_By_Type("Can Attack");
+			if(defender.Player==self.Player)return false;
+			var available = self.Mods_By_Type("Can Attack");
 			for(var i=0;i<available.length;i++)
 			{
-				var response = available[i].Do([this,defender]);
+				var response = available[i].Do([self,defender]);
 				if(response)return true;
 				else if(response==null)continue;
 				return false;
 			}
-			if(this.Slow_Attack)
+			if(self.Slow_Attack)
 			{
 				return !defender.Trenched;
 			}
 			if(defender.Unit_Type==1)return false;
-			if(this.Unit_Type==2)
+			if(self.Unit_Type==2)
 			{
 				return defender.Unit_Type==2;
 			}
 			if(defender.Unit_Type==2)
 			{
-				return this.Unit_Type!=0;
+				return self.Unit_Type!=0;
 			}
-			if(this.Source==3)return false;
+			if(self.Source==3)return false;
 			return true;
 		};
-		this.Repairing = function()
+		self.Repairing = function()
 		{
-			return repair_ani.values.show;
+			return mods.includes(CURMODS.Start_Turn.Repair);
 		};
-		this.Repair = function()
+		self.Repair = function()
 		{
-			if(this.Health==this.Max_Health)return;
-			repair_ani.set({show:true});
-			this.Add_Modifier(CURMODS.Start_Turn.Repair);
+			if(self.Health==self.Max_Health)return;
+			self.Add_Modifier(CURMODS.Start_Turn.Repair);
 			game.Interface.Draw();
-			this.End_Turn();
+			self.End_Turn();
 		};
 
-		this.Calculate_Damage = function(defender)
+		self.Calculate_Damage = function(defender)
 		{
-			var bonus = this.Health/this.Max_Health;
-			if(this.Weapon==0)
+			var bonus = self.Health/self.Max_Health;
+			if(self.Weapon==0)
 			{
 				if(defender.Armor==0)
 				{
@@ -998,7 +991,7 @@ var Characters = {
 					bonus*=.5;
 				}
 			}
-			else if(this.Weapon==1)
+			else if(self.Weapon==1)
 			{
 				if(defender.Armor==0)
 				{
@@ -1030,17 +1023,17 @@ var Characters = {
 				if(tile_def.Building!=null)
 					tile_def = tile_def.Building;
 				bonus*=(1-tile_def.Protection);
-				// bonus*=1+((this.Terrain().Height-tile_def.Height)/300);
+				// bonus*=1+((self.Terrain().Height-tile_def.Height)/300);
 			}
-			var available = this.Mods_By_Type("Damage");
+			var available = self.Mods_By_Type("Damage");
 			for(var i=0;i<available.length;i++)
 			{
-				bonus*=available[i].Do([this, defender]);
+				bonus*=available[i].Do([self, defender]);
 			}
-			bonus*=game.Active_Weather.Damage(this.Weapon);
-			return Math.ceil(bonus*this.Power);
+			bonus*=game.Active_Weather.Damage(self.Weapon);
+			return Math.ceil(bonus*self.Power);
 		};
-		this.Calculate_Move_Cost = function(terrain)
+		self.Calculate_Move_Cost = function(terrain)
 		{
 			// terrain types
 			// 0 = dirty
@@ -1064,76 +1057,76 @@ var Characters = {
 			// 7 = submerged
 			// 8 = heavy ship
 
-			if(this.Unit_Type==1)
-			if(game.Location_In_Radar(terrain.X, terrain.Y, this.Player))
+			if(self.Unit_Type==1)
+			if(game.Location_In_Radar(terrain.X, terrain.Y, self.Player))
 				return 100; // if air is jammed
-			if(this.Move_Type==9)
+			if(self.Move_Type==9)
 				return 100; //immoveable
 
 			var t_data = Terrain_Data.TERRE[terrain.Source];
 
 			if(t_data.Name=="Shore")
 			{
-				if(this.Move_Type==8)
+				if(self.Move_Type==8)
 					return 100;	// heavy boats
-				if(this.Move_Type==7)
+				if(self.Move_Type==7)
 					return 2;	// wheel units
-				if(this.Move_Type==1)
+				if(self.Move_Type==1)
 					return 2;	// submerged sea units
 				return 1;
 			}
 			else if(t_data.Name=="Bridge")
 			{
-				if(this.Unit_Type==2)
+				if(self.Unit_Type==2)
 					return 100;
 			}
 
-			var bonus = 1*game.Active_Weather.Move_Cost(this, terrain);
+			var bonus = 1*game.Active_Weather.Move_Cost(self, terrain);
 			//check modifiers path
 			if(t_data.Type==7)return 100;
 			if(t_data.Type==0)
 			{
-				if(this.Move_Type==1)bonus+=.5;
-				if(this.Unit_Type==1)return 1*bonus;
-				if(this.Unit_Type==2)return 100;
+				if(self.Move_Type==1)bonus+=.5;
+				if(self.Unit_Type==1)return 1*bonus;
+				if(self.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==1)
 			{
-				if(this.Move_Type==0)bonus-=.5;
-				if(this.Move_Type==1)bonus+=.5;
-				if(this.Unit_Type==1)return 1*bonus;
-				if(this.Unit_Type==2)return 100;
+				if(self.Move_Type==0)bonus-=.5;
+				if(self.Move_Type==1)bonus+=.5;
+				if(self.Unit_Type==1)return 1*bonus;
+				if(self.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==2)
 			{
-				if(this.Move_Type==1||this.Move_Type==2)return 100;
-				if(this.Unit_Type==1)return 1*bonus;
-				if(this.Unit_Type==2)return 100;
+				if(self.Move_Type==1||self.Move_Type==2)return 100;
+				if(self.Unit_Type==1)return 1*bonus;
+				if(self.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==3)
 			{
-				if(this.Move_Type==1)bonus-=.75;
-				if(this.Unit_Type==1)return 1*bonus;
-				if(this.Unit_Type==2)return 100;
+				if(self.Move_Type==1)bonus-=.75;
+				if(self.Unit_Type==1)return 1*bonus;
+				if(self.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==4)
 			{
-				if(this.Move_Type==0)bonus+=.5;
-				if(this.Unit_Type==1)return 1*bonus;
-				if(this.Unit_Type==2)return 100;
+				if(self.Move_Type==0)bonus+=.5;
+				if(self.Unit_Type==1)return 1*bonus;
+				if(self.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==5)
 			{
-				if(this.Move_Type==0)bonus+=1;
-				if(this.Move_Type==1)bonus+=1.5;
-				if(this.Move_Type==2)bonus+=.5;
-				if(this.Unit_Type==1)return 1*bonus;
-				if(this.Unit_Type==2)return 100;
+				if(self.Move_Type==0)bonus+=1;
+				if(self.Move_Type==1)bonus+=1.5;
+				if(self.Move_Type==2)bonus+=.5;
+				if(self.Unit_Type==1)return 1*bonus;
+				if(self.Unit_Type==2)return 100;
 			}
 			else if(t_data.Type==6)
 			{
-				if(this.Unit_Type==1)return 1*bonus;
-				if(this.Unit_Type==0)return 100;
+				if(self.Unit_Type==1)return 1*bonus;
+				if(self.Unit_Type==0)return 100;
 			}
 			else if(t_data.Type==7)
 			{
@@ -1145,47 +1138,47 @@ var Characters = {
 			return Math.round(bonus*terrain.Drag);
 		};
 
-		this.Clone = function(engine)
+		self.Clone = function(engine)
 		{
 			return new Characters.Char_Class(engine,char_index);
 		};
 
-		this.Dead = false;
-		this.Die = function()
+		self.Dead = false;
+		self.Die = function()
 		{
-			this.Dead = true;
-			this.Health = 0;
-			this.Move_From();
+			self.Dead = true;
+			self.Health = 0;
+			self.Move_From();
 			SFXs.Retrieve('explosion').Play();
-			Core.Explode(this);
+			Core.Explode(self);
 		};
-		this.Remove_From_Game = function()
+		self.Remove_From_Game = function()
 		{
-			this.Player.Remove_Unit(this);
-			game.Remove_Unit(this);
+			self.Player.Remove_Unit(self);
+			game.Remove_Unit(self);
 		};
 
 		var move_path;
-		this.Mover = null;
-		this.Start_Path = function(x, y, onlyAllowedMoves)
+		self.Mover = null;
+		self.Start_Path = function(x, y, onlyAllowedMoves)
 		{
 			if(x==null)
-				x = this.X;
+				x = self.X;
 			if(y==null)
-				y = this.Y;
-			move_path = new Path_Finder_Handler(game, this, x, y, onlyAllowedMoves);
+				y = self.Y;
+			move_path = new Path_Finder_Handler(game, self, x, y, onlyAllowedMoves);
 		};
-		this.Current_Path = function()
+		self.Current_Path = function()
 		{
 			return move_path;
 		};
-		this.Get_Movable_Spaces = function()
+		self.Get_Movable_Spaces = function()
 		{
-			var __path = new Path_Finder_Handler(game, this, this.X, this.Y, true);
+			var __path = new Path_Finder_Handler(game, self, self.X, self.Y, true);
 			return __path.All_Movable_Spaces();
 		};
 
-		this.Open_Actions = function(value)
+		self.Open_Actions = function(value)
 		{
 			if(game.Interface.Fake)return;
 
@@ -1197,9 +1190,7 @@ var Characters = {
 				return;
 			}
 
-			var self = this;
-
-			var Mods = this.Mods_By_Type("Self Action");
+			var Mods = self.Mods_By_Type("Self Action");
 			if(Mods.length==0)
 			{
 				game.Interface.Select_Tile();
@@ -1236,7 +1227,7 @@ var Characters = {
 
 			INTERFACE.Display_Menu(Menu.Game_Prompt, true);
 		};
-		this.Mods_By_Type = function(type)
+		self.Mods_By_Type = function(type)
 		{
 			var cur = [];
 			for(var i=0;i<mods.length;i++)
@@ -1246,22 +1237,22 @@ var Characters = {
 			}
 			return cur;
 		};
-		this.Modifier_Amt = function()
+		self.Modifier_Amt = function()
 		{
 			return mods.length;
 		}
-		this.Modifier = function(i)
+		self.Modifier = function(i)
 		{
 			if(i<mods.length&&i>=0)
 				return mods[i];
 			err("Not a valid index");
 			return null;
 		}
-		this.Add_Modifier = function(value)
+		self.Add_Modifier = function(value)
 		{
 			mods.push(value);
 		};
-		this.Del_Modifier = function(value)
+		self.Del_Modifier = function(value)
 		{
 			for(var i=0;i<mods.length;i++)
 			{
@@ -1274,7 +1265,7 @@ var Characters = {
 			err("Not a valid index");
 		};
 
-		if(this.Resources())
+		if(self.Resources())
 			Additional_Display = Char_Data.Resources;
 	},
 	New:function(Game, name)

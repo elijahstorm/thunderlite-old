@@ -215,7 +215,8 @@ var Engine_Data = function(data)
 		{
 			if(units.At(x,y)!=null)
 			{
-				console.log(input.Rescued_Unit==units.At(x,y));
+				console.error(input.Rescued_Unit);
+				console.log(units.At(x,y));
 				if(input.Rescued_Unit==units.At(x,y))
 				{
 					units.Set(x,y,null);
@@ -296,7 +297,7 @@ var Engine_Data = function(data)
 			if(~pos)
 			{
 				this.Units_Map.Set(value.X,value.Y,null);
-				Units.splice(pos,1);
+				Units.splice(pos,1)[0].Hide_Animation_Display();
 				return true;
 			}
 			return false;
@@ -387,6 +388,7 @@ var Engine_Class = function(input, is_sample)
 
 	let _self = this;
 	let last_move_time = new Date(),
+		warningMsg,
 		last_timeout;
 	const	MAX_MOVE_DELAY_TIME = 60000;
 	const AI_HALTED_CORRECTION = MAX_MOVE_DELAY_TIME/4;
@@ -397,7 +399,6 @@ var Engine_Class = function(input, is_sample)
 		const this_move_time = last_move_time;
 
 		clearLastTimeoutCheck();
-			// this isn't nessisary, it just might be more memory effecient
 
 		if(_self.AI_Players().includes(_self.Active_Player()))
 		{
@@ -416,7 +417,7 @@ var Engine_Class = function(input, is_sample)
 		last_timeout = setTimeout(function(){
 			if(last_move_time==this_move_time)
 			{ // warn that user has 15 seconds to make a move
-				LOG.add((client==_self.Active_Player() ? "You" : "They")+" have 15 seconds to make another move", "#F00", 10000);
+				warningMsg = LOG.add((client==_self.Active_Player() ? "You" : "They")+" have 15 seconds to make another move", "#F00", 10000);
 				last_timeout = setTimeout(function(){
 					if(last_move_time==this_move_time)
 					{	// force player to end their turn
@@ -432,6 +433,11 @@ var Engine_Class = function(input, is_sample)
 	{	// only to be used when ending and starting new turns
 		if(last_timeout!=null)
 		{	// clear out the last time check
+			if(warningMsg!=null)
+			{
+				LOG.remove(warningMsg);
+				warningMsg = null;
+			}
 			clearTimeout(last_timeout);
 		}
 	}
@@ -487,6 +493,8 @@ var Engine_Class = function(input, is_sample)
 		this.Active_Weather.Stop(UI);
 		if(UI!=Fast_Fake_Interface)
 		{
+			clearLastTimeoutCheck();
+			window.parent.setConnection(1);
 			Select_Animation.Remove_All();
 			Repair_Animation.Remove_All();
 			for(var x=1;x<Terrain_Data.TERRE.length;x++)
@@ -1236,6 +1244,15 @@ var Engine_Class = function(input, is_sample)
 			if(!online)console.log("not online");
 		}
 		animationCanvas.clearRect(0, 0, 900, 900);
+		if(Cities.length==0)
+		{
+			for(let p in Players)
+			{
+				Players[p].Add_Control(0, true);
+				Players[p].Add_Control(1, true);
+				Players[p].Add_Control(2, true);
+			}
+		}
 	};
 	this.Leave = function(slot)
 	{

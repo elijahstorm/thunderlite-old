@@ -77,6 +77,13 @@ var Player_Class = function(game, name, team, colors)
 		var build_data = [];
 		for(var i in Units)
 		{
+			if(Units[i].Rescued_Unit!=null)
+			{
+				if(units_data.indexOf(Units[i].Rescued_Unit)!=-1)
+					units_data[units_data.indexOf(Units[i].Rescued_Unit)] = Units[i].Data();
+				else return "CAUGHT ERROR: Rescued_Unit reference invalid";
+				continue;
+			}
 			units_data.push(Units[i].Data());
 		}
 		for(var i in Buildings)

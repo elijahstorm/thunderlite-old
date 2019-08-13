@@ -646,7 +646,7 @@ Menu.MapEditor.Open = function()
 				}
 			}, null, 455, 335, 25, 25, "v"), function(){
 				POPUP_CLOSER();
-				Map_Size(width, height-1, 0, 0);
+				Map_Size(width, height-1, 0, 1);
 				MAP_OPTION_ADDER();
 				data_saved = false;
 				Draw();
@@ -665,7 +665,7 @@ Menu.MapEditor.Open = function()
 				}
 			}, null, 455, 365, 25, 25, "^"), function(){
 				POPUP_CLOSER();
-				Map_Size(width, height-1, 0, 1);
+				Map_Size(width, height-1, 0, 0);
 				MAP_OPTION_ADDER();
 				data_saved = false;
 				Draw();
