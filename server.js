@@ -907,7 +907,6 @@ io.on('connection', function(socket){
 	});
 	socket.on('gamedata get', function(sort_by, start_index, end_amt, userSearch){
 		sort_by.PUBLISHED = true;
-		let returnNum = ;
 		db.gamedata.find(sort_by, function(err, data){
 			if(err){
 				socket.send({type:500});
