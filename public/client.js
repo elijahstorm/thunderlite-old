@@ -319,15 +319,7 @@ window.onload = function(){
 		}
 		else if(data.type==503)
 		{	// recieved a list of game data that matched the query
-			game.Menu.LevelSelect.Update_Map_Search(data.data);
-			if(game.INTERFACE.Open_Menu()==game.Menu.LevelSelect)
-				game.INTERFACE.Open_Menu().Draw();
-		}
-		else if(data.type==504)
-		{	// recieved a list of game data that matched the query
-			game.Menu.LevelSelect.Update_Map_Search(data.data, 1);
-			if(game.INTERFACE.Open_Menu()==game.Menu.LevelSelect)
-				game.INTERFACE.Open_Menu().Draw();
+			game.Menu.LevelSelect.Update_Map_Search(data.data, data.response);
 		}
 
 			/** client saved custom map data */

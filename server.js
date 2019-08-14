@@ -907,7 +907,7 @@ io.on('connection', function(socket){
 	});
 	socket.on('gamedata get', function(sort_by, start_index, end_amt, userSearch){
 		sort_by.PUBLISHED = true;
-		let returnNum = (userSearch) ? 504 : 503;
+		let returnNum = ;
 		db.gamedata.find(sort_by, function(err, data){
 			if(err){
 				socket.send({type:500});
@@ -921,10 +921,14 @@ io.on('connection', function(socket){
 
 			for(let i=0;i<end_amt && i<data.length;i++)
 			{
-				arr.push(data[i].mapdata);
+				data[i]
+				arr.push({
+					game:data[i].mapdata,
+					name:data[i].mapowner
+				});
 			}
 
-			socket.send({type:returnNum, data:arr});
+			socket.send({type:503, data:arr});
 		});
 	});
 

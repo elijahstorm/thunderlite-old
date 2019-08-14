@@ -1714,9 +1714,11 @@ Menu.Game_Prompt = new Menu.Menu_Class();
 Menu.LevelSelect = new Menu.Menu_Class("#77a8bc");
 with(Menu.LevelSelect){
 	Add(new Canvas.Drawable(new Text_Class("32pt Impact", "#A349A4"), null, 30, 10, 600, 45, "Level Select"));
-	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 65, 600, 45, "Free maps"));
-	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 220, 600, 45, "User Created Maps"));
-	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 210, 230, 3, "#000000", null, .6));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 65, 600, 45, "Free Maps"));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 270, 600, 45, "Recently Uploaded Maps"));
+	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 260, 230, 3, "#000000", null, .6));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 470, 600, 45, "Search"));
+	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 460, 230, 3, "#000000", null, .6));
 	Add(new Canvas.Drawable({ // back btn
 		Draw:function(c, x, y, w, h, s){
 			Shape.Rectangle.Draw(c,x,y,310,75,Menu.Button[0]);
@@ -1733,18 +1735,37 @@ with(Menu.LevelSelect){
 		}
 	});
 
-	let caption = new Text_Class("15pt Impact", "#642D64");
+	let Caption = new Text_Class("15pt Impact", "#D7EFD0");
+	let Owner = new Text_Class("9pt Impact", "#C2D8BC");
 
-	Menu.LevelSelect.Update_Map_Search = function(_data_text, y_loc)
+	let y_loc = 0;
+	Menu.LevelSelect.Prep = function(input)
+	{
+		switch (input){
+			case 0:
+				y_loc = 0;
+				break;
+			case 1:
+				y_loc = 1;
+				break;
+			case 2:
+				y_loc = 2;
+				break;
+		}
+	};
+	Menu.LevelSelect.Update_Map_Search = function(_data_text)
 	{	// data, y row index
 		var _read_game_data = new Array(_data_text.length),
-		_game_imgs = new Array(_data_text.length);
-		y_loc = (y_loc==null) ? 0 : y_loc*160;
+		_game_imgs = new Array(_data_text.length),
+		names = new Array(_data_text.length);
+		y_loc = (y_loc==null) ? 0 : y_loc*200;
+
 		let remove_index;
 			/// start load maps
 		for(let index in _data_text)
 		{
-			_data_text[index] = decrypt_game_data(_data_text[index]);
+			names[index] = _data_text[index].name;
+			_data_text[index] = decrypt_game_data(_data_text[index].game);
 			_read_game_data[index] = Map_Reader.Read(_data_text[index]);
 
 			if(_read_game_data[index].Valid)
@@ -1755,7 +1776,11 @@ with(Menu.LevelSelect){
 					sampledGame.Set_Interface(INTERFACE);
 					_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
 					sampledGame.End_Game();
+					imageHolderCanvas.clearRect(0, 0, 900, 900);
+					worldCanvas.clearRect(0, 0, 900, 900);
 					console.timeEnd('drawing map '+index+' sample');
+					if(INTERFACE.Open_Menu()==Menu.LevelSelect)
+						Menu.LevelSelect.Draw();
 				}, 5, index);
 			}
 		}
@@ -1764,8 +1789,16 @@ with(Menu.LevelSelect){
 			let _index = Add(new Canvas.Drawable({ // level display
 				Draw:function(c,x,y,w,h,_load){
 					if(_game_imgs[_load]!=null)
-						Canvas.ScaleImageData(c, _game_imgs[_load], (x+2)*Menu.LevelSelect.xScale, (y+2)*Menu.LevelSelect.yScale, w/(_game_imgs[_load].width-4)*Menu.LevelSelect.xScale, h/(_game_imgs[_load].height-4)*Menu.LevelSelect.yScale);
-					caption.Draw(c,x+5,y+153,w,h,_read_game_data[_load].Name);
+						Canvas.ScaleImageData(c, _game_imgs[_load], x*Menu.LevelSelect.xScale, y*Menu.LevelSelect.yScale, w/_game_imgs[_load].width*Menu.LevelSelect.xScale, h/_game_imgs[_load].height*Menu.LevelSelect.yScale);
+					c.globalAlpha = .2;
+					Shape.Rectangle.Draw(c,x,y,w,h,"#E5D1D0");
+					c.globalAlpha = .7;
+					Shape.Rectangle.Draw(c,x,y+120,w,30,"#57634E");
+					Shape.Rectangle.Draw(c,x,y+120,w,1,"#F4EFEB");
+					c.globalAlpha = 1;
+					Shape.Box.Draw(c,x,y,w,h,"#73877B");
+					Caption.Draw(c,x+5,y+123,w,25,_read_game_data[_load].Name);
+					Owner.Draw(c,x+5,y+140,w,10,names[_load]);
 				}
 			}, null, 30+160*i, 100+y_loc, 150, 150, i), function(level){
 				var gameName = "";

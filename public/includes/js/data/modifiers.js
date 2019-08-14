@@ -209,6 +209,7 @@ var Mod_List = {
 				Core.Fade_Drawable(transport, 0, 7, function(){
 					unit.Alpha.Set(0);
 					game.Remove_Unit(transport);
+					transport.Hide_Animation_Display();
 					transport.Set_Active(false);
 					game.Add_Unit(unit, transport.X, transport.Y, transport.Player.Team);
 					Core.Fade_Drawable(unit, 255, 15);
