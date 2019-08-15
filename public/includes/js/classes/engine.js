@@ -362,7 +362,10 @@ var Engine_Data = function(data)
 			for(var u in cur_units)
 			{
 				var u_data = cur_units[u];
-				this.Add_Unit(new Characters.Char_Class(this, u_data.index), u_data.x, u_data.y, p).Health = u_data.health;
+				let _char = new Characters.Char_Class(this, u_data.index);
+				this.Add_Unit(_char, u_data.x, u_data.y, p).Health = u_data.health;
+				if(u_data.Rescued_Unit)
+					_char.Rescued_Unit = u_data.Rescued_Unit;
 			}
 			var cur_build = p_data.cities;
 			for(var b in cur_build)

@@ -1105,7 +1105,7 @@ var Characters = {
 			}
 			else if(t_data.Type==3)
 			{
-				if(self.Move_Type==1)bonus-=.75;
+				if(self.Move_Type==1)bonus-=.25;
 				if(self.Unit_Type==1)return 1*bonus;
 				if(self.Unit_Type==2)return 100;
 			}

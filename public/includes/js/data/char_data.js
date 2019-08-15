@@ -419,8 +419,8 @@ Char_Data.CHARS[CURCHAR++] = {
 	Sprite:[],
 	AttackSFX:SFXs.Retrieve('gun shot'),
 	MoveSFX:null,
-	X:[4,4,4],
-	Y:[5,5,5]
+	X:[6,4,4],
+	Y:[4,5,5]
 };
 
 Char_Data.CHARS[CURCHAR++] = {	// index = 15
