@@ -287,7 +287,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Name:"Spider Tank",
 	Description:"Can climb mountains",
 	Type:0,
-	Max_Health:70,
+	Max_Health:40,
 	Armor:1,
 	Power:55,
 	Weapon:1,

@@ -307,10 +307,10 @@ var Core = {
 		let d = ani.New(HUD_Display.Context,
 			selectable.X*TILESIZE-INTERFACE.X_Offset()+2,
 			(selectable.Y-.7)*TILESIZE-INTERFACE.Y_Offset(), null, null, true);
+		Core.Fade_Drawable(selectable, 0, 6);
 		ani.onEnd(function(){
 			selectable.Remove_From_Game();
 			ani.Remove(d.values.index);
-			Core.Fade_Drawable(selectable, 0, 6);
 		});
 	},
 	Array:{

@@ -215,8 +215,6 @@ var Engine_Data = function(data)
 		{
 			if(units.At(x,y)!=null)
 			{
-				console.error(input.Rescued_Unit);
-				console.log(units.At(x,y));
 				if(input.Rescued_Unit==units.At(x,y))
 				{
 					units.Set(x,y,null);
@@ -364,7 +362,7 @@ var Engine_Data = function(data)
 				var u_data = cur_units[u];
 				let _char = new Characters.Char_Class(this, u_data.index);
 				this.Add_Unit(_char, u_data.x, u_data.y, p).Health = u_data.health;
-				if(u_data.Rescued_Unit)
+				if(u_data.rescued)
 					_char.Rescued_Unit = u_data.Rescued_Unit;
 			}
 			var cur_build = p_data.cities;
