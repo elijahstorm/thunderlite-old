@@ -191,7 +191,7 @@ var Engine_Data = function(data)
 			if(Players[__team]==null)return -1;
 			var standing = 0; // 0 is bad, the higher the better the position
 
-			var percentOfUnits = (Players[__team].Total_Units()/Units.length)*Players.length;
+			var percentOfUnits = (Players[__team].Units_Amount()/Units.length)*Players.length;
 			if(percentOfUnits>0.4)
 			{
 				standing++;
@@ -722,7 +722,7 @@ var Engine_Class = function(input, is_sample)
 	this.Collect_Visible_Enemies = function(_player)
 	{
 		var data = [];
-		let u, t, _amt = _player.Total_Units();
+		let u, t, _amt = _player.Units_Amount();
 		for(let i=0;i<_amt;i++)
 		{
 			u = _player.Get_Unit(i);
@@ -993,7 +993,7 @@ var Engine_Class = function(input, is_sample)
 
 		this.Hide_Terrain();
 
-		let u, _amt = _player.Total_Units();
+		let u, _amt = _player.Units_Amount();
 		for(let i=0;i<_amt;i++)
 		{
 			u = _player.Get_Unit(i);
@@ -1061,7 +1061,7 @@ var Engine_Class = function(input, is_sample)
 		if(Players[__team]==null)return -1;
 		var standing = 0; // 0 is bad, the higher the better the position
 
-		var percentOfUnits = (Players[__team].Total_Units()/Units.length)*Players.length;
+		var percentOfUnits = (Players[__team].Units_Amount()/Units.length)*Players.length;
 		if(percentOfUnits>0.4)
 		{
 			standing++;

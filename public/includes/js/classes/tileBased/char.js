@@ -1150,7 +1150,14 @@ var Characters = {
 			self.Health = 0;
 			self.Move_From();
 			SFXs.Retrieve('explosion').Play();
-			Core.Explode(self);
+			Core.Explode(self, function(){
+				if(self.Game.Game_Over)return;
+				let acts = self.Mods_By_Type("Death");
+				for(let i in acts)
+				{
+					acts[i].Do(self);
+				}
+			});
 		};
 		self.Remove_From_Game = function()
 		{

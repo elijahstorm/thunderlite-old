@@ -299,7 +299,7 @@ var Player_Class = function(game, name, team, colors)
 			Buildings = [];
 		}, AI.TIMEOUT);
 	};
-	self.Total_Units = function()
+	self.Units_Amount = function()
 	{
 		return Units.length;
 	};

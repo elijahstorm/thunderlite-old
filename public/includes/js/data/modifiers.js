@@ -100,20 +100,20 @@ var Mod_List = {
 		},
 		Death:{
 			Insta_Lose:new Mod_Class(CURMOD++, "Intsa Lose",function(unit){
-				var player = unit.Owner;
+				var player = unit.Player;
 				var amount = player.Units_Amount();
 				for(var i=0;i<amount;i++)
 				{	// check if any instant lose units still exist
 					if(unit==player.Get_Unit(i))continue;
-					if(Char_Data.CHARS[player.Get_Unit(i).Source].Modifiers.includes(Mods_List.Units.Death.Insta_Lose))
+					if(Char_Data.CHARS[player.Get_Unit(i).Source].Modifiers.includes(Mod_List.Units.Death.Insta_Lose))
 						return;
 				}
-				// amount = player.Building_Amount();
-				// for(var i=0;i<amount;i++)
-				// {	// if any instant lose buildings still exist, don't lose
-					// if(player.Get_Building(i).Source==unit.Source)
-						// return;
-				// }
+				amount = player.Building_Amount();
+				for(var i=0;i<amount;i++)
+				{	// if any instant lose buildings still exist, don't lose
+					if(player.Get_Building(i).Source==Building_Data.Get("Command Center"))
+						return;
+				}
 				player.Lose();
 			},"Death","current unit","If all command units die, and player has no more command centers, instantly lose")
 		},
@@ -306,7 +306,7 @@ var Mod_List = {
 				});
 			},"Self Action",[""],"Can build other units", true),
 			Miner:new Mod_Class(CURMOD++, "Miner",function(unit){
-				unit.Player.Data().data.money_gained+=500;
+				unit.Player.data.money_gained+=500;
 				unit.Cash+=500;
 				unit.End_Turn();
 

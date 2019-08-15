@@ -1815,7 +1815,7 @@ let t1,t2,t = at;
 			cur_player = _game.Player(i);
 			if(cur_player==_game.Client_Player())
 				continue;
-			for(var j=0;j<cur_player.Total_Units();j++)
+			for(var j=0;j<cur_player.Units_Amount();j++)
 			{
 				var unit = cur_player.Get_Unit(j),
 					atks;

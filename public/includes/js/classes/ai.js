@@ -47,7 +47,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 					return;
 			}
 		}
-		_amt = __player.Total_Units();
+		_amt = __player.Units_Amount();
 		for(var i=0;i<_amt;i++)
 		{
 			_check_ = __player.Get_Unit(i);
@@ -441,7 +441,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 		{
 			var player = __game.Player(i);
 			if(player==attacker)continue;
-			for(var j=0;j<player.Total_Units();j++)
+			for(var j=0;j<player.Units_Amount();j++)
 				types[player.Get_Unit(j).Armor]++;
 		}
 
@@ -684,7 +684,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 			{
 				player = __game.Player(j);
 				if(player==__player)continue;
-				var total = __game.Player(j).Total_Units();
+				var total = __game.Player(j).Units_Amount();
 				for(var i=0;i<total;i++)
 				{
 					var unit = player.Get_Unit(i);
@@ -698,7 +698,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 			if(airUnits>0)
 			{
 				var missing_anti_air = true;
-				var units = __player.Total_Units();
+				var units = __player.Units_Amount();
 				var unit;
 				for(var i=0;i<units;i++)
 				{
@@ -857,7 +857,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 	{	/** Uses strongest units first, and ranomizes near-similar choices */
 		var all_units = [],
 			all_choices = [];
-		var armySize = player.Total_Units();
+		var armySize = player.Units_Amount();
 		var cur_unit;
 		for(var i=0;i<armySize;i++)
 		{
@@ -1193,7 +1193,6 @@ var AI_Class = function(_last_game, _ai_player, _index)
 				if(!__unit.Can_Attack(checkingEnemyUnit))continue;
 
 				checkingAttackImpact = AttackImpact(__unit, checkingEnemyUnit);
-				console.log(i, checkingAttackImpact);
 				// now check if its best choice
 				if(!DECISION_MADE)
 				{
@@ -1232,7 +1231,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 					// same team
 
 				// run thru current enemy player's units
-				for(var j=0;j<checkingEnemyPlayer.Total_Units();j++)
+				for(var j=0;j<checkingEnemyPlayer.Units_Amount();j++)
 				{
 					checkingEnemyUnit = checkingEnemyPlayer.Get_Unit(j);
 					if(checkingEnemyUnit==null)continue;
@@ -1502,7 +1501,7 @@ console.log(__target.Name);
 console.log(__target.X, __target.Y);
 
 
-		var total_units = __player.Total_Units(),
+		var total_units = __player.Units_Amount(),
 			currentUnit,
 			_enemies = GET_ENEMIES_IN_AREA(__game, __player, __target.X, __target.Y, range);
 		var best_choices = BEST_DEFENSE_BY_AREA(__game, __player, __target.X, __target.Y, range);
@@ -2072,6 +2071,7 @@ console.log(currentUnit.Name);
 		if(currentUnit.Alpha.Get()!=0)
 		if(INTERFACE.isTileOnScreen(currentUnit.X, currentUnit.Y)!=0)
 		{
+			if(!__game.Terrain_Map.At(currentUnit.X, currentUnit.Y).Hidden)
 			INTERFACE.Scroll_To_Tile(currentUnit.X, currentUnit.Y);
 
 			setTimeout(function(){
@@ -2163,7 +2163,7 @@ console.log(currentUnit.Name);
 				}
 
 				capital_found = false;
-				amt = p.Total_Units();
+				amt = p.Units_Amount();
 				for(let j=0;j<amt;j++)
 				{	// estimate each capital enemy location -> with fake unit with location near known location
 					b = p.Get_Unit(j);

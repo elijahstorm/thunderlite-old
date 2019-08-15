@@ -300,7 +300,7 @@ var Core = {
 		change = y_off/frames;
 		Core.Smooth_Changer(drawable,drawable.Y,change,frames,function(){});
 	},
-	Explode:function(selectable)
+	Explode:function(selectable, callback)
 	{
 		let ani = Animations.Retrieve("Explosion");
 		ani.Stop = false;
@@ -311,6 +311,8 @@ var Core = {
 		ani.onEnd(function(){
 			selectable.Remove_From_Game();
 			ani.Remove(d.values.index);
+			if(callback!=null)
+				callback();
 		});
 	},
 	Array:{
