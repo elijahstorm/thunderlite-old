@@ -482,6 +482,7 @@ var Engine_Class = function(input, is_sample)
 	this.id = null; // this should be game index in server
 	this.valid = true;
 	this.game_data = [false,input,0];
+	this.FORCE_MERGE_DISPLAY = false;
 
 	this.Set_Interface = function(ui)
 	{

@@ -73,8 +73,17 @@ var Characters = {
 		self.Y;
 		self.Alpha = new Info(255, self, function(index,info,input){
 			info.data = input;
-			game.Interface.Draw();
+			game.Interface.Simple_Draw();
 		}); // for STEALTH and building new unit
+		self.Fade = function(end, frames, callback)
+		{
+			game.Interface.Set_Unit_Focus(self);
+			Core.Fade_Drawable(self, end, frames, function(){
+				game.Interface.Set_Unit_Focus();
+				if(callback!=null)
+					callback();
+			});
+		};
 		var tileXOff = 0;
 		var tileYOff = 0;
 		self.X_Offset = function()
@@ -128,6 +137,11 @@ var Characters = {
 			{
 				pic = opacity(pic, self.Alpha.data);
 			}
+			if(game.FORCE_MERGE_DISPLAY)
+			{
+				pic = merge(canvas.getImageData(x, y, pic.width, pic.height), pic);
+			}
+
 			canvas.putImageData(_scale==null ? pic : scale(pic, _scale, _scale), x, y);
 		};
 		self.UI_Draw = function(canvas, x, y)
@@ -391,7 +405,7 @@ var Characters = {
 				if(__unit.Alpha.data<255)
 				if(game.Detected_By_Enemy(__unit))
 				{
-					Core.Fade_Drawable(__unit, 255, 15, function(__unit){
+					__unit.Fade(255, 15, function(__unit){
 						__unit.End_Turn();
 						game.Interface.Draw();
 
@@ -532,7 +546,7 @@ var Characters = {
 					tileYOff = 0;
 					unit.Stunned = true;
 					unit.Attacking = check_hidden; // to show where the path was broken
-					Core.Fade_Drawable(check_hidden, 255, 10, function(){
+					check_hidden.Fade(255, 10, function(){
 						done(unit);
 					});
 					return;
@@ -553,7 +567,7 @@ var Characters = {
 					tileYOff = 0;
 					unit.Stunned = true;
 					unit.Attacking = check_hidden; // to show the path was broken
-					Core.Fade_Drawable(check_hidden, 255, 10, function(){
+					check_hidden.Fade(255, 10, function(){
 						done(unit);
 					});
 					return;
@@ -574,7 +588,7 @@ var Characters = {
 					tileYOff = 0;
 					unit.Stunned = true;
 					unit.Attacking = check_hidden; // to show where the path was broken
-					Core.Fade_Drawable(check_hidden, 255, 10, function(){
+					check_hidden.Fade(255, 10, function(){
 						done(unit);
 					});
 					return;
@@ -595,7 +609,7 @@ var Characters = {
 					tileYOff = 0;
 					unit.Stunned = true;
 					unit.Attacking = check_hidden; // to show where the path was broken
-					Core.Fade_Drawable(check_hidden, 255, 10, function(){
+					check_hidden.Fade(255, 10, function(){
 						done(unit);
 					});
 					return;
@@ -611,7 +625,7 @@ var Characters = {
 			{	/// check if radar can find
 				if(game.Found_By_Radar(unit))
 				{
-					Core.Fade_Drawable(unit, 255, 10, function(){
+					unit.Fade(255, 10, function(){
 						recur_animation(unit, mover, done, i);
 					});
 					return;
@@ -622,7 +636,7 @@ var Characters = {
 				var list = game.Radar_Search(unit);
 				for(var j=0;j<list.length;j++)
 				{
-					Core.Fade_Drawable(list[j], 255, 10);
+					list[j].Fade(255, 10);
 				}
 			}
 
@@ -640,28 +654,28 @@ var Characters = {
 			if(check_hidden.Alpha.data<255)
 			if(check_hidden.Player!=unit.Player)
 			{
-				Core.Fade_Drawable(check_hidden, 255, 7);
+				check_hidden.Fade(255, 7);
 			}
 			check_hidden = game.Units_Map.At(unit.X, unit.Y+1);
 			if(check_hidden!=null)
 			if(check_hidden.Alpha.data<255)
 			if(check_hidden.Player!=unit.Player)
 			{
-				Core.Fade_Drawable(check_hidden, 255, 7);
+				check_hidden.Fade(255, 7);
 			}
 			check_hidden = game.Units_Map.At(unit.X-1, unit.Y);
 			if(check_hidden!=null)
 			if(check_hidden.Alpha.data<255)
 			if(check_hidden.Player!=unit.Player)
 			{
-				Core.Fade_Drawable(check_hidden, 255, 7);
+				check_hidden.Fade(255, 7);
 			}
 			check_hidden = game.Units_Map.At(unit.X, unit.Y-1);
 			if(check_hidden!=null)
 			if(check_hidden.Alpha.data<255)
 			if(check_hidden.Player!=unit.Player)
 			{
-				Core.Fade_Drawable(check_hidden, 255, 7);
+				check_hidden.Fade(255, 7);
 			}
 			done(unit);
 		}
@@ -752,7 +766,7 @@ var Characters = {
 			self.Move_From();
 			if(!game.Interface.Fake)
 			{
-				game.Interface.Set_Moving_Unit(self);
+				game.Interface.Set_Unit_Focus(self);
 				game.Interface.Simple_Draw();
 			}
 			self.On_Move(self, mover);
@@ -761,9 +775,6 @@ var Characters = {
 			var oldY = self.Y;
 			self.Animate_Move(mover,function(unit){
 				moveSFX.Stop();
-				setTimeout(function(){
-					moveSFX.Stop();
-				}, 2000);
 				game.Units_Map.Set(oldX,oldY,null);
 				game.Units_Map.Set(unit.X,unit.Y,unit);
 				if(unit.Rescued_Unit!=null)
@@ -772,7 +783,7 @@ var Characters = {
 					unit.Rescued_Unit.Y = unit.Y;
 				}
 				if(!game.Interface.Fake)
-					game.Interface.Set_Moving_Unit(null);
+					game.Interface.Set_Unit_Focus(null);
 				unit.display_health = true;
 				unit.Terrain().Unit = unit;
 				var b = unit.Terrain().Building;
@@ -790,22 +801,22 @@ var Characters = {
 				if(hidden_enemy_check!=null)
 				if(hidden_enemy_check.Alpha.data<255)
 				if(hidden_enemy_check.Player!=unit.Player)
-					Core.Fade_Drawable(hidden_enemy_check, 255, 15);
+					hidden_enemy_check.Fade(255, 15);
 				hidden_enemy_check = game.Units_Map.At(unit.X-1, unit.Y);
 				if(hidden_enemy_check!=null)
 				if(hidden_enemy_check.Alpha.data<255)
 				if(hidden_enemy_check.Player!=unit.Player)
-					Core.Fade_Drawable(hidden_enemy_check, 255, 15);
+					hidden_enemy_check.Fade(255, 15);
 				hidden_enemy_check = game.Units_Map.At(unit.X, unit.Y+1);
 				if(hidden_enemy_check!=null)
 				if(hidden_enemy_check.Alpha.data<255)
 				if(hidden_enemy_check.Player!=unit.Player)
-					Core.Fade_Drawable(hidden_enemy_check, 255, 15);
+					hidden_enemy_check.Fade(255, 15);
 				hidden_enemy_check = game.Units_Map.At(unit.X, unit.Y-1);
 				if(hidden_enemy_check!=null)
 				if(hidden_enemy_check.Alpha.data<255)
 				if(hidden_enemy_check.Player!=unit.Player)
-					Core.Fade_Drawable(hidden_enemy_check, 255, 15);
+					hidden_enemy_check.Fade(255, 15);
 				if(callback!=null)
 					callback(unit);
 			});

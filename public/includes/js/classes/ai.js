@@ -1472,7 +1472,7 @@ console.log(__unit.Name);
 			new_unit.Set_Active(false);
 			__game.Add_Unit(new_unit, loc_x, loc_y, __player.Team);
 			__unit.End_Turn();
-			Core.Fade_Drawable(new_unit, 255, 7);
+			new_unit.Fade(255, 7);
 
 			setTimeout(function(){
 				INTERFACE.Draw();

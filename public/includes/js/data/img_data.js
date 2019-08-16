@@ -1,5 +1,7 @@
 var _IMAGE_LIST = [];
-var BLANKIMG = Images.Declare("Misc/empty.png","empty");
+var BLANKIMG = Images.Declare("Misc/empty.png","empty");;
+Animations.Declare(Images.Declare("Misc/Loading.png","Load"),"Load", 3, true).Frame_Size(4, 4).Stop = false;
+
 Images.Declare("Misc/idle_overlay.png","Idle Overlay");
 Images.Declare("Misc/lock_icon.png","Locked");
 Images.Declare("Icons/flag_base.png","Flag Base");

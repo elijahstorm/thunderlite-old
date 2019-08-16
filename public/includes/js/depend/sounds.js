@@ -2,17 +2,21 @@ function Sound_list_class(LOCATION)
 {
 	var SND_LOC = "./sounds/"+LOCATION;
 	var muted = false;
-	function Sound_Class(src,name,loop,buff,auto,callback)
+	function Sound_Class(src,name,loop,buff,volume,callback)
 	{
 		var snd;
+		let auto = false;
 		var _onplay = function(){};
 		var _onend = function(){};
+		let snd_ln;
+		let self = this;
 		if(src.Play)
 		{
 			snd = new Howl({
 				urls:[src.Source()],
 				buffer:buff,
 				autoplay:auto,
+				volume:volume,
 				loop:loop,
 				onplay:function(){
 					_onplay();
@@ -21,7 +25,7 @@ function Sound_list_class(LOCATION)
 					_onend();
 				},
 				onload:function(){
-					callback();
+					callback(self);
 				}
 			});
 		}
@@ -31,6 +35,7 @@ function Sound_list_class(LOCATION)
 				urls:[SND_LOC+src+'.wav', SND_LOC+src+'.ogg'],
 				buffer:buff,
 				autoplay:auto,
+				volume:volume,
 				loop:loop,
 				onplay:function(){
 					_onplay();
@@ -39,17 +44,31 @@ function Sound_list_class(LOCATION)
 					_onend();
 				},
 				onload:function(){
-					callback();
+					callback(self);
 				}
 			});
 		}
-		this.Play = function(time, sprite, loop)
+
+		this.Break_By = function(amt)
+		{
+			if(amt<=0)return this;
+			snd_ln = snd._duration/amt - .015;
+			let sprite = new Array(amt);
+			for(let i=0;i<amt;i++)
+				sprite[i] = [i*snd_ln*1000, snd_ln*1000];
+			snd._sprite = sprite;
+			return this;
+		};
+		this.Sprite_Amount = function()
+		{
+			return snd._duration/snd_ln;
+		};
+
+		this.Play = function(sprite, loop)
 		{
 			if(muted)return;
+			console.log(snd._sprite[sprite]);
 			snd.play(sprite, loop);
-			if(time)setTimeout(function(){
-				snd.stop();
-			}, time);
 		};
 		this.Stop = function()
 		{
@@ -87,7 +106,7 @@ function Sound_list_class(LOCATION)
 
 	var Sounds = [];
 	var total_snds=0,loaded_snds=0;
-	this.Declare = function(src,name,buff,loop,auto)
+	this.Declare = function(src,name,buff,loop,auto, callback)
 	{
 		for(var i in Sounds)
 		{
@@ -98,8 +117,10 @@ function Sound_list_class(LOCATION)
 			}
 		}
 		total_snds++;
-		Sounds[name] = new Sound_Class(src,name,loop,buff,auto,function(){
+		Sounds[name] = new Sound_Class(src,name,loop,buff,auto,function(self){
 			loaded_snds++;
+			if(callback!=null)
+				callback(self);
 		});
 		return Sounds[name];
 	};
@@ -127,8 +148,9 @@ function Sound_list_class(LOCATION)
 	this.Mute = function(input)
 	{
 		if(input==null)
-			muted = true;
+			muted = !muted;
 		else muted = input;
+		return muted;
 	};
 
 	this.Done = function()

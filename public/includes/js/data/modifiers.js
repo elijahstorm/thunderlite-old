@@ -147,14 +147,14 @@ var Mod_List = {
 				var _game = unit.Game;
 				if(_game.Detected_By_Enemy(unit))
 				{
-					Core.Fade_Drawable(unit, 255, 15);
+					unit.Fade(255, 15);
 					return false;
 				}
 
 					/// down here it's able to cloak
 				if(_game.Client_Player().Team==unit.Player.Team)
-					Core.Fade_Drawable(unit, 155, 15);
-				else Core.Fade_Drawable(unit, 0, 15);
+					unit.Fade(155, 15);
+				else unit.Fade(0, 15);
 				return true;
 			},"End Turn",[""],"Can use cloak if not by enemy unit at end of turn")
 		},
@@ -168,13 +168,13 @@ var Mod_List = {
 
 				transport.Health = transport.Max_Health*unit.Health/unit.Max_Health;
 
-				Core.Fade_Drawable(unit, 0, 7, function(){
+				unit.Fade(0, 7, function(){
 					game.Remove_Unit(unit);
 					unit.Set_Active(false);
 					unit.Alpha.data = 255;
 					unit.Hide_Animation_Display();
 					game.Add_Unit(transport, unit.X, unit.Y, unit.Player.Team);
-					Core.Fade_Drawable(transport, 255, 15);
+					transport.Fade(255, 15);
 				});
 				return true;
 			},"Self Action",["unit"],"Can move other units", true, function(unit){
@@ -189,12 +189,12 @@ var Mod_List = {
 
 				transport.Health = transport.Max_Health*unit.Health/unit.Max_Health;
 
-				Core.Fade_Drawable(unit, 0, 7, function(){
+				unit.Fade(0, 7, function(){
 					game.Remove_Unit(unit);
 					unit.Alpha.data = 255;
 					unit.Hide_Animation_Display();
 					game.Add_Unit(transport, unit.X, unit.Y, unit.Player.Team);
-					Core.Fade_Drawable(transport, 255, 15);
+					transport.Fade(255, 15);
 				});
 				return true;
 			},"Self Action",["unit"],"Set out for the sea!", true, function(unit){
@@ -206,13 +206,13 @@ var Mod_List = {
 
 				unit.Health = unit.Max_Health*transport.Health/transport.Max_Health;
 
-				Core.Fade_Drawable(transport, 0, 7, function(){
+				transport.Fade(0, 7, function(){
 					unit.Alpha.Set(0);
 					game.Remove_Unit(transport);
 					transport.Hide_Animation_Display();
 					transport.Set_Active(false);
 					game.Add_Unit(unit, transport.X, transport.Y, transport.Player.Team);
-					Core.Fade_Drawable(unit, 255, 15);
+					unit.Fade(255, 15);
 					unit.Set_Active(true);
 				});
 				return true;
@@ -301,7 +301,7 @@ var Mod_List = {
 						new_unit.Set_Active(false);
 						unit.Game.Add_Unit(new_unit, loc_x, loc_y, player.Team);
 						unit.End_Turn();
-						Core.Fade_Drawable(new_unit, 255, 7);
+						new_unit.Fade(255, 7);
 					});
 				});
 			},"Self Action",[""],"Can build other units", true),

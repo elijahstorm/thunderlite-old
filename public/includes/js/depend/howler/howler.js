@@ -1215,7 +1215,7 @@
         loadSound(obj);
         return;
       }
-      
+
       if (/^data:[^;]+;base64,/.test(url)) {
         // Decode base64 data-URIs because some browsers cannot load data-URIs with XMLHttpRequest.
         var data = atob(url.split(',')[1]);
@@ -1223,7 +1223,7 @@
         for (var i=0; i<data.length; ++i) {
           dataView[i] = data.charCodeAt(i);
         }
-        
+
         decodeAudioData(dataView.buffer, obj, url);
       } else {
         // load the buffer from the URL

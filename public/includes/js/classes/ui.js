@@ -257,6 +257,7 @@ let t1,t2,t = at;
 		if(!game.Terrain_Map.At(at.X,at.Y).Hidden || game.Client_Player()==at.Player)
 			at.UI_Draw(moveUnitCanvas, left, top);
 	};
+	let allow_render = true;
 	var render = function(left, top, zoom, simple){
 		if(game==null)return;
 		zoom = 1;
@@ -270,6 +271,7 @@ let t1,t2,t = at;
 		if(simple)
 		{
 			moveUnitCanvas.clearRect(0,0,600,600);
+			if(moving_unit==null)return;
 			terrain_disp.render(left, top, zoom, simplePaint);
 			return;
 		}
@@ -278,6 +280,8 @@ let t1,t2,t = at;
 			clearMoveCanvas = false;
 			moveUnitCanvas.clearRect(0,0,900,900);
 		}
+
+		if(!allow_render)return;
 		// TILESIZE = Math.floor((window.parent.mobilecheck() ? 30 : 60 )*zoom);
 		self.zoom = zoom;
 		backCanvas.fillStyle = "#3C6BBE";
@@ -618,12 +622,14 @@ let t1,t2,t = at;
 		Next_Player:function(player,callback)
 		{
 			if(player.Game.Game_Over)return;
+			// allow_render = false;
 			var collectiveDrawable = Dialog_Display.Add_Drawable({
 				back:Shape.Rectangle,
 				border:Shape.Box,
 				icon:player.Icon,
 				name:new Text_Class("25pt Arial", "#000"),
 				Draw:function(c, x, y, w, h, s){
+					if(c.globalAlpha==1)return;
 					this.back.Draw(c,x,y,w,h,"#DDCA7D");
 					c.lineWidth = 10;
 					this.border.Draw(c,x+5,y+5,w-10,h-10,data_to_hex(Team_Colors.Color[player.Color][2]));
@@ -636,7 +642,7 @@ let t1,t2,t = at;
 				setTimeout(function(){
 					Core.Fade_Drawable(collectiveDrawable, 0, 5, function(collectiveDrawable){
 						Dialog_Display.Delete_Drawable(collectiveDrawable);
-						Dialog_Display.Clear();
+						// allow_render = true;
 						callback();
 					});
 				}, 700);
@@ -648,6 +654,7 @@ let t1,t2,t = at;
 	this.Display_Menu = function(menu, no_scale)
 	{
 		if(open_menu)return;
+		menuCanvas.clearRect(0,0,900,900);
 		open_menu = menu;
 		menu_scale = (no_scale==true) ? false : true;
 		if(menu_scale)
@@ -1857,7 +1864,7 @@ let t1,t2,t = at;
 	var hl_path = null;
 	var moving_unit = null;
 	let clearMoveCanvas = true;
-	self.Set_Moving_Unit = function(value)
+	self.Set_Unit_Focus = function(value)
 	{
 		moving_unit = value;
 		if(value==null)
@@ -2102,5 +2109,6 @@ var Fast_Fake_Interface = {
 	Draw:function(){},
 	Simple_Draw:function(){},
 	Scroll_To_Tile:function(){},
-	Resource_Draw:function(){}
+	Resource_Draw:function(){},
+	Set_Unit_Focus:function(){}
 };

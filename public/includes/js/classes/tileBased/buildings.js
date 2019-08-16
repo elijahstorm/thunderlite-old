@@ -115,6 +115,10 @@ var Buildings = {
 			}
 			else
 			{
+				if(game.FORCE_MERGE_DISPLAY)
+				{
+					pic = merge(canvas.getImageData(x, y, pic.width, pic.height), pic);
+				}
 				canvas.putImageData(this.Sprite, x, y);
 			}
 		};
@@ -267,7 +271,6 @@ var Buildings = {
 		this.Die = function()
 		{
 			this.Owner = null;
-			Core.Explode(this);
 		};
 		this.Remove_From_Game = function()
 		{

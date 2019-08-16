@@ -44,8 +44,10 @@ var Building_Data = {
 				c.Idle = true;
 				game.Add_Unit(c, building.X, building.Y, player.Team);
 				building.End_Turn();
+				game.Interface.Set_Unit_Focus(c);
 				Core.Fade_Drawable(c, 255, 7, function(){
 					c.Alpha.data = 255;
+					game.Interface.Set_Unit_Focus();
 					if(callback!=null)callback(building);
 				});
 			});
@@ -65,8 +67,10 @@ var Building_Data = {
 		c.Idle = true;
 		game.Add_Unit(c, building.X, building.Y, player.Team);
 		building.End_Turn();
+		game.Interface.Set_Unit_Focus(c);
 		Core.Fade_Drawable(c, 255, 7, function(){
 			c.Alpha.data = 255;
+			game.Interface.Set_Unit_Focus();
 			if(callback!=null)callback(building);
 		});
 		return true;

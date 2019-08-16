@@ -19,6 +19,11 @@ Menu.MapEditor.Open = function()
 				SERVER.Report_List = fnc;
 			}
 		};
+		let SFX = SFXs.Retrieve("editor sheet");
+		function Play_Placement_SFX(type)
+		{
+			SFX.Play(Math.floor(Math.random()*SFX.Sprite_Amount()));
+		}
 		function send_map_data_to_server(type, data)
 		{
 			if(!online)return;
@@ -158,7 +163,6 @@ Menu.MapEditor.Open = function()
 				__script__ = "";
 				for(let i=0;i<editor._document.storage.length;i++)
 					__script__+=editor._document.storage[i];
-	console.log(__script__);
 				data_saved = false;
 
 				Draw();
@@ -266,9 +270,7 @@ Menu.MapEditor.Open = function()
 
 
 			/// load saved data
-		let _read_game_data = new Array(9),
-			_data_text = new Array(9),
-			_game_imgs = new Array(9);
+		let _read_game_data,_data_text,_game_imgs,loader_icons;
 		function display_server_saved_maps(fnc1, fnc2, fnc3)
 		{
 			if(fnc1==null)
@@ -318,6 +320,7 @@ Menu.MapEditor.Open = function()
 			_read_game_data = new Array(9);
 			_data_text = new Array(9);
 			_game_imgs = new Array(9);
+			loader_icons = new Array(9);
 
 			POPUP_ADDER();									// declare popup about to be used
 
@@ -350,7 +353,7 @@ Menu.MapEditor.Open = function()
 							sampledGame.End_Game();
 							Menu.MapEditor.Draw();
 							console.timeEnd('drawing map '+index+' sample');
-						}, 5, index);
+						}, 50, index);
 					}
 				}
 
@@ -358,10 +361,14 @@ Menu.MapEditor.Open = function()
 				{
 					if(_read_game_data[i]!=null)
 					{
+						loader_icons[i] = Animations.Retrieve("Load").New(menuCanvas, 230+(110*(i%3)), 215+(140*Math.floor(i/3)), 30, 30, true);
 						POPUP_ADDER(new Canvas.Drawable({
 							Draw:function(c,x,y,w,h,_load){
 								if(_game_imgs[_load]!=null)
+								{
+									loader_icons[_load].values.show = false;
 									Canvas.ScaleImageData(c, _game_imgs[_load], (x+2)*Menu.MapEditor.xScale, (y+2)*Menu.MapEditor.yScale, w/(_game_imgs[_load].width-4)*Menu.MapEditor.xScale, 100/(_game_imgs[_load].height-4)*Menu.MapEditor.yScale);
+								}
 								new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
 
 								if(_read_game_data[_load].uploaded)
@@ -912,6 +919,7 @@ Menu.MapEditor.Open = function()
 
 				data_saved = false;
 				beaten_game = false;
+				Play_Placement_SFX(ACTIVE_TYPE);
 
 				if(ACTIVE_TYPE==TYPES.ERASE)
 				{
@@ -1658,6 +1666,7 @@ Menu.MapEditor.Open = function()
 				beaten_game = true;
 				data_saved = true;
 			}
+			Animations.Retrieve("Load").Remove_All();
 			ERROR_DISPLAY.Index = Menu.MapEditor;
 			ERROR_DISPLAY.Alpha.Set(0);
 			ACTIVE_INDEX = 1;
@@ -1717,7 +1726,8 @@ with(Menu.LevelSelect){
 	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 65, 600, 45, "Free Maps"));
 	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 270, 600, 45, "Recently Uploaded Maps"));
 	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 260, 230, 3, "#000000", null, .6));
-	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 470, 600, 45, "Search"));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 470, 600, 45, "Search..."));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 510, 600, 45, "Coming soon!"));
 	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 460, 230, 3, "#000000", null, .6));
 	Add(new Canvas.Drawable({ // back btn
 		Draw:function(c, x, y, w, h, s){
@@ -1757,7 +1767,8 @@ with(Menu.LevelSelect){
 	{	// data, y row index
 		var _read_game_data = new Array(_data_text.length),
 		_game_imgs = new Array(_data_text.length),
-		names = new Array(_data_text.length);
+		names = new Array(_data_text.length),
+		loaders = new Array(_data_text.length);
 		y_loc = (y_loc==null) ? 0 : y_loc*200;
 
 		let remove_index;
@@ -1774,6 +1785,7 @@ with(Menu.LevelSelect){
 					console.time('drawing map '+index+' sample');
 					var sampledGame = new Engine_Class(_read_game_data[index], true);
 					sampledGame.Set_Interface(INTERFACE);
+					sampledGame.FORCE_MERGE_DISPLAY = true;
 					_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
 					sampledGame.End_Game();
 					imageHolderCanvas.clearRect(0, 0, 900, 900);
@@ -1781,15 +1793,23 @@ with(Menu.LevelSelect){
 					console.timeEnd('drawing map '+index+' sample');
 					if(INTERFACE.Open_Menu()==Menu.LevelSelect)
 						Menu.LevelSelect.Draw();
-				}, 5, index);
+				}, 50, index);
 			}
 		}
 
 		for(var i=0;i<_data_text.length;i++){
+			loaders[i] = Animations.Retrieve("Load").New(menuCanvas, 80+160*i, 150+y_loc, 50, 50, false);
 			let _index = Add(new Canvas.Drawable({ // level display
 				Draw:function(c,x,y,w,h,_load){
-					if(_game_imgs[_load]!=null)
+					if(_game_imgs[_load]==null)
+					{
+						loaders[_load].values.show = true;
+					}
+					else
+					{
+						loaders[_load].values.show = false;
 						Canvas.ScaleImageData(c, _game_imgs[_load], x*Menu.LevelSelect.xScale, y*Menu.LevelSelect.yScale, w/_game_imgs[_load].width*Menu.LevelSelect.xScale, h/_game_imgs[_load].height*Menu.LevelSelect.yScale);
+					}
 					c.globalAlpha = .2;
 					Shape.Rectangle.Draw(c,x,y,w,h,"#E5D1D0");
 					c.globalAlpha = .7;
@@ -1800,16 +1820,19 @@ with(Menu.LevelSelect){
 					Caption.Draw(c,x+5,y+123,w,25,_read_game_data[_load].Name);
 					Owner.Draw(c,x+5,y+140,w,10,names[_load]);
 				}
-			}, null, 30+160*i, 100+y_loc, 150, 150, i), function(level){
+			}, null, 30+160*(_data_text.length-i-1), 100+y_loc, 150, 150, i), function(level){
 				var gameName = "";
 				while(gameName=="")gameName = prompt("Name the game ");
 				if(!gameName)return;
+				Animations.Retrieve("Load").Remove_All();
 				new_custom_game(_read_game_data[level], gameName);
 				Menu.LevelSelect.Remove(remove_index, _data_text.length);
-			}, new Canvas.Drawable(Shape.Rectangle, null, 30+160*i, 100+y_loc, 150, 150, "#666607", null, .5));
+			}, new Canvas.Drawable(Shape.Box, null, 30+160*(_data_text.length-i-1), 100+y_loc, 150, 150, "#F2F5FF", null, .5));
 			if(i==0)
 				remove_index = _index;
 		}
+		if(INTERFACE.Open_Menu()==Menu.LevelSelect)
+			Draw();
 	};
 }
 
@@ -1913,7 +1936,7 @@ Menu.PostGame.Set = function(map, players, turn, close_func){
 		Add(new Canvas.Drawable(caption_txt, null, 333, 120, 70, 30, "units"));
 		Add(new Canvas.Drawable(caption_txt, null, 420, 120, 70, 30, "funds"));
 		Add(new Canvas.Drawable(caption_txt, null, 500, 120, 70, 30, "turns"));
-		Add(new Canvas.Drawable(caption_txt, null, 580, 120, 160, 30, "damage dealt"));
+		Add(new Canvas.Drawable(caption_txt, null, 580, 120, 200, 30, "damage dealt"));
 		Add(new Canvas.Drawable(Shape.Box, null, 60, 143, 700, 399, "#000"));
 		for(var i=0;i<players.length;i++){
 			var cur = players[i];

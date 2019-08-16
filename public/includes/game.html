@@ -37,7 +37,7 @@
 		<div class="canvas" id="statsCanvas"></div>
 		<div class="canvas" id="menuCanvas" style="width:810px;height:665px;"></div>
 		<div class="canvas" id="logCanvas" style="width:810px;height:665px;"></div>
-		<div class="canvas" id="dialogCanvas" style="width:810px;height:665px;"></div>
+		<div class="canvas" id="dialogCanvas" style="width:600px;height:600px;"></div>
 		<div class="canvas" id="inputHandler" style="width:810px;height:665px;"></div>
 	</div>
 	<div id="mainMenu" style="display:block;">
@@ -45,7 +45,7 @@
 		<div id="listHandler">
 			<div class="btn_super" id="->levelSelect" onclick="openLevelSelect()">Open New Game</div><br />
 			<div class="btn_super" id="->mapEdit" onclick="openMapEditor()">Map Editor</div><br />
-			<div class="btn_super" id="->options" onclick="displayNext(this.id);">Options</div><br />
+			<div class="btn_super" id="sound" onclick="sfxToggle(this);">Sound On</div><br />
 			<div class="btn_super" id="->credits" onclick="displayNext(this.id);">Credits</div>
 			<div class="sub_menu" id="htp">
 				This game is played with the mouse.<br />
@@ -120,7 +120,7 @@
 <script src="js/data/building_data.js"></script>
 <script src="js/data/terr_data.js"></script>
 <script src="js/data/weather_data.js"></script>
-<script src="js/data/sfxSprites.js"></script>
+<script src="js/data/sfx_sprites.js"></script>
 <script src="js/data/char_data.js"></script>
 <script src="js/data/colors.js"></script>
 <script src="js/classes/tileBased/buildings.js"></script>

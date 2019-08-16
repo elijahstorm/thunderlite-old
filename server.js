@@ -654,7 +654,7 @@ io.on('connection', function(socket){
 	socket.on('mapdata download', function(userpass){
 
 		db.users.find({username:userpass.name}, function(err, data){
-			if(err){
+			if(err || data.length==0){
 				socket.send({type:700});
 				return;
 			}
@@ -687,7 +687,7 @@ io.on('connection', function(socket){
 	});
 	socket.on('mapdata upload', function(userpass, input_data){
 		db.users.find({username:userpass.name}, function(err, data){
-			if(err){
+			if(err || data.length==0){
 				socket.send({type:700});
 				return;
 			}
@@ -738,7 +738,7 @@ io.on('connection', function(socket){
 	socket.on('mapdata update', function(userpass, input_data){
 
 		db.users.find({username:userpass.name}, function(err, data){
-			if(err){
+			if(err || data.length==0){
 				socket.send({type:700});
 				return;
 			}
@@ -779,7 +779,7 @@ io.on('connection', function(socket){
 	socket.on('mapdata mark playtested', function(userpass, mapid){
 
 		db.users.find({username:userpass.name}, function(err, data){
-			if(err){
+			if(err || data.length==0){
 				socket.send({type:700});
 				return;
 			}
@@ -818,7 +818,7 @@ io.on('connection', function(socket){
 	});
 	socket.on('mapdata delete', function(userpass, mapid){
 		db.users.find({username:userpass.name}, function(err, data){
-			if(err){
+			if(err || data.length==0){
 				socket.send({type:700});
 				return;
 			}
@@ -854,7 +854,7 @@ io.on('connection', function(socket){
 	});
 	socket.on('mapdata publish', function(userpass, mapid){
 		db.users.find({username:userpass.name}, function(err, data){
-			if(err){
+			if(err || data.length==0){
 				socket.send({type:700});
 				return;
 			}

@@ -15,9 +15,6 @@ var FRAMERATEDISPLAY;
 var lastLoop = new Date;
 var parentFrame = window.parent.document.getElementById('gameFrame');
 
-// SFX.Mute();
-// Music.Mute();
-
 var	fps = 30,
 	paused = false,
 	currently_playing = false,
@@ -307,7 +304,7 @@ var Core = {
 		let d = ani.New(HUD_Display.Context,
 			selectable.X*TILESIZE-INTERFACE.X_Offset()+2,
 			(selectable.Y-.7)*TILESIZE-INTERFACE.Y_Offset(), null, null, true);
-		Core.Fade_Drawable(selectable, 0, 6);
+		selectable.Fade(0, 6);
 		ani.onEnd(function(){
 			selectable.Remove_From_Game();
 			ani.Remove(d.values.index);
@@ -592,9 +589,6 @@ window.onload = function(){
 	};
 	Canvas.Reflow();
 	Canvas.Next_Tick();
-
-		/// LOAD FREE MAPS DATA
-	socket.emit('gamedata get', {mapowner:'freemaps'}, 0, 5);
 };
 
 var INTERFACE;
@@ -664,7 +658,9 @@ function init_map(map, players, game_id, skip_pregame, test_game){
 		else Game.Set_Player(0, socket.index, socket.username, true);
 		return;
 	}
+	Game.FORCE_MERGE_DISPLAY = true;
 	Menu.PreGame.Map(map, INTERFACE.Get_Sample(Game));
+	Game.FORCE_MERGE_DISPLAY = false;
 	if(players!=null)
 	{
 		for(var i in players.c)
@@ -766,6 +762,8 @@ function mainMenu(){
 		backCanvas.fillRect(0,0,Canvas.Width,Canvas.Height);
 	});
 	INTERFACE.Close_Menu();
+			/// LOAD FREE MAPS DATA
+	socket.emit('gamedata get', {mapowner:'freemaps'}, 0, 5);
 
 	document.getElementById("mainMenu").style.display="block";
 	window.parent.openLobby();
@@ -840,14 +838,12 @@ function getElementsByClass(searchClass,tag,node){
 }
 
 function sfxToggle(button){
-	// if(sfx){
-		// button.innerHTML = "SFX Off";
-		// sfx = false;
-	// }
-	// else{
-		// button.innerHTML = "SFX On";
-		// sfx = true;
-	// }
+	if(SFXs.Mute(Music.Mute())){
+		button.innerHTML = "Sound Off";
+	}
+	else{
+		button.innerHTML = "Sound On";
+	}
 }
 
 function displayNext(id_to_show){
@@ -858,6 +854,7 @@ function displayNext(id_to_show){
 	}
 	id_to_show = id_to_show.substring(id_to_show.indexOf("->")+2,id_to_show.length);
 	document.getElementById(id_to_show).style.display = "block";
+	document.getElementById("gameLogo").style.visibility = "hidden";
 }
 function backNav(x){
 	x.style.display = "none";
@@ -866,4 +863,5 @@ function backNav(x){
 	{
 		elements[i].style.display = "block";
 	}
+	document.getElementById("gameLogo").style.visibility = "visible";
 }
