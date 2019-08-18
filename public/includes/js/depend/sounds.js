@@ -67,7 +67,6 @@ function Sound_list_class(LOCATION)
 		this.Play = function(sprite, loop)
 		{
 			if(muted)return;
-			console.log(snd._sprite[sprite]);
 			snd.play(sprite, loop);
 		};
 		this.Stop = function()

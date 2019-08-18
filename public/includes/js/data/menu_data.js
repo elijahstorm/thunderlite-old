@@ -5,6 +5,7 @@ Menu.Button = [	"#056937",	"#08AF5C",	"#726962",	"#FFB200",	"#4B5148",	"#FDF5BF"
 Menu.MapEditor = new Menu.Menu_Class("#7F9172");
 Menu.MapEditor.Open = function()
 {
+	Animations.Retrieve("Load").Remove_All();
 	with(Menu.MapEditor){
 		let SERVER = {
 			LOAD:'download',
@@ -22,7 +23,7 @@ Menu.MapEditor.Open = function()
 		let SFX = SFXs.Retrieve("editor sheet");
 		function Play_Placement_SFX(type)
 		{
-			SFX.Play(Math.floor(Math.random()*SFX.Sprite_Amount()));
+			SFX.Play(1+Math.floor(Math.random()*(SFX.Sprite_Amount()-1)));
 		}
 		function send_map_data_to_server(type, data)
 		{
@@ -336,24 +337,31 @@ Menu.MapEditor.Open = function()
 					/// start load maps
 				for(let _m in _list_data)
 				{
-					let curMap = _list_data[_m];
-					var index = curMap.saveindex;
-					_data_text[index] = decrypt_game_data(curMap.map);
-					_read_game_data[index] = Map_Reader.Read(_data_text[index]);
-					_read_game_data[index].id = curMap.map_id;
-					_read_game_data[index].uploaded = curMap.uploaded;
+					try {
+						let curMap = _list_data[_m];
+						var index = curMap.saveindex;
+						_data_text[index] = decrypt_game_data(curMap.map);
+						_read_game_data[index] = Map_Reader.Read(_data_text[index]);
+						_read_game_data[index].id = curMap.map_id;
+						_read_game_data[index].uploaded = curMap.uploaded;
 
-					if(_read_game_data[index].Valid)
-					{
-						setTimeout(function(index){
-							console.time('drawing map '+index+' sample');
-							var sampledGame = new Engine_Class(_read_game_data[index], true);
-							sampledGame.Set_Interface(INTERFACE);
-							_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
-							sampledGame.End_Game();
-							Menu.MapEditor.Draw();
-							console.timeEnd('drawing map '+index+' sample');
-						}, 50, index);
+						if(_read_game_data[index].Valid)
+						{
+							setTimeout(function(index){
+								console.time('drawing map '+index+' sample');
+								var sampledGame = new Engine_Class(_read_game_data[index], true);
+								sampledGame.Set_Interface(INTERFACE);
+								_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
+								sampledGame.End_Game();
+								Menu.MapEditor.Draw();
+								console.timeEnd('drawing map '+index+' sample');
+							}, 50, index);
+						}
+					} catch (e) {
+						_read_game_data[index] = null;
+						console.error(e);
+					} finally {
+
 					}
 				}
 
@@ -361,7 +369,7 @@ Menu.MapEditor.Open = function()
 				{
 					if(_read_game_data[i]!=null)
 					{
-						loader_icons[i] = Animations.Retrieve("Load").New(menuCanvas, 230+(110*(i%3)), 215+(140*Math.floor(i/3)), 30, 30, true);
+						loader_icons[i] = Animations.Retrieve("Load").New(menuCanvas, (230+(110*(i%3)))*Menu.MapEditor.xScale, (215+(140*Math.floor(i/3)))*Menu.MapEditor.yScale, 30*Menu.MapEditor.xScale, 30*Menu.MapEditor.yScale, true);
 						POPUP_ADDER(new Canvas.Drawable({
 							Draw:function(c,x,y,w,h,_load){
 								if(_game_imgs[_load]!=null)
@@ -812,8 +820,7 @@ Menu.MapEditor.Open = function()
 			WEATHER:3,
 			ERASE:4
 		};
-
-
+		
 		var ACTIVE_INDEX = 1,								// active list data
 			ACTIVE_DRAWABLE = {
 				Draw:function(c,x,y,w,h,s){
@@ -1124,7 +1131,7 @@ Menu.MapEditor.Open = function()
 				return;
 			}
 
-			while(name=="" || name==null || name=="Unnamed Custom Map")
+			while(name=="" || name==null || name=="Unnamed Custom Map" || name.includes(";"))
 				name = prompt("Give your map a name", name);
 			if(name==null)
 				return;
@@ -1206,8 +1213,8 @@ Menu.MapEditor.Open = function()
 		Add(new Canvas.Drawable({							// down one player
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,"<");
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,"<");
+				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+4,260,20,"<");
+				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+3,260,20,"<");
 			}
 		}, null, 620, 145, 20, 30, Player_Text), function(text){
 			if(ACTIVE_PLAYER>-1)
@@ -1216,15 +1223,15 @@ Menu.MapEditor.Open = function()
 		}, {
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,"<");
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,"<");
+				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+4,260,20,"<");
+				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+3,260,20,"<");
 			}
 		});
 		Add(new Canvas.Drawable({							// up one player
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,">");
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,">");
+				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+4,260,20,">");
+				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+3,260,20,">");
 			}
 		}, null, 755, 145, 20, 30, Player_Text), function(text){
 			if(ACTIVE_PLAYER<max_players-1)
@@ -1233,8 +1240,8 @@ Menu.MapEditor.Open = function()
 		}, {
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,">");
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,">");
+				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+4,260,20,">");
+				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+3,260,20,">");
 			}
 		});
 		Add(Player_Text);
@@ -1523,16 +1530,16 @@ Menu.MapEditor.Open = function()
 					Add(new Canvas.Drawable({		// left
 						Draw:function(c, x, y, w, h, s){
 							Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+3,260,20,s);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+2,260,20,s);
+							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+3,260,20,s);
+							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+2,260,20,s);
 						}
 					}, null, 705, 495, 18, 30, "<"), function(){
 						Update_Active_List(__type, page-1);
 					}, {
 						Draw:function(c, x, y, w, h, s){
 							Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+3,260,20,s);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+2,260,20,s);
+							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+3,260,20,s);
+							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+2,260,20,s);
 						}
 					});
 				}
@@ -1542,16 +1549,16 @@ Menu.MapEditor.Open = function()
 					Add(new Canvas.Drawable({		// left
 						Draw:function(c, x, y, w, h, s){
 							Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+3,260,20,s);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+2,260,20,s);
+							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+3,260,20,s);
+							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+2,260,20,s);
 						}
 					}, null, 728, 495, 18, 30, ">"), function(){
 						Update_Active_List(__type, page+1);
 					}, {
 						Draw:function(c, x, y, w, h, s){
 							Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+3,260,20,s);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+2,260,20,s);
+							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+3,260,20,s);
+							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+2,260,20,s);
 						}
 					});
 				}
@@ -1736,6 +1743,7 @@ with(Menu.LevelSelect){
 			new Text_Class("36pt Verdana", Menu.Button[3]).Draw(c,x+87,y+17,260,55,"BACK");
 		}
 	}, null, 430, 10, 310, 75), function(){
+		Animations.Retrieve("Load").Remove_All();
 		mainMenu();
 	}, {
 		Draw:function(c, x, y, w, h, s){
@@ -1748,18 +1756,20 @@ with(Menu.LevelSelect){
 	let Caption = new Text_Class("15pt Impact", "#D7EFD0");
 	let Owner = new Text_Class("9pt Impact", "#C2D8BC");
 
-	let y_loc = 0;
+	let h_index = 0;
+	let remove_index = new Array(3);
+	let _width = window.parent.mobilecheck() ? 250 : 200;
 	Menu.LevelSelect.Prep = function(input)
 	{
 		switch (input){
 			case 0:
-				y_loc = 0;
+				h_index = 0;
 				break;
 			case 1:
-				y_loc = 1;
+				h_index = 1;
 				break;
 			case 2:
-				y_loc = 2;
+				h_index = 2;
 				break;
 		}
 	};
@@ -1769,9 +1779,13 @@ with(Menu.LevelSelect){
 		_game_imgs = new Array(_data_text.length),
 		names = new Array(_data_text.length),
 		loaders = new Array(_data_text.length);
-		y_loc = (y_loc==null) ? 0 : y_loc*200;
+		let y_loc = h_index*200;
+		if(remove_index[h_index]!=null)
+		{
+			Menu.LevelSelect.Remove(remove_index[h_index], _data_text.length);
+			remove_index[h_index] = null;
+		}
 
-		let remove_index;
 			/// start load maps
 		for(let index in _data_text)
 		{
@@ -1798,7 +1812,7 @@ with(Menu.LevelSelect){
 		}
 
 		for(var i=0;i<_data_text.length;i++){
-			loaders[i] = Animations.Retrieve("Load").New(menuCanvas, 80+160*i, 150+y_loc, 50, 50, false);
+			loaders[i] = Animations.Retrieve("Load").New(menuCanvas, 30+((_width+10+(_width/3))*(_data_text.length-i-1)), (150+y_loc)*Menu.LevelSelect.yScale, _width/3*Menu.LevelSelect.xScale, 50*Menu.LevelSelect.yScale, (y_loc!=0));
 			let _index = Add(new Canvas.Drawable({ // level display
 				Draw:function(c,x,y,w,h,_load){
 					if(_game_imgs[_load]==null)
@@ -1820,16 +1834,15 @@ with(Menu.LevelSelect){
 					Caption.Draw(c,x+5,y+123,w,25,_read_game_data[_load].Name);
 					Owner.Draw(c,x+5,y+140,w,10,names[_load]);
 				}
-			}, null, 30+160*(_data_text.length-i-1), 100+y_loc, 150, 150, i), function(level){
+			}, null, 30+((_width+10)*(_data_text.length-i-1)), 100+y_loc, _width, 150, i), function(level){
 				var gameName = "";
 				while(gameName=="")gameName = prompt("Name the game ");
 				if(!gameName)return;
 				Animations.Retrieve("Load").Remove_All();
 				new_custom_game(_read_game_data[level], gameName);
-				Menu.LevelSelect.Remove(remove_index, _data_text.length);
-			}, new Canvas.Drawable(Shape.Box, null, 30+160*(_data_text.length-i-1), 100+y_loc, 150, 150, "#F2F5FF", null, .5));
+			}, new Canvas.Drawable(Shape.Box, null, 30+((_width+10)*(_data_text.length-i-1)), 100+y_loc, _width, 150, "#F2F5FF", null, .5));
 			if(i==0)
-				remove_index = _index;
+				remove_index[h_index] = _index;
 		}
 		if(INTERFACE.Open_Menu()==Menu.LevelSelect)
 			Draw();

@@ -50,21 +50,7 @@ var Player_Class = function(game, name, team, colors)
 			imageHolderCanvas.clearRect(0,0,img.Image().width,img.Image().height);
 		}
 
-		function ICON_DRAWER(imgData)
-		{
-			this.Draw = function(canvas, x, y, w, h)
-			{
-				if(w==null)w=imgData.width;
-				if(h==null)h=imgData.height;
-
-				var back = canvas.getImageData(x, y, w, h);
-				var x_scale = w/imgData.width;
-				var y_scale = h/imgData.height;
-
-				canvas.putImageData(merge(back, scale(imgData, x_scale, y_scale)), x, y);
-			};
-		};
-		self.Icon = new ICON_DRAWER(charSprites[1][0]);
+		self.Icon = Images.Retrieve("Player Face"+colors);
 	}
 
 	self.Name = name;

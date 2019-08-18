@@ -319,7 +319,7 @@ window.onload = function(){
 		}
 		else if(data.type==503)
 		{	// recieved a list of game data that matched the query
-			game.Menu.LevelSelect.Update_Map_Search(data.data, data.response);
+			game.Menu.LevelSelect.Update_Map_Search(data.data);
 		}
 
 			/** client saved custom map data */

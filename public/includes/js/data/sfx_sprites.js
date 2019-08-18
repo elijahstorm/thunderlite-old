@@ -22,6 +22,6 @@ SFXs.Declare("explosion", "explosion", true, false);
 SFXs.Declare("machineGun", "machine gun", true, true);
 SFXs.Declare("gun", "gun shot", true, false);
 
-SFXs.Declare("map editor/placement sheet", "editor sheet", true, false, .3, function(self){
-  self.Break_By(8);
+SFXs.Declare("map editor/placement sheet", "editor sheet", true, false, .5, function(self){
+  self.Break_By(16);
 });

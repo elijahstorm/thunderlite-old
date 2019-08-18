@@ -349,10 +349,10 @@ let t1,t2,t = at;
 		Avatar = {
 			DayNumber:Avatar_Display.Add_Drawable(new Text_Class("12pt Arial", "#000"), "Day Number", 2, 8, 30, 27, "Day", Canvas.Background),
 			Turn_Number:Avatar_Display.Add_Drawable(new Text_Class("20pt Arial", "#000"), "Turn Number", 36, 5, 30, 30, null, Canvas.Background),
-			Current_Player:Avatar_Display.Add_Drawable(new Text_Class("15pt Arial", "#000"), "Player Name", 5, 130, 80, 35, null, Canvas.Background),
+			Current_Player:Avatar_Display.Add_Drawable(new Text_Class("15pt Arial", "#000"), "Player Name", 5, -130, 80, 35, null, Canvas.Background),
 			Standings:Avatar_Display.Add_Drawable(new Text_Class("10pt Arial", "#000"), "Standings", 2, 27, 200, 200, null, Canvas.Background),
-			Info:Avatar_Display.Add_Drawable(new Text_Class("13pt Arial", "#000"), "Info", 2, 45, 200, 20, null, Canvas.Background),
-			Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 30, 45, 30, 30, null, Canvas.Background),
+			Info:Avatar_Display.Add_Drawable(new Text_Class("13pt Arial", "#000"), "Info", 2, 40, 200, 20, null, Canvas.Background),
+			Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 15, 55, 30, 30, null, Canvas.Background),
 
 			All_Threaths:Avatar_Display.Add_Drawable({Draw:function(){}}, "Threats", 605, 242, 80, 30, "#EE6352", Canvas.Background),
 			_ThreathsBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "ThreatsBG", 5, 242, 80, 30, "#EE6352", Canvas.Background),
@@ -399,7 +399,7 @@ let t1,t2,t = at;
 						active_player = __game.Player((active_player.Team+1)%total_players);
 					}
 				}
-			}, "Player List Highlights", 2, 70, 50, 40, null, Canvas.Merge),
+			}, "Player List Highlights", 2, 90, 50, 40, null, Canvas.Merge),
 
 			Update_Player_List:function(){
 				var total_players = game.Total_Players();
@@ -437,6 +437,7 @@ let t1,t2,t = at;
 				this.Info.State.Set("$"+player.Cash_Money());
 				this.Current_Player.State.Set(player.Name);
 				this.Icon.Source.Set(player.Icon);
+				this.Icon.Alpha.Set(1);
 				this.Update_Player_List();
 			}
 		};
@@ -491,7 +492,7 @@ let t1,t2,t = at;
 			}
 		};
 		Avatar = {
-			TurnBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "TurnBG", 20, 15, 150, 55, "#73877B", Canvas.Background),
+			TurnBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "TurnBG", 20, 15, 150, 55, "#D6E094", Canvas.Background),
 			TurnBox:Avatar_Display.Add_Drawable(Shape.Box, "TurnBox", 20, 15, 150, 55, "#DFB2F4", Canvas.Merge),
 			Turn:Avatar_Display.Add_Drawable(new Text_Class("20pt Arial", "#000"), "Turn", 30, 30, 50, 40, null, Canvas.Merge),
 			Weather:Avatar_Display.Add_Drawable(Shape.Rectangle, "Weather Icon", 10, 185, 50, 50, null, Canvas.Background),
@@ -501,8 +502,7 @@ let t1,t2,t = at;
 			Standings_Border2:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border2", 20, 105, 150, 2, "#000", Canvas.Background),
 			Current_Player:Avatar_Display.Add_Drawable(new Text_Class("25pt Arial", "#000"), "Player Name", 10, 130, 200, 35, null, Canvas.Background),
 			Info:Avatar_Display.Add_Drawable(new Text_Class("15pt Arial", "#000"), "Info", 15, 165, 200, 20, null, Canvas.Background),
-			// IconBG:Avatar_Display.Add_Drawable(Shape.Box, "IconBG", 110, 167, 80, 80, "#000", Canvas.Background),
-			Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 110, 170, 80, 80, null, Canvas.Background),
+			Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 110, 160, 80, 80, null, Canvas.Background),
 
 			All_Threaths:Avatar_Display.Add_Drawable({Draw:function(){}}, "Threats", 605, 242, 80, 30, "#EE6352", Canvas.Background),
 			_ThreathsBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "ThreatsBG", 5, 242, 80, 30, "#EE6352", Canvas.Background),
@@ -589,6 +589,7 @@ let t1,t2,t = at;
 				this.Info.State.Set("$"+player.Cash_Money());
 				this.Current_Player.State.Set(player.Name);
 				this.Icon.Source.Set(player.Icon);
+				this.Icon.Alpha.Set(1);
 				this.Update_Player_List();
 			}
 		};
@@ -634,8 +635,8 @@ let t1,t2,t = at;
 					c.lineWidth = 10;
 					this.border.Draw(c,x+5,y+5,w-10,h-10,data_to_hex(Team_Colors.Color[player.Color][2]));
 					c.lineWidth = 1;
-					this.icon.Draw(c,x+20,y+20);
-					this.name.Draw(c,x+100,y+40,w,h,player.Name);
+					this.icon.Draw(c,x+20,y+20,100,100);
+					this.name.Draw(c,x+180,y+40,w,h,player.Name);
 				}
 			}, null, 600, 200, 400, 200, null, null, .7);
 			Core.Slide_Drawable_X(collectiveDrawable, -500, 10, function(collectiveDrawable){

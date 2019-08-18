@@ -122,7 +122,7 @@ var Map_Reader_Class = function(){
 			// terrain width
 		__data[3] = parseInt(__input.substring(dividers[2]+1, dividers[3]));
 			// terrain height
-		var temp_str = __input.substring(dividers[3]+1, dividers[4]);
+		var temp_str = __input.substring(dividers[3]+1, dividers[4]),
 			temp_len = __data[2]*__data[3];
 		var temp_array = new Array(temp_len),
 			temp_last_loc = 0, temp_next_loc;

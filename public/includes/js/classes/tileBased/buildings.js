@@ -112,15 +112,14 @@ var Buildings = {
 			{
 				var img = BuildData.Sprite.Image();
 				BuildData.Sprite.Draw(canvas,x,y,img.width*TILESIZE/60,img.height*TILESIZE/60);
+				return;
 			}
-			else
+			if(game.FORCE_MERGE_DISPLAY)
 			{
-				if(game.FORCE_MERGE_DISPLAY)
-				{
-					pic = merge(canvas.getImageData(x, y, pic.width, pic.height), pic);
-				}
-				canvas.putImageData(this.Sprite, x, y);
+				canvas.putImageData(merge(canvas.getImageData(x, y, this.Sprite.width, this.Sprite.height), this.Sprite), x, y);
+				return;
 			}
+			canvas.putImageData(this.Sprite, x, y);
 		};
 		this.UI_Draw = function(canvas, x, y)
 		{
