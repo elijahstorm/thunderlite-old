@@ -820,7 +820,7 @@ Menu.MapEditor.Open = function()
 			WEATHER:3,
 			ERASE:4
 		};
-		
+
 		var ACTIVE_INDEX = 1,								// active list data
 			ACTIVE_DRAWABLE = {
 				Draw:function(c,x,y,w,h,s){
@@ -1733,8 +1733,8 @@ with(Menu.LevelSelect){
 	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 65, 600, 45, "Free Maps"));
 	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 270, 600, 45, "Recently Uploaded Maps"));
 	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 260, 230, 3, "#000000", null, .6));
-	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 470, 600, 45, "Search..."));
-	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 510, 600, 45, "Coming soon!"));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 470, 600, 45, "Search maps by..."));
+	Add(new Canvas.Drawable(new Text_Class("15pt Impact", "#000"), null, 320, 467, 600, 45, "Username:"));
 	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 460, 230, 3, "#000000", null, .6));
 	Add(new Canvas.Drawable({ // back btn
 		Draw:function(c, x, y, w, h, s){
@@ -1752,6 +1752,76 @@ with(Menu.LevelSelect){
 			new Text_Class("36pt Verdana", Menu.Button[3]).Draw(c,x+87,y+17,260,55,"BACK");
 		}
 	});
+
+
+	Menu.LevelSelect.Activate = function()
+	{
+		let search = new CanvasTextEditor(new Document("Enter here..."), {width:175, height:18, left:420, top:460});
+
+	  // document.getElementById('inputHandler').appendChild(editor.getEl());
+		// editor.getEl().id = "LevelSelectNameSearch";
+	  document.getElementById('inputHandler').appendChild(search.getEl());
+		search.getEl().id = "LevelSelectUserSearch";
+
+		Menu.LevelSelect.Current_Scale = function(x, y)
+		{
+			search.reflow(x, y);
+		};
+		Menu.LevelSelect.Current_Scale(Menu.LevelSelect.xScale, Menu.LevelSelect.yScale);
+
+		let last_q;
+		let search_fnc = function()
+		{
+			Menu.LevelSelect.Prep(2);
+
+			let query = "";
+			for(let i=0;i<search._document.storage.length-1;i++)
+			{
+				query+=search._document.storage[i].substring(0, search._document.storage[i].length-1);
+			}
+			query+=search._document.storage[search._document.storage.length-1];
+			search._document = new Document(query);
+
+			if(query==last_q)
+				return;
+			if(query.length==0)
+				return;
+			if(query.includes("'") || query.includes('"'))
+				return;
+			if(query.includes(".") || query.includes(';'))
+				return;
+
+			last_q = query;
+			socket.emit('gamedata get', {mapowner:query}, 0, 5);
+			search.render();
+		};
+
+		search.inputEl.onkeydown = function(e)
+		{
+			if(e.keyCode==13)
+			{
+				search_fnc();
+			}
+		};
+		search.inputEl.onblur = search_fnc;
+		search.inputEl.onfocus = function(e)
+		{
+			if(search._document.storage[0]=="Enter here...")
+				search._document = new Document("");
+		};
+
+		let old_closer = Menu.LevelSelect.Close;
+		Menu.LevelSelect.Close = function()
+		{
+			// document.getElementById('inputHandler').removeChild(document.getElementById('LevelSelectNameSearch'));
+			document.getElementById('inputHandler').removeChild(document.getElementById('LevelSelectSearch'));
+			old_closer();
+		};
+	};
+
+
+
+
 
 	let Caption = new Text_Class("15pt Impact", "#D7EFD0");
 	let Owner = new Text_Class("9pt Impact", "#C2D8BC");
@@ -1811,41 +1881,83 @@ with(Menu.LevelSelect){
 			}
 		}
 
+		let drawer = { // level display
+			Draw:function(c,x,y,w,h,_load){
+				if(_game_imgs[_load]==null)
+				{
+					loaders[_load].values.show = true;
+				}
+				else
+				{
+					loaders[_load].values.show = false;
+					Canvas.ScaleImageData(c, _game_imgs[_load], x*Menu.LevelSelect.xScale, y*Menu.LevelSelect.yScale, w/_game_imgs[_load].width*Menu.LevelSelect.xScale, h/_game_imgs[_load].height*Menu.LevelSelect.yScale);
+				}
+				c.globalAlpha = .2;
+				Shape.Rectangle.Draw(c,x,y,w,h,"#E5D1D0");
+				c.globalAlpha = .7;
+				Shape.Rectangle.Draw(c,x,y+120,w,30,"#57634E");
+				Shape.Rectangle.Draw(c,x,y+120,w,1,"#F4EFEB");
+				c.globalAlpha = 1;
+				Shape.Box.Draw(c,x,y,w,h,"#73877B");
+				Caption.Draw(c,x+5,y+123,w,25,_read_game_data[_load].Name);
+				Owner.Draw(c,x+5,y+140,w,10,names[_load]);
+			}
+		};
+		let clicker = function(level){
+			var gameName = "";
+			while(gameName=="")gameName = prompt("Name the game ");
+			if(!gameName)return;
+			Animations.Retrieve("Load").Remove_All();
+			new_custom_game(_read_game_data[level], gameName);
+		};
 		for(var i=0;i<_data_text.length;i++){
 			loaders[i] = Animations.Retrieve("Load").New(menuCanvas, 30+((_width+10+(_width/3))*(_data_text.length-i-1)), (150+y_loc)*Menu.LevelSelect.yScale, _width/3*Menu.LevelSelect.xScale, 50*Menu.LevelSelect.yScale, (y_loc!=0));
-			let _index = Add(new Canvas.Drawable({ // level display
-				Draw:function(c,x,y,w,h,_load){
-					if(_game_imgs[_load]==null)
-					{
-						loaders[_load].values.show = true;
-					}
-					else
-					{
-						loaders[_load].values.show = false;
-						Canvas.ScaleImageData(c, _game_imgs[_load], x*Menu.LevelSelect.xScale, y*Menu.LevelSelect.yScale, w/_game_imgs[_load].width*Menu.LevelSelect.xScale, h/_game_imgs[_load].height*Menu.LevelSelect.yScale);
-					}
-					c.globalAlpha = .2;
-					Shape.Rectangle.Draw(c,x,y,w,h,"#E5D1D0");
-					c.globalAlpha = .7;
-					Shape.Rectangle.Draw(c,x,y+120,w,30,"#57634E");
-					Shape.Rectangle.Draw(c,x,y+120,w,1,"#F4EFEB");
-					c.globalAlpha = 1;
-					Shape.Box.Draw(c,x,y,w,h,"#73877B");
-					Caption.Draw(c,x+5,y+123,w,25,_read_game_data[_load].Name);
-					Owner.Draw(c,x+5,y+140,w,10,names[_load]);
-				}
-			}, null, 30+((_width+10)*(_data_text.length-i-1)), 100+y_loc, _width, 150, i), function(level){
-				var gameName = "";
-				while(gameName=="")gameName = prompt("Name the game ");
-				if(!gameName)return;
-				Animations.Retrieve("Load").Remove_All();
-				new_custom_game(_read_game_data[level], gameName);
-			}, new Canvas.Drawable(Shape.Box, null, 30+((_width+10)*(_data_text.length-i-1)), 100+y_loc, _width, 150, "#F2F5FF", null, .5));
+			let _index = Add(new Canvas.Drawable(drawer, null, 30+((_width+10)*(_data_text.length-i-1)), 100+y_loc, _width, 150, i), clicker, new Canvas.Drawable(Shape.Box, null, 30+((_width+10)*(_data_text.length-i-1)), 100+y_loc, _width, 150, "#F2F5FF", null, .5));
 			if(i==0)
 				remove_index[h_index] = _index;
 		}
 		if(INTERFACE.Open_Menu()==Menu.LevelSelect)
 			Draw();
+
+
+
+
+
+
+
+						// let list_painter = function(x, y, left, top, w, h, zoom)
+						// {
+						// 	if(g_list[y][x]==null)return;
+						// 	g_list[y][x].Y.Set(top+draw_top);
+						// 	if(top<0)
+						// 	{
+						// 		g_list[y][x].Alpha.Set(1+(top/draw_height));
+						// 		return;
+						// 	}
+						// 	if(top>450)
+						// 	{
+						// 		g_list[y][x].Alpha.Set(1-((top%draw_height)/draw_height));
+						// 		return;
+						// 	}
+						// 	g_list[y][x].Alpha.Set(1);
+						// };
+						//
+						// let g_list_display = new Tiling;
+						// g_list_display.setup(600, 5draw_height, 3*draw_width, Math.max(Math.max(ground_index, air_index), sea_index)*draw_height, draw_width, draw_height);
+						//
+						// let g_list_scroller = new Scroller(function(left, top, zoom)
+						// {
+						// 	top/=TILESIZE;
+						// 	top*=draw_height;
+						// 	g_list_display.render(left, top, zoom, list_painter);
+						// }, {
+						// 	locking:false,
+						// 	zooming:false
+						// });
+						//
+						// g_list_scroller.setDimensions(draw_width, 80, 4, (Math.max(Math.max(ground_index, air_index), sea_index)-5)*TILESIZE);
+						//
+						// scroller = g_list_scroller;
 	};
 }
 

@@ -1661,7 +1661,7 @@ var Engine_Class = function(input, is_sample)
 
 		if(input.Valid)
 		{		/// input is map_data
-	console.time("parse data");
+			// console.time("parse data");
 			var data = Levels.Play_Custom(this, input);
 			var __terre = data[0];
 			var __units = data[1];
@@ -1669,13 +1669,13 @@ var Engine_Class = function(input, is_sample)
 			if(__terre==null)return;
 			global_weather = data[3];
 			this.Weather = global_weather;
-	console.timeEnd("parse data");
+			// console.timeEnd("parse data");
 
-	console.time("preparing map");
+			// console.time("preparing map");
 			draw_map_data(this, __terre);
-	console.timeEnd("preparing map");
+			// console.timeEnd("preparing map");
 
-	console.time("initalizing assets");
+			// console.time("initalizing assets");
 			for(var i in __units)
 			{
 				this.Add_Unit(Characters.New(this,Char_Data.Reverse_Get(__units[i][0]).Name), __units[i][1], __units[i][2], __units[i][3]);
@@ -1684,10 +1684,8 @@ var Engine_Class = function(input, is_sample)
 			{
 				this.Add_Building(Buildings.New(this,Building_Data.Reverse_Get(__cities[i][0]).Name), __cities[i][1], __cities[i][2], __cities[i][3]);
 			}
-	console.timeEnd("initalizing assets");
-
+			// console.timeEnd("initalizing assets");
 		}
-		else console.error("oh this is BAD",input);
 	}
 	else this.valid = false; // game does not have valid input to function
 	let t1 = performance.now();

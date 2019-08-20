@@ -31,7 +31,7 @@ var LOG = {
 		var level = 10;
 		for(var i in this.list)
 		{
-			let size = Math.max((Canvas.Width/2)-(window.parent.mobilecheck() ? 100 : 400), TILESIZE*3);
+			let size = Math.max((Canvas.Width/2)-(window.parent.mobilecheck() ? 100 : 400), TILESIZE*3)+30;
 			height = 15*Math.ceil(this.list[i].msg.length/(size/16))+10;
 			Shape.Rectangle.Draw(logCanvas, 10, level, size, height, this.list[i].boxColor);
 			Shape.Box.Draw(logCanvas, 10, level, size, height, "#FFF");
@@ -47,7 +47,7 @@ var LOG = {
 		}
 		if(color==null)color = "#fff";
 		this.list.push({
-			txt:new Text_Class("15pt Times New Roman", color),
+			txt:new Text_Class("15pt Arial", color),
 			boxColor: parseInt(color.charAt(1), 16)<=7 ? "#5B2838" : "#768280",
 			msg:msg,
 			index:this.indexer
@@ -729,6 +729,7 @@ function load_game(gameData){
 
 function openLevelSelect(){
 	Menu.LevelSelect.Prep(1);
+	Menu.LevelSelect.Activate();
 	socket.emit('gamedata get', {}, 0, 5);
 	document.getElementById("mainMenu").style.display="none";
 	INTERFACE.Close_Menu();

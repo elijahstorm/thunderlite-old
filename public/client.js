@@ -306,7 +306,7 @@ window.onload = function(){
 		}
 		else if(data.type==501)
 		{	// map index does not exist
-			console.error("No maps in that query exist.");
+			game.LOG.add("We could not find any of the maps that you were looking for. Try changing your search");
 		}
 		else if(data.type==502)
 		{	// recieved game data

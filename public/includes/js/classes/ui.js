@@ -668,8 +668,8 @@ let t1,t2,t = at;
 	};
 	this.Close_Menu = function()
 	{
-		if(open_menu)open_menu.Close();
-		else return;
+		if(!open_menu)return;
+		open_menu.Close();
 		open_menu = null;
 		self.Click = click_fnc;
 		self.Release = release_fnc;
@@ -1619,8 +1619,7 @@ let t1,t2,t = at;
 
 			let g_list_scroller = new Scroller(function(left, top, zoom)
 			{
-				top/=TILESIZE;
-				top*=draw_height;
+				top*=draw_height/TILESIZE;
 				g_list_display.render(left, top, zoom, list_painter);
 			}, {
 				locking:false,

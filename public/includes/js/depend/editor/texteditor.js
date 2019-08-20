@@ -905,11 +905,17 @@ CanvasTextEditor.prototype.insertTextAtCurrentPosition = function(text) {
 
   var pos = this._selection.getPosition();
 
-  // Inserting new text and changing position of cursor to a new one
-  this._selection.setPosition.apply(
-    this._selection,
-    this._document.insertText(text, pos[0], pos[1])
-  );
+  try {
+    // Inserting new text and changing position of cursor to a new one
+    this._selection.setPosition.apply(
+      this._selection,
+      this._document.insertText(text, pos[0], pos[1])
+    );
+  } catch (e) {
+
+  } finally {
+
+  }
   this.render();
 };
 
@@ -1005,8 +1011,9 @@ CanvasTextEditor.prototype.keydown = function(e) {
       this.insertTextAtCurrentPosition('\n');
       break;
     case 83: // s
-      if(!e.ctrlKey)break;
-      this.sendSaveCode();
+      if(e.ctrlKey)
+        this.sendSaveCode();
+      else handled = false;
       break;
     case 37: // Left arrow
       this._selection.moveLeft(1, this.shiftPressed);
