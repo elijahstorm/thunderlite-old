@@ -292,6 +292,7 @@ Menu.MapEditor.Open = function()
 					setTimeout(function(){
 						send_map_data_to_server(SERVER.SAVE, {
 							index:id==-1 ? local_saved_map : id,
+							name:name,
 							map:encrypt_game_data(Map_Data_To_Str())
 						});
 					}, 500);
@@ -312,6 +313,7 @@ Menu.MapEditor.Open = function()
 
 					send_map_data_to_server(SERVER.SAVE, {
 						index:id==-1 ? local_saved_map : id,
+						name:name,
 						map:encrypt_game_data(Map_Data_To_Str())
 					});
 					data_saved = true;
@@ -1138,6 +1140,7 @@ Menu.MapEditor.Open = function()
 
 			send_map_data_to_server(SERVER.SAVE, {
 				index:id==-1 ? local_saved_map : id,
+				name:name,
 				map:encrypt_game_data(Map_Data_To_Str())
 			});
 			data_saved = true;
@@ -1734,7 +1737,33 @@ with(Menu.LevelSelect){
 	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 270, 600, 45, "Recently Uploaded Maps"));
 	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 260, 230, 3, "#000000", null, .6));
 	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 470, 600, 45, "Search maps by..."));
-	Add(new Canvas.Drawable(new Text_Class("15pt Impact", "#000"), null, 320, 467, 600, 45, "Username:"));
+	let USER_SEARCH = 0,
+		SEARCH_TEXT = "Username";
+	Add(new Canvas.Drawable(new Text_Class("15pt Impact", "#000", {underline:true}), null, 320, 467, 100, 20, function() {
+		return SEARCH_TEXT+":";
+	}), function(){
+		USER_SEARCH = (USER_SEARCH+1)%3;
+		switch (USER_SEARCH) {
+			case 0:
+				SEARCH_TEXT = "User";
+				break;
+			case 1:
+				SEARCH_TEXT = "Map ID";
+				break;
+			case 2:
+				SEARCH_TEXT = "Map Name";
+				break;
+			default:
+				SEARCH_TEXT = "Nothing";
+		}
+		Draw();
+	}, new Canvas.Drawable({
+		Draw:function(c,x,y,w,h,s)
+		{
+			Shape.Rectangle.Draw(c,x,y,w,h,"#77a8bc");
+			s.Draw(c,x,y,w,h,SEARCH_TEXT+":");
+		}
+	}, null, 320, 467, 100, 20, new Text_Class("15pt Impact", "#00f", {underline:true})));
 	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 460, 230, 3, "#000000", null, .6));
 	Add(new Canvas.Drawable({ // back btn
 		Draw:function(c, x, y, w, h, s){
@@ -1761,7 +1790,7 @@ with(Menu.LevelSelect){
 	  // document.getElementById('inputHandler').appendChild(editor.getEl());
 		// editor.getEl().id = "LevelSelectNameSearch";
 	  document.getElementById('inputHandler').appendChild(search.getEl());
-		search.getEl().id = "LevelSelectUserSearch";
+		search.getEl().id = "LevelSelectSearch";
 
 		Menu.LevelSelect.Current_Scale = function(x, y)
 		{
@@ -1792,7 +1821,22 @@ with(Menu.LevelSelect){
 				return;
 
 			last_q = query;
-			socket.emit('gamedata get', {mapowner:query}, 0, 5);
+			let QUERY = {};
+			switch (USER_SEARCH) {
+				case 0:
+					QUERY.mapowner = query;
+					break;
+				case 1:
+					QUERY.Map_Id = query;
+					break;
+				case 2:
+					QUERY.mapname = query;
+					break;
+				default:
+					return;
+			}
+
+			socket.emit('gamedata get', QUERY, 0, 5);
 			search.render();
 		};
 
@@ -1806,6 +1850,13 @@ with(Menu.LevelSelect){
 		search.inputEl.onblur = search_fnc;
 		search.inputEl.onfocus = function(e)
 		{
+			if(window.parent.mobilecheck())
+			{
+				let _q = prompt("Please enter yor search");
+				search._document = new Document(_q);
+				search_fnc();
+				return;
+			}
 			if(search._document.storage[0]=="Enter here...")
 				search._document = new Document("");
 		};
@@ -1976,31 +2027,31 @@ Menu.PreGame.Set = function(index,value){
 	if(index>=this.Slots.length)return;
 	this.Slots[index].State.Set(value);
 };
+Menu.PreGame.visibleMapID = function(txt){
+	if(txt==null)return "";
+	if(txt.length!=9)return "";
+	return txt.substring(0, 3) + " - " + txt.substring(3, 6) + " - " + txt.substring(6, 9);
+};
 Menu.PreGame.Map = function(map, gameImage){
 	if(map==null || gameImage==null)return;
 
-	let playersAmount, __name;
+	let playersAmount, __name, __id;
 
-	if(map.Valid)
-	{
-		playersAmount = map.Player_Amount();
-		__name = map.Name;
-	}
-	else
-	{
-		playersAmount = Levels.Players(map);
-		__name = Levels.Names(map);
-	}
+	if(!map.Valid)return;
+	playersAmount = map.Player_Amount();
+	__name = map.Name;
+	__id = map.id;
 
 	this.Erase();
-	this.Add(new Canvas.Drawable(new Text_Class("45pt Impact", Menu.Button[1]), null, 50, 70, 600, 45, __name));
+	this.Add(new Canvas.Drawable(new Text_Class("45pt Impact", "#000"), null, 50, 70, 600, 45, __name));
+	this.Add(new Canvas.Drawable(new Text_Class("20pt Impact", "#000"), null, 140, 14, 300, 30, "Map ID: "+Menu.PreGame.visibleMapID(__id)));
 	this.Add(new Canvas.Drawable({ // back btn
 		Draw:function(c, x, y, w, h, s){
 			Shape.Rectangle.Draw(c,x,y,85,35,Menu.Button[0]);
 			new Text_Class("15pt Verdana", Menu.Button[2]).Draw(c,x+15,y+10,60,25,"BACK");
 			new Text_Class("15pt Verdana", Menu.Button[3]).Draw(c,x+13,y+8,60,25,"BACK");
 		}
-	}, null, 80, 10, 85, 35), function(){
+	}, null, 20, 10, 85, 35), function(){
 		INTERFACE.Game.Send_Move('leave');
 		mainMenu();
 	}, {

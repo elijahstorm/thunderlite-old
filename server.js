@@ -717,6 +717,7 @@ io.on('connection', function(socket){
 						mapowner:userpass.name,
 						saveindex:input_data.index,
 						mapdata:input_data.map,
+						mapname:input_data.name,
 						playtested:false,
 						last_playtested:null,
 						upload_date:new Date(),
