@@ -1864,8 +1864,14 @@ with(Menu.LevelSelect){
 		let old_closer = Menu.LevelSelect.Close;
 		Menu.LevelSelect.Close = function()
 		{
-			// document.getElementById('inputHandler').removeChild(document.getElementById('LevelSelectNameSearch'));
-			document.getElementById('inputHandler').removeChild(document.getElementById('LevelSelectSearch'));
+			try {
+				// document.getElementById('inputHandler').removeChild(document.getElementById('LevelSelectNameSearch'));
+				document.getElementById('inputHandler').removeChild(document.getElementById('LevelSelectSearch'));
+			} catch (e) {
+
+			} finally {
+
+			}
 			old_closer();
 		};
 	};
