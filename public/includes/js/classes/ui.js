@@ -260,6 +260,9 @@ let t1,t2,t = at;
 	let allow_render = true;
 	var render = function(left, top, zoom, simple){
 		if(game==null)return;
+
+// console.log(scroller);
+
 		zoom = 1;
 
 		left = Math.round(left);
@@ -651,7 +654,7 @@ let t1,t2,t = at;
 		}
 	};
 
-	var open_menu = null;
+	let open_menu = null;
 	this.Display_Menu = function(menu, no_scale)
 	{
 		if(open_menu)return;
@@ -1470,13 +1473,28 @@ let t1,t2,t = at;
 
 	var lastScroller;
 	let menuCloser;
+	self.Open_Level_Select = function()
+	{
+		if(game)return;
+		Menu.LevelSelect.Activate();
+		Menu.LevelSelect.Prep(1);
+		socket.emit('gamedata get', {}, 0, 5);
+		document.getElementById("mainMenu").style.display="none";
+		self.Close_Menu();
+		self.Set_Controls(document.getElementById("inputHandler"));
+		self.Allow_Controls(true);
+		self.Display_Menu(Menu.LevelSelect);
+	};
 	self.Open_Unit_Create_Menu = function(player, resources, onBuildFnc, onCloseFnc)
 	{
 		if(player.Game.Client_Player()!=player)return;
 		if(onBuildFnc==null)return;
 
+		MUSIC = MUSIC.Switch(Music.Retrieve("thought music"), 1000);
+
 		lastScroller = scroller;
 		menuCloser = function(){
+			MUSIC = MUSIC.Switch(Music.Retrieve("player turn"), 1000);
 			scroller = lastScroller;
 			lastScroller = null;
 			Menu.Game_Prompt.Erase();
@@ -1751,12 +1769,32 @@ let t1,t2,t = at;
 		window.parent.openChat();
 		Mod_List.Units.Self_Action.Irreparable.Sprite = Mod_List.Units.Self_Action.Repairable.Sprite;
 		Mod_List.Units.Self_Action.Irreparable.Active = false;
+		SFXs.Stop_All();
+		Music.Stop_All();
+		Enviornment.Stop_All();
+		MUSIC = Music.Retrieve("game intro").Play();
+		MUSIC.Volume(1);
+		Music.Retrieve("player turn").Volume(0);
+		Music.Retrieve("thought music").Volume(0);
+		Music.Retrieve("hurry warning").Volume(0);
+		Music.Retrieve("enemy turn").Volume(0);
+		Music.Retrieve("ally turn").Volume(0);
+		Music.Retrieve("player turn").Play();
+		Music.Retrieve("thought music").Play();
+		Music.Retrieve("hurry warning").Play();
+		Music.Retrieve("enemy turn").Play();
+		Music.Retrieve("ally turn").Play();
 	};
-	self.End_Game = function(players, turns)
+	self.End_Game = function(game_won, players, turns)
 	{
 		if(open_menu)
 			self.Close_Menu();
 		Animations.kill = true;
+		Music.Stop_All();
+		SFXs.Stop_All();
+		Enviornment.Stop_All();
+		if(players!=null)
+			MUSIC = Music.Retrieve("game "+ (game_won ? "won" : "lost")).Play();
 		for(var x=1;x<Terrain_Data.TERRE.length;x++)
 		{
 			var _t = Terrain_Data.TERRE[x];
@@ -1870,10 +1908,31 @@ let t1,t2,t = at;
 		if(value==null)
 			clearMoveCanvas = true;
 	};
+	self.Warn_Hurry = function()
+	{
+		if(game.Active_Player()!=game.Client_Player())return;
+		MUSIC = MUSIC.Switch(Music.Retrieve("hurry warning"));
+	};
+	self.Stop_Hurry = function()
+	{
+		if(game.Active_Player()!=game.Client_Player())return;
+		if(MUSIC!=Music.Retrieve("hurry warning"))return;
+		MUSIC = MUSIC.Switch(Music.Retrieve("player turn"));
+	};
 	self.Set_Next_Player = function(player, callback)
 	{
 		self.Allow_Controls(false);
 		Avatar.Display();
+		if(player==game.Client_Player())
+		{
+			console.log("going to player");
+			MUSIC = MUSIC.Switch(Music.Retrieve("player turn"));
+		}
+		else if(MUSIC!=Music.Retrieve("enemy turn"))
+		{
+			console.log("going to enemy");
+			MUSIC = MUSIC.Switch(Music.Retrieve("enemy turn"));
+		}
 		Screen.Next_Player(player, function(){ // when done drawing player intro
 			Avatar.Display(player);
 			self.Allow_Controls(true);

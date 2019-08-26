@@ -95,7 +95,7 @@ Char_Data.CHARS[CURCHAR++] = {	// index = 0
 	Modifiers:[],
 	Sprite:[ERRORIMG,ERRORIMG,ERRORIMG],
 	AttackSFX:null,
-	MoveSFX:null,
+	MoveSFX:SFXs.Retrieve('quite'),
 	X:[0,0,0],
 	Y:[0,0,0]
 };
@@ -117,7 +117,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Start_Turn.Capture,CURMODS.Move.Tracking,CURMODS.Self_Action.Transport,CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('machine gun'),
+	AttackSFX:SFXs.Retrieve('light gun'),
 	MoveSFX:SFXs.Retrieve('footstep'),
 	X:[20,20,20],
 	Y:[13,13,13]
@@ -140,7 +140,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Start_Turn.Capture,CURMODS.Move.Tracking,CURMODS.Self_Action.Transport,CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('gun shot'),
+	AttackSFX:SFXs.Retrieve('big gun'),
 	MoveSFX:SFXs.Retrieve('footstep'),
 	X:[14,20,20],
 	Y:[13,13,13]
@@ -186,7 +186,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Can_Attack.Counter_Range,CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('attack'),
+	AttackSFX:SFXs.Retrieve('big gun'),
 	MoveSFX:SFXs.Retrieve('car engine'),
 	X:[2,15,15],
 	Y:[5,2,7]
@@ -209,7 +209,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Can_Attack.Counter_Range,CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('attack'),
+	AttackSFX:SFXs.Retrieve('explosion'),
 	MoveSFX:SFXs.Retrieve('car engine'),
 	X:[2,17,15],
 	Y:[5,6,7]
@@ -255,7 +255,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Damage.Fast_Attack,CURMODS.Self_Action.Repairable,CURMODS.Can_Attack.Bombard],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('gun shot'),
+	AttackSFX:SFXs.Retrieve('big gun'),
 	MoveSFX:SFXs.Retrieve('car engine'),
 	X:[8,12,12],
 	Y:[15,4,7]
@@ -278,7 +278,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.End_Turn.Cloak,CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('gun shot'),
+	AttackSFX:SFXs.Retrieve('distance gun'),
 	MoveSFX:SFXs.Retrieve('car engine'),
 	X:[8,12,12],
 	Y:[10,7,7]
@@ -289,7 +289,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Type:0,
 	Max_Health:40,
 	Armor:1,
-	Power:55,
+	Power:40,
 	Weapon:1,
 	Movement:4,
 	Move_Type:0,
@@ -301,7 +301,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Attack.Stun,CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('gun shot'),
+	AttackSFX:SFXs.Retrieve('light gun'),
 	MoveSFX:SFXs.Retrieve('footstep'),
 	X:[9,12,12],
 	Y:[11,7,7]
@@ -324,7 +324,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Attack.Lance,CURMODS.Self_Action.Repairable,CURMODS.Can_Attack.Bombard],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('gun shot'),
+	AttackSFX:SFXs.Retrieve('big gun'),
 	MoveSFX:SFXs.Retrieve('car engine'),
 	X:[5,12,12],
 	Y:[10,4,7]
@@ -347,7 +347,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Damage.Slow_Attack,CURMODS.Self_Action.Repairable,CURMODS.Can_Attack.Bombard],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('attack'),
+	AttackSFX:SFXs.Retrieve('explosion'),
 	MoveSFX:SFXs.Retrieve('car engine'),
 	X:[3,3,0],
 	Y:[3,4,0]
@@ -371,7 +371,7 @@ Char_Data.CHARS[CURCHAR++] = {	// index = 12
 	Actable:true,
 	Modifiers:[CURMODS.Self_Action.Miner,CURMODS.Self_Action.Builder,CURMODS.Self_Action.Repairable,CURMODS.Death.Insta_Lose],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('attack'),
+	AttackSFX:SFXs.Retrieve('explosion'),
 	MoveSFX:SFXs.Retrieve('car engine'),
 	X:[2,0,0],
 	Y:[-17,-17,-10]
@@ -395,7 +395,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Modifiers:[CURMODS.Self_Action.Irreparable],
 	Sprite:[],
 	AttackSFX:null,
-	MoveSFX:null,
+	MoveSFX:SFXs.Retrieve('quite'),
 	X:[3,3,3],
 	Y:[5,5,5]
 };
@@ -417,8 +417,8 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('gun shot'),
-	MoveSFX:null,
+	AttackSFX:SFXs.Retrieve('distance gun'),
+	MoveSFX:SFXs.Retrieve('quite'),
 	X:[6,4,4],
 	Y:[4,5,5]
 };
@@ -464,7 +464,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Can_Attack.Bombard],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('attack'),
+	AttackSFX:SFXs.Retrieve('explosion'),
 	MoveSFX:SFXs.Retrieve('air'),
 	X:[2,3,7],
 	Y:[4,3,7]
@@ -487,7 +487,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.End_Turn.Vulture,CURMODS.Self_Action.Repairable,CURMODS.Can_Attack.Bombard],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('machine gun'),
+	AttackSFX:SFXs.Retrieve('distance gun'),
 	MoveSFX:SFXs.Retrieve('jet'),
 	X:[7,6,7],
 	Y:[10,7,7]
@@ -557,7 +557,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Can_Attack.Air_Raid,CURMODS.Damage.Flak,CURMODS.Move.Tracking,CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('attack'),
+	AttackSFX:SFXs.Retrieve('machine gun'),
 	MoveSFX:SFXs.Retrieve('boat'),
 	X:[0,12,12],
 	Y:[2,7,7]
@@ -580,7 +580,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Can_Attack.Ground_Assult,CURMODS.Damage.Fast_Attack],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('attack'),
+	AttackSFX:SFXs.Retrieve('big gun'),
 	MoveSFX:SFXs.Retrieve('boat'),
 	X:[2,12,12],
 	Y:[8,7,0]
@@ -603,7 +603,7 @@ Char_Data.CHARS[CURCHAR++] = {
 	Actable:true,
 	Modifiers:[CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('attack'),
+	AttackSFX:SFXs.Retrieve('big gun'),
 	MoveSFX:SFXs.Retrieve('boat'),
 	X:[0,0,0],
 	Y:[0,0,0]
@@ -626,7 +626,7 @@ Char_Data.CHARS[CURCHAR++] = {	// index = 23
 	Actable:true,
 	Modifiers:[CURMODS.End_Turn.Cloak,CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('attack'),
+	AttackSFX:SFXs.Retrieve('big gun'),
 	MoveSFX:SFXs.Retrieve('boat'),
 	X:[3,20,20],
 	Y:[10,10,7]
@@ -649,7 +649,7 @@ Char_Data.CHARS[CURCHAR++] = {	// index = 23
 	Actable:true,
 	Modifiers:[CURMODS.Self_Action.Land,,CURMODS.Self_Action.Repairable],
 	Sprite:[],
-	AttackSFX:SFXs.Retrieve('attack'),
+	AttackSFX:null,
 	MoveSFX:SFXs.Retrieve('boat'),
 	X:[3,20,20],
 	Y:[10,10,7]

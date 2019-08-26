@@ -1,7 +1,8 @@
 var Weather = function(name, sightAffect, move_cost, damage, _aniW, _aniH)
 {
 	let sheetAni = Animations.Retrieve(name),
-		particleAni = Animations.Retrieve(name+" Particles");
+		particleAni = Animations.Retrieve(name+" Particles"),
+		sndfx = Enviornment.Retrieve(name);
 	if(_aniW==null)
 		_aniW = sheetAni.Width;
 	if(_aniH==null)
@@ -21,6 +22,12 @@ var Weather = function(name, sightAffect, move_cost, damage, _aniW, _aniH)
 			_aniW = sheetAni.Width;
 		if(_aniH==null)
 			_aniH = sheetAni.Height;
+		if(name=="Snow")
+		{
+			SFXs.Volume(.5);
+			MUSIC.Volume(.5);
+		}
+		sndfx.Fade_In(1000);
 		if(sightAffect!=null)
 		{
 			let u,amt = interface.Game.Unit_Amount();
@@ -50,6 +57,12 @@ var Weather = function(name, sightAffect, move_cost, damage, _aniW, _aniH)
 	};
 	this.Stop = function(interface)
 	{
+		if(name=="Snow")
+		{
+			SFXs.Volume(1);
+			MUSIC.Volume(1);
+		}
+		sndfx.Fade_Out(1000);
 		clearInterval(particleInterval);
 		particleAni.Remove_All();
 		sheetAni.Remove_All();
@@ -72,9 +85,12 @@ Weather_Data.Normal = {
 	Move_Cost:function(){return 1;},
 	Damage:function(){return 1;},
 	Start:function(interface){
+		Enviornment.Retrieve("Sunny").Fade_In(1000);
 		interface.Game.Player_Visibility();
 	},
-	Stop:function(){}
+	Stop:function(){
+		Enviornment.Retrieve("Sunny").Fade_Out(1000);
+	}
 };
 Weather_Data.Normal.Icon = Images.Retrieve("Sunny Icon");
 Weather_Data.Rain = new Weather("Rain", 1, 1.15, function(type){

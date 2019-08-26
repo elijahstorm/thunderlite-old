@@ -21,10 +21,34 @@ Menu.MapEditor.Open = function()
 			}
 		};
 		let SFX = SFXs.Retrieve("editor sheet");
+		let MUSIC_CHANGING = false;
+		if(!MUSIC.Name().includes("editor"))
+		{
+			Music.Stop_All();
+			MUSIC = Music.Retrieve("editor plains").Play();
+			Music.Retrieve("editor water").Play().Howl().volume(0);
+		}
+	 	let oldcloser = Menu.MapEditor.Close;
+		Menu.MapEditor.Close = function()
+		{
+			Music.Retrieve("editor water").Stop();
+			Music.Retrieve("editor plains").Stop();
+			oldcloser();
+		};
+		function Change_Music(change)
+		{
+			if(MUSIC_CHANGING)return;
+			MUSIC_CHANGING = true;
+			MUSIC = MUSIC.Switch(Music.Retrieve("editor "+change), 3000);
+			setTimeout(function(){
+				MUSIC_CHANGING = false;
+			}, 3000)
+		}
 		function Play_Placement_SFX(type)
 		{
-			SFX.Play(1+Math.floor(Math.random()*(SFX.Sprite_Amount()-1)));
+			SFX.Play_Out(Math.floor(Math.random()*(SFX.Sprite_Amount())));
 		}
+
 		function send_map_data_to_server(type, data)
 		{
 			if(!online)return;
@@ -1006,6 +1030,29 @@ Menu.MapEditor.Open = function()
 							break;
 						}
 					}
+
+					let _wateramt = 49;
+					for(let i=0;i<map_list.length;i++)
+					{
+						if(map_list[i]>=12)
+						{
+							_wateramt++;
+						}
+					}
+					if(_wateramt>=width*height/2)
+					{
+						if(MUSIC.Name().includes("plains"))
+						{
+							Change_Music("water");
+						}
+					}
+					else
+					{
+						if(MUSIC.Name().includes("water"))
+						{
+							Change_Music("plains");
+						}
+					}
 				}
 				else if(ACTIVE_TYPE==TYPES.UNIT)
 				{
@@ -1782,7 +1829,11 @@ with(Menu.LevelSelect){
 		}
 	});
 
-
+	let setScroller;
+	Menu.LevelSelect.Set_Scroller = function(scrollerFnc)
+	{
+		setScroller = scrollerFnc;
+	};
 	Menu.LevelSelect.Activate = function()
 	{
 		let search = new CanvasTextEditor(new Document("Enter here..."), {width:175, height:18, left:420, top:460});
@@ -1876,10 +1927,6 @@ with(Menu.LevelSelect){
 		};
 	};
 
-
-
-
-
 	let Caption = new Text_Class("15pt Impact", "#D7EFD0");
 	let Owner = new Text_Class("9pt Impact", "#C2D8BC");
 
@@ -1902,6 +1949,7 @@ with(Menu.LevelSelect){
 	};
 	Menu.LevelSelect.Update_Map_Search = function(_data_text)
 	{	// data, y row index
+		if(!setScroller)return;
 		var _read_game_data = new Array(_data_text.length),
 		_game_imgs = new Array(_data_text.length),
 		names = new Array(_data_text.length),
@@ -1932,8 +1980,10 @@ with(Menu.LevelSelect){
 					imageHolderCanvas.clearRect(0, 0, 900, 900);
 					worldCanvas.clearRect(0, 0, 900, 900);
 					console.timeEnd('drawing map '+index+' sample');
-					if(INTERFACE.Open_Menu()==Menu.LevelSelect)
-						Menu.LevelSelect.Draw();
+					setTimeout(function(){
+						if(INTERFACE.Open_Menu()==Menu.LevelSelect)
+							Menu.LevelSelect.Draw();
+					}, 20);
 				}, 50, index);
 			}
 		}
@@ -1976,45 +2026,7 @@ with(Menu.LevelSelect){
 		if(INTERFACE.Open_Menu()==Menu.LevelSelect)
 			Draw();
 
-
-
-
-
-
-
-						// let list_painter = function(x, y, left, top, w, h, zoom)
-						// {
-						// 	if(g_list[y][x]==null)return;
-						// 	g_list[y][x].Y.Set(top+draw_top);
-						// 	if(top<0)
-						// 	{
-						// 		g_list[y][x].Alpha.Set(1+(top/draw_height));
-						// 		return;
-						// 	}
-						// 	if(top>450)
-						// 	{
-						// 		g_list[y][x].Alpha.Set(1-((top%draw_height)/draw_height));
-						// 		return;
-						// 	}
-						// 	g_list[y][x].Alpha.Set(1);
-						// };
-						//
-						// let g_list_display = new Tiling;
-						// g_list_display.setup(600, 5draw_height, 3*draw_width, Math.max(Math.max(ground_index, air_index), sea_index)*draw_height, draw_width, draw_height);
-						//
-						// let g_list_scroller = new Scroller(function(left, top, zoom)
-						// {
-						// 	top/=TILESIZE;
-						// 	top*=draw_height;
-						// 	g_list_display.render(left, top, zoom, list_painter);
-						// }, {
-						// 	locking:false,
-						// 	zooming:false
-						// });
-						//
-						// g_list_scroller.setDimensions(draw_width, 80, 4, (Math.max(Math.max(ground_index, air_index), sea_index)-5)*TILESIZE);
-						//
-						// scroller = g_list_scroller;
+		// setScroller();
 	};
 }
 

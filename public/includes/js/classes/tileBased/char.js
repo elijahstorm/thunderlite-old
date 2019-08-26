@@ -511,6 +511,7 @@ var Characters = {
 		{
 			if(self.Idle)return;
 			if(act==null)act = true;
+			moveSFX.Stop();
 			self.Set_Active(false);
 			self.Attacking = null;
 			var curCity = game.Cities_Map.At(self.X,self.Y);
@@ -692,6 +693,14 @@ var Characters = {
 		}
 		self.Animate_Move = function(mover, done){
 			self.display_health = false;
+			try {
+				moveSFX.Play();
+			} catch (e) {
+				console.error("trying to fix");
+				setTimeout(function(){
+					moveSFX.Play();
+				}, 10);
+			}
 			recur_animation(self, mover, done, 0);
 		};
 		self.Face = function(x, y){
@@ -762,7 +771,6 @@ var Characters = {
 		};
 		self.Move_To = function(mover, end, callback)
 		{		// go to self next
-			moveSFX.Play();
 			self.Move_From();
 			if(!game.Interface.Fake)
 			{
@@ -774,7 +782,6 @@ var Characters = {
 			var oldX = self.X;
 			var oldY = self.Y;
 			self.Animate_Move(mover,function(unit){
-				moveSFX.Stop();
 				game.Units_Map.Set(oldX,oldY,null);
 				game.Units_Map.Set(unit.X,unit.Y,unit);
 				if(unit.Rescued_Unit!=null)
@@ -883,7 +890,9 @@ var Characters = {
 						callback(unit);
 				}
 			};
+
 			if(mover!=null)
+			if(mover.length!=0)
 			{
 				self.Move_To(mover,end,function(unit){
 					if(unit.Stunned)
@@ -920,7 +929,17 @@ var Characters = {
 				sneak_attack = true;
 				self.Alpha.Set(255);
 			}
-			if(attkSFX)attkSFX.Play(1000);
+			if(attkSFX)
+			{
+				try {
+					attkSFX.Play(Math.floor(Math.random()*4));
+				} catch (e) {
+					console.error("trying to fix");
+					setTimeout(function(){
+						attkSFX.Play(Math.floor(Math.random()*4));
+					}, 20);
+				}
+			}
 			self.Killed = null;
 			self.Face(defender.X, defender.Y);
 			var damage = self.Calculate_Damage(defender);
@@ -1160,7 +1179,6 @@ var Characters = {
 			self.Dead = true;
 			self.Health = 0;
 			self.Move_From();
-			SFXs.Retrieve('explosion').Play();
 			Core.Explode(self, function(){
 				if(self.Game.Game_Over)return;
 				let acts = self.Mods_By_Type("Death");

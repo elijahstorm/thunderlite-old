@@ -2,10 +2,12 @@ function Sound_list_class(LOCATION)
 {
 	var SND_LOC = "./sounds/"+LOCATION;
 	var muted = false;
-	function Sound_Class(src,name,loop,buff,volume,callback)
+	let switch_to, switching = false;
+	function Sound_Class(src,name,loop,__volume,callback)
 	{
 		var snd;
-		let auto = false;
+		let auto = false,
+			buff = true;
 		var _onplay = function(){};
 		var _onend = function(){};
 		let snd_ln;
@@ -16,7 +18,7 @@ function Sound_list_class(LOCATION)
 				urls:[src.Source()],
 				buffer:buff,
 				autoplay:auto,
-				volume:volume,
+				volume:__volume,
 				loop:loop,
 				onplay:function(){
 					_onplay();
@@ -32,10 +34,10 @@ function Sound_list_class(LOCATION)
 		else
 		{
 			snd = new Howl({
-				urls:[SND_LOC+src+'.wav', SND_LOC+src+'.ogg'],
+				urls:[SND_LOC+src+'.mp3', SND_LOC+src+'.ogg'],
 				buffer:buff,
 				autoplay:auto,
-				volume:volume,
+				volume:__volume,
 				loop:loop,
 				onplay:function(){
 					_onplay();
@@ -52,10 +54,10 @@ function Sound_list_class(LOCATION)
 		this.Break_By = function(amt)
 		{
 			if(amt<=0)return this;
-			snd_ln = snd._duration/amt - .015;
-			let sprite = new Array(amt);
+			snd_ln = snd._duration/amt;
+			let sprite = new Array();
 			for(let i=0;i<amt;i++)
-				sprite[i] = [i*snd_ln*1000, snd_ln*1000];
+				sprite[""+i] = [i*snd_ln*1000, snd_ln*1000];
 			snd._sprite = sprite;
 			return this;
 		};
@@ -64,18 +66,85 @@ function Sound_list_class(LOCATION)
 			return snd._duration/snd_ln;
 		};
 
-		this.Play = function(sprite, loop)
+		this.Play = function(sprite)
 		{
-			if(muted)return;
-			snd.play(sprite, loop);
+			if(muted)return this;
+			if(sprite!=null)
+				sprite = ""+sprite;
+			snd.play(sprite);
+			return this;
+		};
+		this.Play_Out = function(sprite)
+		{
+			if(muted)return this;
+			if(sprite!=null)
+				sprite = ""+sprite;
+			let dur = snd_ln==null ? snd._duration : snd_ln;
+			snd.play(sprite);
+			snd.fade(__volume, 0, dur*1000, function(){
+				snd.volume(__volume);
+			})
+			return this;
 		};
 		this.Stop = function()
 		{
 			snd.stop();
+			return this;
+		};
+		this.Switch = function(change, time)
+		{
+			if(change==this)return;
+			if(switching)
+			{
+				switch_to = change;
+				if(time==null)
+					time = 2000;
+				switch_time = time;
+				return change;
+			}
+			switching = true;
+			if(time==null)
+				time = 2000;
+			let c_howl = change.Howl();
+			c_howl.volume(0);
+			c_howl.fade(0, snd.volume(), time);
+			snd.fade(snd.volume(), 0, time);
+
+			let self = this;
+			setTimeout(function(){
+				switching = false;
+				if(switch_to!=null)
+				{
+					change.Switch(switch_to, switch_time);
+				}
+				switch_to = null;
+				switch_time = 0;
+			}, time);
+			return change;
+		};
+		this.Fade_In = function(time)
+		{
+			snd.play();
+			snd.volume(0);
+			snd.fade(0, __volume, time);
+		};
+		this.Fade_Out = function(time)
+		{
+			snd.fade(__volume, 0, time);
+			setTimeout(function(){
+				snd.stop();
+			}, time);
 		};
 		this.Pause = function()
 		{
 			snd.pause();
+			return this;
+		};
+		this.Volume = function(amt)
+		{
+			if(amt==null)return snd.volume();
+			snd.volume(amt*__volume);
+			return snd.volume();
 		};
 		this.On_Play = function(fnc)
 		{
@@ -105,7 +174,7 @@ function Sound_list_class(LOCATION)
 
 	var Sounds = [];
 	var total_snds=0,loaded_snds=0;
-	this.Declare = function(src,name,buff,loop,auto, callback)
+	this.Declare = function(src,name,loop,volume,callback)
 	{
 		for(var i in Sounds)
 		{
@@ -116,7 +185,7 @@ function Sound_list_class(LOCATION)
 			}
 		}
 		total_snds++;
-		Sounds[name] = new Sound_Class(src,name,loop,buff,auto,function(self){
+		Sounds[name] = new Sound_Class(src,name,loop,volume,function(self){
 			loaded_snds++;
 			if(callback!=null)
 				callback(self);
@@ -139,7 +208,7 @@ function Sound_list_class(LOCATION)
 		return null;
 	};
 
-	this.Stop_Loops = function()
+	this.Stop_All = function()
 	{
 		for(var i in Sounds)
 			Sounds[i].Stop();
@@ -149,7 +218,23 @@ function Sound_list_class(LOCATION)
 		if(input==null)
 			muted = !muted;
 		else muted = input;
+		if(muted)
+		{
+			for(let i in Sounds)
+			{
+				Sounds[i].Stop();
+			}
+		}
 		return muted;
+	};
+	this.Volume = function(amt)
+	{
+		if(amt==null)return;
+		if(amt<0 || amt>1)return;
+		for(let i in Sounds)
+		{
+			Sounds[i].Volume(amt);
+		}
 	};
 
 	this.Done = function()
@@ -170,3 +255,4 @@ function Sound_list_class(LOCATION)
 
 var SFXs = new Sound_list_class('sfx/');
 var Music = new Sound_list_class('music/');
+var Enviornment = new Sound_list_class('envior/');

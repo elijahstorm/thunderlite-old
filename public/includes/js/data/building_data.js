@@ -42,6 +42,7 @@ var Building_Data = {
 				c.Alpha.data = 0;
 				c.Set_Active(false);
 				c.Idle = true;
+				building.Idle = true;
 				game.Add_Unit(c, building.X, building.Y, player.Team);
 				building.End_Turn();
 				game.Interface.Set_Unit_Focus(c);
@@ -65,6 +66,7 @@ var Building_Data = {
 		c.Alpha.data = 0;
 		c.Set_Active(false);
 		c.Idle = true;
+		building.Idle = true;
 		game.Add_Unit(c, building.X, building.Y, player.Team);
 		building.End_Turn();
 		game.Interface.Set_Unit_Focus(c);

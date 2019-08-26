@@ -74,9 +74,11 @@ window.parent.onFinishedLoading(function(){
 		if(cookUser&&cookPass){
 			user.value = cookUser;
 			pass.value = cookPass;
-			login();
+			// login();
 		}
+		pass.focus();
 	}
+	else user.focus();
 });
 
 function openSignup(){

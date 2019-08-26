@@ -111,6 +111,12 @@ var con_handler = function(){
 	};
 };
 var Connections = new con_handler();
+
+let SUDO_ROUTE_PASS = Math.random();
+setInterval(function(){
+	SUDO_ROUTE_PASS = Math.random();
+}, 300000); // refresh passkey every 5 minutes
+
 var Game = function(map, name, slots){
 	let __passkey = null;
 	function passkey_check(input_key)
@@ -118,6 +124,8 @@ var Game = function(map, name, slots){
 		if(__passkey==null)
 			return true; // no passkey needed yet--game hasn't started
 		if(__passkey==input_key)
+			return true;
+		if(__passkey==SUDO_ROUTE_PASS)
 			return true;
 		timestamp("Invalid passkey attempt in Game",self.index_in_server);
 		return false;
@@ -267,8 +275,9 @@ var Game = function(map, name, slots){
 	};
 	self.Rejoin = function(input_passkey, playerIndex, socketIndex){
 		if(!passkey_check(input_passkey))return;
-	console.log("---- rejoinging ----");
-	console.log("DEBUG THIS AREA -> Player left and rejoined ASAP");
+	console.log("---- ++++ ---- rejoinging ---- ++++ ----");
+	console.log("DEBUG THIS AREA -> Player left and rejoined game");
+	return;
 	console.log(playerIndex, socketIndex);
 	console.log(playerData[playerIndex]);
 	console.log(playerData);
@@ -486,7 +495,7 @@ io.on('connection', function(socket){
 				continue;
 			if(socket.vars.in_game!=null)
 			{
-				Game_List.Game(socket.vars.in_game).Leave(socket.index);
+				Game_List.Game(socket.vars.in_game).Leave(SUDO_ROUTE_PASS, socket.index);
 			}
 			socket.vars.in_game = game_id;
 			game.Set(i, socket.index);
@@ -1009,7 +1018,7 @@ io.on('connection', function(socket){
 		socket.broadcast.emit('user left', socket.username);
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game){	// if in game, allow 30 secs to reconnect before removal
-			game.Leave(socket.index, 30000, function(){
+			game.Leave(SUDO_ROUTE_PASS, socket.index, 30000, function(){
 					// if they reconnect the system will auto join them to the game
 					// if they havent reconnected after 30secs, remove them from server
 				Connections.Disconnect(socket.index);

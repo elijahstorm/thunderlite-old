@@ -418,6 +418,7 @@ var Engine_Class = function(input, is_sample)
 		last_timeout = setTimeout(function(){
 			if(last_move_time==this_move_time)
 			{ // warn that user has 15 seconds to make a move
+				UI.Warn_Hurry();
 				warningMsg = LOG.add((client==_self.Active_Player() ? "You" : "They")+" have 15 seconds to make another move", "#F00", 10000);
 				last_timeout = setTimeout(function(){
 					if(last_move_time==this_move_time)
@@ -440,6 +441,7 @@ var Engine_Class = function(input, is_sample)
 				warningMsg = null;
 			}
 			clearTimeout(last_timeout);
+			UI.Stop_Hurry();
 		}
 	}
 
@@ -520,11 +522,11 @@ var Engine_Class = function(input, is_sample)
 			if(self.game_data[0]!=false)
 			{
 				if(UI!=Fast_Fake_Interface)
-					UI.End_Game();
+					UI.End_Game(client_won);
 				openMapEditor(self.game_data[1], self.game_data[2], client_won);
 			}
 			else if(UI!=Fast_Fake_Interface)
-				UI.End_Game(Players, turn);
+				UI.End_Game(client_won, Players, turn);
 			self.game_data = [false,input,0];
 		}, 750);
 	};
@@ -1237,13 +1239,13 @@ var Engine_Class = function(input, is_sample)
 						{	/// start AI
 							setTimeout(function(){
 								AI.Solve(self,active_player);
-							}, AI.TIMEOUT);
+							}, AI.TIMEOUT*2);
 						}
 					});
 				});
 			}
 			else UI.Set_Next_Player(Players[cur_player]);
-			if(!online)console.log("not online");
+			if(!online)console.log("Offline game started.");
 		}
 		animationCanvas.clearRect(0, 0, 900, 900);
 		if(Cities.length==0)
@@ -1425,7 +1427,7 @@ var Engine_Class = function(input, is_sample)
 		if(UI!=Fast_Fake_Interface)
 		{
 			if(!UI.Check_Controls() && !ignore_controls)return;
-			SFXs.Stop_Loops();
+			SFXs.Stop_All();
 		}
 
 		clearLastTimeoutCheck();
@@ -1450,7 +1452,7 @@ var Engine_Class = function(input, is_sample)
 					{	/// start AI
 						setTimeout(function(){
 							AI.Solve(self,active_player);
-						}, AI.TIMEOUT);
+						}, AI.TIMEOUT*3);
 					}
 				});
 			});

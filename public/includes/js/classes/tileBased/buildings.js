@@ -160,6 +160,7 @@ var Buildings = {
 		};
 
 		this.Active = false;
+		this.Idle = false;
 		this.Set_Active = function(value)
 		{
 			if(BuildData.Act==null)return;
@@ -179,20 +180,24 @@ var Buildings = {
 
 		this.Start_Turn = function(client)
 		{
-			if(client)
+			if(game.Units_Map.At(this.X, this.Y)==null)
 			{
-				if(BuildData.Act)
+				if(client)
 				{
-					this.Set_Active(true);
+					if(BuildData.Act)
+					{
+						this.Set_Active(true);
+					}
+				}
+				else
+				{
+					if(BuildData.Act)
+					{
+						this.Active = true;
+					}
 				}
 			}
-			else
-			{
-				if(BuildData.Act)
-				{
-					this.Active = true;
-				}
-			}
+			this.Idle = false;
 			var available = this.Mods_By_Type("Start Turn");
 			for(var i=0;i<available.length;i++)
 			{
