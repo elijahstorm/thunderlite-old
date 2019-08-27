@@ -298,7 +298,7 @@ let t1,t2,t = at;
 		buildingCanvas.clearRect(0,0,600,600);
 		charCanvas.clearRect(0,0,600,600);
 		// weatherCanvas.clearRect(0,0,600,600);
-		dialogCanvas.clearRect(0,0,600,600);
+
 
 // indexTile = [];
 // perfTile = [];
@@ -1750,6 +1750,7 @@ let t1,t2,t = at;
 			mousedown = false;
 		}
 		allow_input = input;
+		dialogCanvas.clearRect(0,0,600,600);
 	};
 	self.Check_Controls = function()
 	{
