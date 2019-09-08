@@ -407,7 +407,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 		{
 			var city = __game.Cities_Map.At(movableSpaces[i][0], movableSpaces[i][1]);
 			if(city!=null)
-			if(city.Active)continue;
+			if(city.Active && city.Owner==__unit.Player)continue;
 			if(__game.Units_Map.At(movableSpaces[i][0], movableSpaces[i][1])!=null)
 				continue;
 			checkCurrent = distanceFunction(movableSpaces[i][0], movableSpaces[i][1], _x, _y);
@@ -775,25 +775,17 @@ var AI_Class = function(_last_game, _ai_player, _index)
 			move-=__unit.Calculate_Move_Cost(terrain_type);
 			if(move<0)
 			{
-				if(terrain_type.Building==null)
-				{
-					if(__game.Units_Map.At(_x, _y)!=null)
-					{
-						var result = CLOSEST_REACHABLE_SPOT(__game, __unit, _x, _y);
-						_x = result[0];
-						_y = result[1];
-					}
-
-				}
-				else if(terrain_type.Building.Active ||
-					__game.Units_Map.At(_x, _y)!=null)
-				{
-					var result = CLOSEST_REACHABLE_SPOT(__game, __unit, _x, _y);
-					_x = result[0];
-					_y = result[1];
-				}
+				var result = CLOSEST_REACHABLE_SPOT(__game, __unit, _x, _y);
+				_x = result[0];
+				_y = result[1];
 				break;
 			}
+
+			if(__game.Units_Map.At(route[i][0], route[i][1])!=null)
+				continue;
+			if(terrain_type.Building!=null)
+			if(terrain_type.Building.Active && terrain_type.Building.Owner==__player)
+				continue;
 			_x = route[i][0];
 			_y = route[i][1];
 		}
@@ -803,6 +795,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 			destination[0] = _x;
 			destination[1] = _y;
 		}	// otherwise, can't travel because path is too populated
+		else DECISION_MADE = false;
 
 		return DECISION_MADE;
 	};

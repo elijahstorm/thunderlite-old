@@ -1926,12 +1926,10 @@ let t1,t2,t = at;
 		Avatar.Display();
 		if(player==game.Client_Player())
 		{
-			console.log("going to player");
 			MUSIC = MUSIC.Switch(Music.Retrieve("player turn"));
 		}
 		else if(MUSIC!=Music.Retrieve("enemy turn"))
 		{
-			console.log("going to enemy");
 			MUSIC = MUSIC.Switch(Music.Retrieve("enemy turn"));
 		}
 		Screen.Next_Player(player, function(){ // when done drawing player intro
