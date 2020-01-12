@@ -634,12 +634,16 @@ let t1,t2,t = at;
 				name:new Text_Class("25pt Arial", "#000"),
 				Draw:function(c, x, y, w, h, s){
 					if(c.globalAlpha==1)return;
-					this.back.Draw(c,x,y,w,h,"#DDCA7D");
-					c.lineWidth = 10;
-					this.border.Draw(c,x+5,y+5,w-10,h-10,data_to_hex(Team_Colors.Color[player.Color][2]));
-					c.lineWidth = 1;
-					this.icon.Draw(c,x+20,y+20,100,100);
-					this.name.Draw(c,x+180,y+40,w,h,player.Name);
+					try {
+						this.back.Draw(c,x,y,w,h,"#DDCA7D");
+						c.lineWidth = 10;
+						this.border.Draw(c,x+5,y+5,w-10,h-10,data_to_hex(Team_Colors.Color[player.Color][2]));
+						c.lineWidth = 1;
+						this.icon.Draw(c,x+20,y+20,100,100);
+						this.name.Draw(c,x+180,y+40,w,h,player.Name);
+					} catch (e) {
+						console.error("ERROR DRAWING CHANGING PLAYER");
+					}
 				}
 			}, null, 600, 200, 400, 200, null, null, .7);
 			Core.Slide_Drawable_X(collectiveDrawable, -500, 10, function(collectiveDrawable){
