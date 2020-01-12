@@ -18,6 +18,11 @@ var AI_Class = function(_last_game, _ai_player, _index)
 	let SUB_GAME_AI = false;
 	let TIMEOUT = 735;
 	let FAKE_GAME;
+	self.LOGGING = false;
+	let LOGGER = function(args){
+		if(!self.LOGGING)return;
+		console.log("AI LOG: ",args);
+	};
 	let Fog_Check = false;
 	let Visible_Enemies = null;
 	let Estimated_Enemies;
@@ -270,7 +275,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 				// grab the next node and remove it from Open array
 				myNode = Open.splice(min, 1)[0];
 				// is it the destination node?
-// console.log(myNode.value === mypathEnd.value);
+// LOGGER(myNode.value === mypathEnd.value);
 // console.error(myNode.value, mypathEnd.value);
 
 				if(myNode.value === mypathEnd.value)
@@ -293,7 +298,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 						// we want to start to finish
 						result.reverse();
 					}
-// console.log(result);
+// LOGGER(result);
 					continue;
 				}
 				// find which nearby nodes are walkable
@@ -309,25 +314,25 @@ var AI_Class = function(_last_game, _ai_player, _index)
 						{
 							if (Closed[asCheck].value==myPath.value)
 							{
-// console.log("values",Closed[asCheck].value,myPath.value);
-// console.log("checking",myPath.x,myPath.y);
-// console.log("asCheck",asCheck);
-// console.log("VALUE",Closed[asCheck].Parent);
+// LOGGER("values",Closed[asCheck].value,myPath.value);
+// LOGGER("checking",myPath.x,myPath.y);
+// LOGGER("asCheck",asCheck);
+// LOGGER("VALUE",Closed[asCheck].Parent);
 								if (Closed[asCheck].Parent!=undefined)
 								{
-// console.log(Closed[asCheck]);
-// console.log(myNode);
+// LOGGER(Closed[asCheck]);
+// LOGGER(myNode);
 									if(Closed[asCheck].Parent.totalMovementCost>myNode.totalMovementCost)
 									{	// if we found a cheaper route, add this route to the list!
-// console.log(Closed[asCheck].Parent.totalMovementCost,"is LARGER than",myNode.totalMovementCost);
+// LOGGER(Closed[asCheck].Parent.totalMovementCost,"is LARGER than",myNode.totalMovementCost);
 										AStar[myPath.value] = false;
-// console.log("Current");
-// console.log(myPath);
-// console.log("Old");
-// console.log(Closed[asCheck]);
+// LOGGER("Current");
+// LOGGER(myPath);
+// LOGGER("Old");
+// LOGGER(Closed[asCheck]);
 										break;
 									}
-// console.log(Closed[asCheck].Parent.totalMovementCost,"is cheaper than",myNode.totalMovementCost);
+// LOGGER(Closed[asCheck].Parent.totalMovementCost,"is cheaper than",myNode.totalMovementCost);
 								}
 							}
 						}
@@ -335,7 +340,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 
 					if (!AStar[myPath.value])
 					{
-// console.log("AStar",myPath.x,myPath.y);
+// LOGGER("AStar",myPath.x,myPath.y);
 						// estimated cost of this particular route so far
 						myPath.g = myNode.g + distanceFunction(myNeighbours[i], myNode);
 						// estimated cost of entire guessed route to the destination
@@ -351,7 +356,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 				// remember this route as having no more untested options
 				Closed.push(myNode);
 			} // keep iterating until the Open list is empty
-// console.log(result);
+// LOGGER(result);
 
 			return result;
 		}
@@ -1340,10 +1345,10 @@ var AI_Class = function(_last_game, _ai_player, _index)
 
 	var Manuver_Capital_Unit = function(__standing, __game, __player, __unit)
 	{	/** To handle how a capital unit will act */
-console.log(" ");
-console.log("--");
-console.log("standing",__standing);
-console.log(__unit.Name);
+LOGGER(" ");
+LOGGER("--");
+LOGGER("standing",__standing);
+LOGGER(__unit.Name);
 
 			// only build sea units if on a Shore
 		let choice = BEST_BUILD_CHOICE(__game, __player, __unit.Cash, (__game.Terrain_Map.At(__unit.X, __unit.Y).Source==Terrain_Data.Get("Shore")) ? null : 0);
@@ -1371,14 +1376,14 @@ console.log(__unit.Name);
 					var moverClass = new Move_Class(__unit,__unit.X,__unit.Y,__game.Terrain_Map,function(list){});
 					__unit.Start_Path(__unit.X, __unit.Y, true);
 
-					console.log("ITS IN");
+					LOGGER("ITS IN");
 
 					var destination = [-1, -1];
 					var spaces = __unit.Current_Path().All_Movable_Spaces();
 					if(TARGET_LOC(__game, __player, __unit, spaces, destination, t))
 					{	// if it can make it to that location
 						moverClass.Add(destination[0], destination[1]);
-						console.log("chasing ore deposit", destination[0], destination[1]);
+						LOGGER("chasing ore deposit", destination[0], destination[1]);
 
 						Prep_Movement(__game, __player, __unit, destination, moverClass);
 						return true;
@@ -1487,11 +1492,11 @@ console.log(__unit.Name);
 	{	/** Prioritize units to defend or run to specific target within range */
 		var DECISION_MADE = false; // when true, stop looking for move, and go to finish
 
-console.log(" ");
-console.log("!!!");
-console.log("DEFEND TARGET");
-console.log(__target.Name);
-console.log(__target.X, __target.Y);
+LOGGER(" ");
+LOGGER("!!!");
+LOGGER("DEFEND TARGET");
+LOGGER(__target.Name);
+LOGGER(__target.X, __target.Y);
 
 
 		var total_units = __player.Units_Amount(),
@@ -1522,7 +1527,7 @@ console.log(__target.X, __target.Y);
 			DECISION_MADE = TRY_ATTACK_UNITS(__game, __player, currentUnit, currentUnit.Current_Path().Attackables(), destination, moverClass, _enemies);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("defending", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("defending", destination[0], destination[1]);
 
 
 			/// STEP 2) 	 ---------------------   Chase City   ---------------------------
@@ -1533,7 +1538,7 @@ console.log(__target.X, __target.Y);
 				DECISION_MADE = TARGET_LOC(__game, __player, currentUnit, spaces, destination, __target);
 				if(DECISION_MADE)
 					moverClass.Add(destination[0], destination[1]);
-				if(DECISION_MADE)console.log("running to defense", destination[0], destination[1]);
+				if(DECISION_MADE)LOGGER("running to defense", destination[0], destination[1]);
 			}
 
 
@@ -1546,7 +1551,7 @@ console.log(__target.X, __target.Y);
 				DECISION_MADE = BEST_HEAL_CHOICE(__game, __player, currentUnit, spaces, destination);
 				if(DECISION_MADE)
 					moverClass.Add(destination[0], destination[1]);
-				if(DECISION_MADE)console.log("healing", currentUnit.X, currentUnit.Y);
+				if(DECISION_MADE)LOGGER("healing", currentUnit.X, currentUnit.Y);
 			}
 
 
@@ -1559,7 +1564,7 @@ console.log(__target.X, __target.Y);
 				DECISION_MADE = IDLE_ROAM(__game, __player, currentUnit, spaces, destination);
 				if(DECISION_MADE)
 					moverClass.Add(destination[0], destination[1]);
-				if(DECISION_MADE)console.log("idle roam", currentUnit.X, currentUnit.Y);
+				if(DECISION_MADE)LOGGER("idle roam", currentUnit.X, currentUnit.Y);
 			}
 
 			Prep_Movement(__game, __player, currentUnit, destination, moverClass);
@@ -1628,10 +1633,10 @@ console.log(__target.X, __target.Y);
 		var spaces = currentUnit.Current_Path().All_Movable_Spaces();
 		var DECISION_MADE = false; // when true, stop looking for move, and go to finish
 
-console.log(" ");
-console.log("--");
-console.log("*");
-console.log(currentUnit.Name);
+LOGGER(" ");
+LOGGER("--");
+LOGGER("*");
+LOGGER(currentUnit.Name);
 
 
 		/// STEP 1) 	 ---------------------   Capturing   ---------------------------
@@ -1640,7 +1645,7 @@ console.log(currentUnit.Name);
 		DECISION_MADE = TRY_CAPTURE(__game, aiPlayer, currentUnit, spaces, destination);
 		if(DECISION_MADE)
 			moverClass.Add(destination[0], destination[1]);
-		if(DECISION_MADE)console.log("capture", destination[0], destination[1]);
+		if(DECISION_MADE)LOGGER("capture", destination[0], destination[1]);
 		If_Capture_And_Should_Attack(__game, currentUnit, moverClass, destination);
 
 
@@ -1653,7 +1658,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = FLEE_ENEMY(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("chase", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("chase", destination[0], destination[1]);
 		}
 
 
@@ -1667,7 +1672,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = BEST_HEAL_CHOICE(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("healing", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("healing", currentUnit.X, currentUnit.Y);
 		}
 
 
@@ -1677,7 +1682,7 @@ console.log(currentUnit.Name);
 		if(!DECISION_MADE)
 		{
 			DECISION_MADE = TRY_ATTACK(__game, aiPlayer, currentUnit, currentUnit.Current_Path().Attackables(), destination, moverClass);
-			if(DECISION_MADE)console.log("atk", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("atk", destination[0], destination[1]);
 		}
 
 
@@ -1690,7 +1695,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = BEST_HEAL_CHOICE(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("healing", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("healing", currentUnit.X, currentUnit.Y);
 		}
 
 
@@ -1703,7 +1708,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = IDLE_ROAM(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("idle roam", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("idle roam", currentUnit.X, currentUnit.Y);
 		}
 
 		Prep_Movement(__game, aiPlayer, currentUnit, destination, moverClass);
@@ -1717,10 +1722,10 @@ console.log(currentUnit.Name);
 		var spaces = currentUnit.Current_Path().All_Movable_Spaces();
 		var DECISION_MADE = false; // when true, stop looking for move, and go to finish
 
-console.log(" ");
-console.log("--");
-console.log("**");
-console.log(currentUnit.Name);
+LOGGER(" ");
+LOGGER("--");
+LOGGER("**");
+LOGGER(currentUnit.Name);
 
 
 		/// STEP 1) 	 ---------------------   Capturing   ---------------------------
@@ -1731,7 +1736,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = TRY_CAPTURE(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("capture", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("capture", destination[0], destination[1]);
 			If_Capture_And_Should_Attack(__game, currentUnit, moverClass, destination);
 		}
 
@@ -1742,7 +1747,7 @@ console.log(currentUnit.Name);
 		if(!DECISION_MADE)
 		{
 			DECISION_MADE = TRY_ATTACK(__game, aiPlayer, currentUnit, currentUnit.Current_Path().Attackables(), destination, moverClass);
-			if(DECISION_MADE)console.log("atk", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("atk", destination[0], destination[1]);
 		}
 
 
@@ -1756,7 +1761,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = BEST_HEAL_CHOICE(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("healing", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("healing", currentUnit.X, currentUnit.Y);
 		}
 
 
@@ -1768,7 +1773,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = CHASE_CITY(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("chase city", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("chase city", destination[0], destination[1]);
 		}
 
 
@@ -1781,7 +1786,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = BEST_HEAL_CHOICE(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("healing", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("healing", currentUnit.X, currentUnit.Y);
 		}
 
 
@@ -1794,7 +1799,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = IDLE_ROAM(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("idle roam", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("idle roam", currentUnit.X, currentUnit.Y);
 		}
 
 		Prep_Movement(__game, aiPlayer, currentUnit, destination, moverClass);
@@ -1808,10 +1813,10 @@ console.log(currentUnit.Name);
 		var spaces = currentUnit.Current_Path().All_Movable_Spaces();
 		var DECISION_MADE = false; // when true, stop looking for move, and go to finish
 
-console.log(" ");
-console.log("--");
-console.log("***");
-console.log(currentUnit.Name);
+LOGGER(" ");
+LOGGER("--");
+LOGGER("***");
+LOGGER(currentUnit.Name);
 
 
 		/// STEP 1) 	 ---------------------   Capturing   ---------------------------
@@ -1820,7 +1825,7 @@ console.log(currentUnit.Name);
 		DECISION_MADE = TRY_CAPTURE(__game, aiPlayer, currentUnit, spaces, destination);
 		if(DECISION_MADE)
 			moverClass.Add(destination[0], destination[1]);
-		if(DECISION_MADE)console.log("capture", destination[0], destination[1]);
+		if(DECISION_MADE)LOGGER("capture", destination[0], destination[1]);
 		If_Capture_And_Should_Attack(__game, currentUnit, destination);
 
 
@@ -1830,7 +1835,7 @@ console.log(currentUnit.Name);
 		if(!DECISION_MADE)
 		{
 			DECISION_MADE = TRY_ATTACK(__game, aiPlayer, currentUnit, currentUnit.Current_Path().Attackables(), destination, moverClass);
-			if(DECISION_MADE)console.log("atk", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("atk", destination[0], destination[1]);
 		}
 
 
@@ -1842,7 +1847,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = CHASE_CITY(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("chase city", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("chase city", destination[0], destination[1]);
 		}
 
 
@@ -1856,7 +1861,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = BEST_HEAL_CHOICE(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("healing", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("healing", currentUnit.X, currentUnit.Y);
 		}
 
 
@@ -1868,7 +1873,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = CHASE_ENEMY(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("chase enemy", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("chase enemy", destination[0], destination[1]);
 		}
 
 
@@ -1881,7 +1886,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = BEST_HEAL_CHOICE(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("healing", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("healing", currentUnit.X, currentUnit.Y);
 		}
 
 
@@ -1894,7 +1899,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = IDLE_ROAM(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("idle roam", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("idle roam", currentUnit.X, currentUnit.Y);
 		}
 
 		Prep_Movement(__game, aiPlayer, currentUnit, destination, moverClass);
@@ -1909,18 +1914,18 @@ console.log(currentUnit.Name);
 		var DECISION_MADE = false; // when true, stop looking for move, and go to finish
 
 
-console.log(" ");
-console.log("--");
-console.log("****");
-console.log(currentUnit.X, currentUnit.Y);
-console.log(currentUnit.Name);
+LOGGER(" ");
+LOGGER("--");
+LOGGER("****");
+LOGGER(currentUnit.X, currentUnit.Y);
+LOGGER(currentUnit.Name);
 
 
 		/// STEP 1) 	 ---------------------   Attacking   ---------------------------
 		/// first things first, try to attack for most possible damage
 
 		DECISION_MADE = TRY_ATTACK(__game, aiPlayer, currentUnit, currentUnit.Current_Path().Attackables(), destination, moverClass);
-		if(DECISION_MADE)console.log("attack", destination[0], destination[1]);
+		if(DECISION_MADE)LOGGER("attack", destination[0], destination[1]);
 
 
 		/// STEP 2) 	 ---------------------   Capturing   ---------------------------
@@ -1931,7 +1936,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = TRY_CAPTURE(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("capture", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("capture", destination[0], destination[1]);
 			If_Capture_And_Should_Attack(__game, currentUnit, moverClass, destination);
 		}
 
@@ -1944,7 +1949,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = CHASE_ENEMY(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("chasing", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("chasing", destination[0], destination[1]);
 		}
 
 
@@ -1957,7 +1962,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = BEST_HEAL_CHOICE(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("healing", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("healing", currentUnit.X, currentUnit.Y);
 		}
 
 
@@ -1970,7 +1975,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = IDLE_ROAM(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("idle roam", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("idle roam", currentUnit.X, currentUnit.Y);
 		}
 
 		Prep_Movement(__game, aiPlayer, currentUnit, destination, moverClass);
@@ -1985,10 +1990,10 @@ console.log(currentUnit.Name);
 		var DECISION_MADE = false; // when true, stop looking for move, and go to finish
 
 
-console.log(" ");
-console.log("--");
-console.log("*****");
-console.log(currentUnit.Name);
+LOGGER(" ");
+LOGGER("--");
+LOGGER("*****");
+LOGGER(currentUnit.Name);
 
 
 		/// STEP 1) 	 ---------------------   Attacking   ---------------------------
@@ -1997,7 +2002,7 @@ console.log(currentUnit.Name);
 		DECISION_MADE = TRY_ATTACK(__game, aiPlayer, currentUnit, currentUnit.Current_Path().Attackables(), destination, moverClass);
 		if(DECISION_MADE)
 			moverClass.Add(destination[0], destination[1]);
-		if(DECISION_MADE)console.log("attacking", destination[0], destination[1]);
+		if(DECISION_MADE)LOGGER("attacking", destination[0], destination[1]);
 
 
 		/// Step 2) 	 ---------------------   Chasing   ---------------------------
@@ -2008,7 +2013,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = CHASE_ENEMY(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("chase", destination[0], destination[1]);
+			if(DECISION_MADE)LOGGER("chase", destination[0], destination[1]);
 		}
 
 
@@ -2021,7 +2026,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = BEST_HEAL_CHOICE(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("healing", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("healing", currentUnit.X, currentUnit.Y);
 		}
 
 
@@ -2034,7 +2039,7 @@ console.log(currentUnit.Name);
 			DECISION_MADE = IDLE_ROAM(__game, aiPlayer, currentUnit, spaces, destination);
 			if(DECISION_MADE)
 				moverClass.Add(destination[0], destination[1]);
-			if(DECISION_MADE)console.log("idle roam", currentUnit.X, currentUnit.Y);
+			if(DECISION_MADE)LOGGER("idle roam", currentUnit.X, currentUnit.Y);
 		}
 
 		Prep_Movement(__game, aiPlayer, currentUnit, destination, moverClass);
@@ -2188,7 +2193,7 @@ console.log(currentUnit.Name);
 
 				if(!capital_found)
 				{
-					console.log("WARN: The AI could not find any units to estimate.");
+					LOGGER("WARN: The AI could not find any units to estimate.");
 				}
 			}
 		}
@@ -2290,38 +2295,38 @@ console.log(currentUnit.Name);
 		var aiState = Check_Standings(aiPlayer);
 		if(aiState==STATE.Setup)
 		{
-			console.log(" ");
-			console.log("+++++++");
-			console.log(aiPlayer.Team,"Find Position");
-			console.log(" ");
+			LOGGER(" ");
+			LOGGER("+++++++");
+			LOGGER(aiPlayer.Team,"Find Position");
+			LOGGER(" ");
 		}
 		else if(aiState==STATE.Argo)
 		{
-			console.log(" ");
-			console.log("+++++++");
-			console.log(aiPlayer.Team,"Argressive");
-			console.log(" ");
+			LOGGER(" ");
+			LOGGER("+++++++");
+			LOGGER(aiPlayer.Team,"Argressive");
+			LOGGER(" ");
 		}
 		else if(aiState==STATE.Gathering)
 		{
-			console.log(" ");
-			console.log("+++++++");
-			console.log(aiPlayer.Team,"Gathering");
-			console.log(" ");
+			LOGGER(" ");
+			LOGGER("+++++++");
+			LOGGER(aiPlayer.Team,"Gathering");
+			LOGGER(" ");
 		}
 		else if(aiState==STATE.Domination)
 		{
-			console.log(" ");
-			console.log("+++++++");
-			console.log(aiPlayer.Team,"Winning");
-			console.log(" ");
+			LOGGER(" ");
+			LOGGER("+++++++");
+			LOGGER(aiPlayer.Team,"Winning");
+			LOGGER(" ");
 		}
 		else if(aiState==STATE.Scared)
 		{
-			console.log(" ");
-			console.log("+++++++");
-			console.log(aiPlayer.Team,"Scared");
-			console.log(" ");
+			LOGGER(" ");
+			LOGGER("+++++++");
+			LOGGER(aiPlayer.Team,"Scared");
+			LOGGER(" ");
 		}
 		STATUS_CHOICE(aiState, __game, aiPlayer);
 	};

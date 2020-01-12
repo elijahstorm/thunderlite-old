@@ -50,7 +50,7 @@ var Player_Class = function(game, name, team, colors)
 			imageHolderCanvas.clearRect(0,0,img.Image().width,img.Image().height);
 		}
 
-		self.Icon = Images.Retrieve("Player Face"+colors);
+		self.Icon = Images.Retrieve("Player Face"+(colors-1));
 	}
 
 	self.Name = name;

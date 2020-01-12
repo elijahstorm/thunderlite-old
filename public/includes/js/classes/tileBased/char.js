@@ -406,7 +406,11 @@ var Characters = {
 				if(game.Detected_By_Enemy(__unit))
 				{
 					__unit.Fade(255, 15, function(__unit){
-						__unit.End_Turn();
+						try {
+							__unit.End_Turn();
+						} catch (e) {
+							// unit is usually dead
+						}
 						game.Interface.Draw();
 
 						if(whenFinished!=null)
