@@ -2328,7 +2328,13 @@ LOGGER(currentUnit.Name);
 			LOGGER(aiPlayer.Team,"Scared");
 			LOGGER(" ");
 		}
-		STATUS_CHOICE(aiState, __game, aiPlayer);
+
+		try {
+			STATUS_CHOICE(aiState, __game, aiPlayer);
+		} catch (e) {
+			LOGGER("ERROR, something broke the AI calculations here");
+			aiPlayer.End_Turn();
+		}
 	};
 
 			//** This executes the move queue and figures out the AI players standing in the gamestate **//
