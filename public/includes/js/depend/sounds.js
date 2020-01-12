@@ -71,7 +71,13 @@ function Sound_list_class(LOCATION)
 			if(muted)return this;
 			if(sprite!=null)
 				sprite = ""+sprite;
-			snd.play(sprite);
+
+			try {
+				snd.play(sprite);
+			} catch (e) {
+				console.error("Sound couldn't play.");
+			}
+
 			return this;
 		};
 		this.Play_Out = function(sprite)
@@ -80,7 +86,13 @@ function Sound_list_class(LOCATION)
 			if(sprite!=null)
 				sprite = ""+sprite;
 			let dur = snd_ln==null ? snd._duration : snd_ln;
-			snd.play(sprite);
+
+			try {
+				snd.play(sprite);
+			} catch (e) {
+				console.error("Sound couldn't play.");
+			}
+
 			snd.fade(__volume, 0, dur*1000, function(){
 				snd.volume(__volume);
 			})
@@ -124,7 +136,12 @@ function Sound_list_class(LOCATION)
 		};
 		this.Fade_In = function(time)
 		{
-			snd.play();
+			try {
+				snd.play();
+			} catch (e) {
+				console.error("Sound couldn't play.");
+			}
+
 			snd.volume(0);
 			snd.fade(0, __volume, time);
 		};

@@ -764,7 +764,7 @@ var Characters = {
 			self.Terrain().Unit = null;
 			var b = self.Terrain().Building;
 			if(b==null)return;
-			if(!b.Owner!=null)return;
+			if(b.Owner==null)return;
 			if(!b.Owner.Active)return;
 			if(b.Idle)return;
 			b.Set_Active(true);

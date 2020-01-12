@@ -624,7 +624,7 @@ window.onload = function(){
 	};
 	document.getElementById("endTurn").onclick = function(){
 		if(!INTERFACE.Game)return;
-		if(INTERFACE.Game.Client_Player().Active)
+		if(INTERFACE.Game.Client_Player().Active || true)
 		{
 			INTERFACE.Select_Tile();
 			INTERFACE.Game.Send_Move('next player', JSON.stringify(INTERFACE.Game.Data(true)));
