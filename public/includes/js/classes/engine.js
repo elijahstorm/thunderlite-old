@@ -1474,7 +1474,6 @@ var Engine_Class = function(input, is_sample)
 		return turn;
 	};
 
-	let t0 = performance.now();
 	if(input!=null)
 	{			/// when input is new map data or map id--make new game
 		let draw_map_data = function(self, __terre){
@@ -1489,9 +1488,11 @@ var Engine_Class = function(input, is_sample)
 				change_amt;
 			if(is_sample)
 				xtra_size = 0;
+
 			var paint_off_map = new Array(boundsX+(xtra_size*2));
 			for(var x=0;x<paint_off_map.length;x++)
 				paint_off_map[x] = new Array(boundsY+(xtra_size*2));
+
 			for(var d=0;d<xtra_size;d++)
 			{	// set corners of out of bounds area
 				paint_off_map[d][d] = 1;
@@ -1499,6 +1500,7 @@ var Engine_Class = function(input, is_sample)
 				paint_off_map[d][paint_off_map[0].length-1-d] = 1;
 				paint_off_map[paint_off_map.length-1-d][paint_off_map[0].length-1-d] = 1;
 			}
+
 			for(var x=0;x<boundsX;x++)
 			{	// set realistic out of bounds map data
 				for(var y=0;y<boundsY;y++)
@@ -1612,7 +1614,6 @@ var Engine_Class = function(input, is_sample)
 					}
 				}
 			}
-
 			for(var x=0;x<old_map.length;x++)
 			{	// turn map data into functional terrain
 				map[x] = new Array(old_map[x].length);
@@ -1633,7 +1634,6 @@ var Engine_Class = function(input, is_sample)
 						Terrain_Animations.push(map[x][y]);
 				}
 			}
-
 			var outside_map = new Array(paint_off_map.length);
 			for(var x=0;x<paint_off_map.length;x++)
 			{	// turn out of bounds map data into displayable terrain
@@ -1663,7 +1663,8 @@ var Engine_Class = function(input, is_sample)
 
 		if(input.Valid)
 		{		/// input is map_data
-			// console.time("parse data");
+
+		// takes some time, 50 - 100 ms
 			var data = Levels.Play_Custom(this, input);
 			var __terre = data[0];
 			var __units = data[1];
@@ -1671,13 +1672,11 @@ var Engine_Class = function(input, is_sample)
 			if(__terre==null)return;
 			global_weather = data[3];
 			this.Weather = global_weather;
-			// console.timeEnd("parse data");
 
-			// console.time("preparing map");
+		// takes awhile, 300 - 500 ms
 			draw_map_data(this, __terre);
-			// console.timeEnd("preparing map");
 
-			// console.time("initalizing assets");
+		// this doesn't take much time, usually .2 - 3.0 ms
 			for(var i in __units)
 			{
 				this.Add_Unit(Characters.New(this,Char_Data.Reverse_Get(__units[i][0]).Name), __units[i][1], __units[i][2], __units[i][3]);
@@ -1686,9 +1685,7 @@ var Engine_Class = function(input, is_sample)
 			{
 				this.Add_Building(Buildings.New(this,Building_Data.Reverse_Get(__cities[i][0]).Name), __cities[i][1], __cities[i][2], __cities[i][3]);
 			}
-			// console.timeEnd("initalizing assets");
 		}
 	}
 	else this.valid = false; // game does not have valid input to function
-	let t1 = performance.now();
 };

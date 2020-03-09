@@ -1932,7 +1932,7 @@ with(Menu.LevelSelect){
 
 	let h_index = 0;
 	let remove_index = new Array(3);
-	let _width = window.parent.mobilecheck() ? 250 : 200;
+	let _width = window.parent.mobilecheck() ? 200 : 150;
 	Menu.LevelSelect.Prep = function(input)
 	{
 		switch (input){
@@ -1971,7 +1971,6 @@ with(Menu.LevelSelect){
 			if(_read_game_data[index].Valid)
 			{
 				setTimeout(function(index){
-					console.time('drawing map '+index+' sample');
 					var sampledGame = new Engine_Class(_read_game_data[index], true);
 					sampledGame.Set_Interface(INTERFACE);
 					sampledGame.FORCE_MERGE_DISPLAY = true;
@@ -1979,7 +1978,6 @@ with(Menu.LevelSelect){
 					sampledGame.End_Game();
 					imageHolderCanvas.clearRect(0, 0, 900, 900);
 					worldCanvas.clearRect(0, 0, 900, 900);
-					console.timeEnd('drawing map '+index+' sample');
 					setTimeout(function(){
 						if(INTERFACE.Open_Menu()==Menu.LevelSelect)
 							Menu.LevelSelect.Draw();
