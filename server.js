@@ -1079,10 +1079,6 @@ io.on('connection', function(socket){
 			}else{
 				timestamp("***user data: ");
 				data.forEach(function(cur){
-
-								db.users.update({username:cur.username}, {$set:{
-									story_prog:1
-								}});
 					console.log(cur.username, cur.password);
 					console.log(cur);
 				});
