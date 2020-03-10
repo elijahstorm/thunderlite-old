@@ -99,6 +99,10 @@ Menu.MapEditor.Open = function()
 
 			return str+__script__+";";
 		}
+		Menu.MapEditor.Log_Data = function()
+		{	// delete this later
+			return encrypt_game_data(Map_Data_To_Str());
+		};
 
 		var POPUP_TINTER = new Canvas.Drawable(Shape.Box, null,
 							-10, -10, 900, 900, "#ccc", null, .2),
@@ -182,7 +186,7 @@ Menu.MapEditor.Open = function()
 				let err = scriptIsValid(editor._document.storage[0]);
 				if(err!=0)
 				{
-					console.error("Invalid error",err);
+					console.error("Invalid game script",err);
 					return;
 				}
 				__script__ = "";
@@ -2025,6 +2029,119 @@ with(Menu.LevelSelect){
 			Draw();
 
 		// setScroller();
+	};
+}
+
+/*** Main Story / Tutorial Screen ***/
+Menu.StoryScreen = new Menu.Menu_Class("#77a8bc");
+with(Menu.StoryScreen){
+	Add(new Canvas.Drawable(new Text_Class("32pt Impact", "#A349A4"), null, 30, 10, 600, 45, "Story Mode"));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 65, 600, 45, "Battle of Torral"));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 270, 600, 45, "Ancient Europe"));
+	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 260, 230, 3, "#000000", null, .6));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 470, 600, 45, "Han Dynasty"));
+
+	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 460, 230, 3, "#000000", null, .6));
+	Add(new Canvas.Drawable({ // back btn
+		Draw:function(c, x, y, w, h, s){
+			Shape.Rectangle.Draw(c,x,y,310,75,Menu.Button[0]);
+			new Text_Class("36pt Verdana", Menu.Button[2]).Draw(c,x+90,y+20,260,55,"BACK");
+			new Text_Class("36pt Verdana", Menu.Button[3]).Draw(c,x+87,y+17,260,55,"BACK");
+		}
+	}, null, 430, 10, 310, 75), function(){
+		Animations.Retrieve("Load").Remove_All();
+		mainMenu();
+	}, {
+		Draw:function(c, x, y, w, h, s){
+			Shape.Rectangle.Draw(c,x,y,310,75,Menu.Button[1]);
+			new Text_Class("36pt Verdana", Menu.Button[2]).Draw(c,x+90,y+20,260,55,"BACK");
+			new Text_Class("36pt Verdana", Menu.Button[3]).Draw(c,x+87,y+17,260,55,"BACK");
+		}
+	});
+
+	let Caption = new Text_Class("15pt Impact", "#D7EFD0");
+	let Owner = new Text_Class("9pt Impact", "#C2D8BC");
+
+	let h_index = 0;
+	let remove_index = new Array(3);
+	let _width = window.parent.mobilecheck() ? 200 : 150;
+	let loaded_ = false;
+	Menu.StoryScreen.Load = function()
+	{	// data, y row index
+		if(loaded_)return;
+		let __unlocked = Levels.Current();
+
+		var _read_game_data = new Array(__unlocked),
+		_game_imgs = new Array(__unlocked),
+		names = new Array(__unlocked),
+		loaders = new Array(__unlocked);
+		let y_loc = h_index*200;
+		if(remove_index[h_index]!=null)
+		{
+			Menu.StoryScreen.Remove(remove_index[h_index], __unlocked);
+			remove_index[h_index] = null;
+		}
+
+			/// start load maps
+		for(let index=0;index<__unlocked;index++)
+		{
+			let _data_text = Levels.Data(index);
+
+			names[index] = Levels.Name(index);
+			_data_text = decrypt_game_data(_data_text);
+			_read_game_data[index] = Map_Reader.Read(_data_text);
+
+			if(_read_game_data[index].Valid)
+			{
+				setTimeout(function(index){
+					var sampledGame = new Engine_Class(_read_game_data[index], true);
+					sampledGame.Set_Interface(INTERFACE);
+					sampledGame.FORCE_MERGE_DISPLAY = true;
+					_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
+					sampledGame.End_Game();
+					imageHolderCanvas.clearRect(0, 0, 900, 900);
+					worldCanvas.clearRect(0, 0, 900, 900);
+					setTimeout(function(){
+						if(INTERFACE.Open_Menu()==Menu.StoryScreen)
+							Menu.StoryScreen.Draw();
+					}, 20);
+				}, 50, index);
+			}
+		}
+
+		let drawer = { // level display
+			Draw:function(c,x,y,w,h,_load){
+				if(_game_imgs[_load]==null)
+				{
+					loaders[_load].values.show = true;
+				}
+				else
+				{
+					loaders[_load].values.show = false;
+					Canvas.ScaleImageData(c, _game_imgs[_load], x*Menu.StoryScreen.xScale, y*Menu.StoryScreen.yScale, w/_game_imgs[_load].width*Menu.StoryScreen.xScale, h/_game_imgs[_load].height*Menu.StoryScreen.yScale);
+				}
+				c.globalAlpha = .2;
+				Shape.Rectangle.Draw(c,x,y,w,h,"#E5D1D0");
+				c.globalAlpha = .7;
+				Shape.Rectangle.Draw(c,x,y+120,w,30,"#57634E");
+				Shape.Rectangle.Draw(c,x,y+120,w,1,"#F4EFEB");
+				c.globalAlpha = 1;
+				Shape.Box.Draw(c,x,y,w,h,"#73877B");
+				Caption.Draw(c,x+5,y+123,w,25,_read_game_data[_load].Name);
+				Owner.Draw(c,x+5,y+140,w,10,names[_load]);
+			}
+		};
+		let clicker = function(level){
+			Animations.Retrieve("Load").Remove_All();
+			new_custom_game(_read_game_data[level], Levels.Name(level), true);
+		};
+		for(var i=0;i<__unlocked;i++){
+			loaders[i] = Animations.Retrieve("Load").New(menuCanvas, 30+((_width+10+(_width/3))*(__unlocked-i-1)), (150+y_loc)*Menu.StoryScreen.yScale, _width/3*Menu.StoryScreen.xScale, 50*Menu.StoryScreen.yScale, (y_loc!=0));
+			let _index = Add(new Canvas.Drawable(drawer, null, 30+((_width+10)*(__unlocked-i-1)), 100+y_loc, _width, 150, i), clicker, new Canvas.Drawable(Shape.Box, null, 30+((_width+10)*(__unlocked-i-1)), 100+y_loc, _width, 150, "#F2F5FF", null, .5));
+			if(i==0)
+				remove_index[h_index] = _index;
+		}
+		loaded_ = true;
 	};
 }
 

@@ -1,94 +1,33 @@
 var Levels_Class = function()
 {
-	var unlocked_levels = 3;
-	var LevelData = {
-		Names:[],
-		Players:[],
-		Terrain:[],
-		Start:function(Game, lvl){}
+	let unlocked_levels = 1;
+	let LevelData = {
+		Name:["First Test", "Second Test", "End Of The World"],
+		Map:[
+			"¥¦¤«¨bbm¡R¡RR|§ mcbmcbmclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclcljljljljljljljlcljlclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclmlt§lme^i^d^cle^d^d^blmj^c^d^blj^b^f^blj^g^i^_clj^e^i^_clj^e^k^_clj^g^k^_clj^j^c^clj^k^e^cld^i^d^clg^b^c^blg^c^b^bld^d^c^blg^k^c^clg^j^b^clmbmm",
+			"¥¦¤«¨bbm¡R¡RR|§ mcbmcbmclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclcljljljljljljljlcljlclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclmlt§lme^i^d^cle^d^d^blmj^c^d^blj^b^f^blj^g^i^_clj^e^i^_clj^e^k^_clj^g^k^_clj^j^c^clj^k^e^cld^i^d^clg^b^c^blg^c^b^bld^d^c^blg^k^c^clg^j^b^clmbmm",
+			"¥¦¤«¨bbm¡R¡RR|§ mcbmcbmclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclcljljljljljljljlcljlclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclclmlt§lme^i^d^cle^d^d^blmj^c^d^blj^b^f^blj^g^i^_clj^e^i^_clj^e^k^_clj^g^k^_clj^j^c^clj^k^e^cld^i^d^clg^b^c^blg^c^b^bld^d^c^blg^k^c^clg^j^b^clmbmm"
+		],
+		id:[1100, 1101, 1102]
 	};
 
-	this.Draw = function(canvas, x, y, w, h, level)
+	this.Report_Unlocked = function(amt)
 	{
-		console.error("dont call here");
-		// var holder = new Engine_Class(level, true);
-		// INTERFACE.Sample_Draw(canvas, x, y, w, h, holder);
-		// holder.End_Game();
+		console.log("SOMETHING IN HERE",amt);
+		unlocked_levels = amt;
 	};
-	this.Terrain = {
-		Draw:function(canvas, x, y, w, h, level){
-			if(canvas==null||typeof canvas==="undefined")return;
-			if(x==null)x = 0;
-			if(y==null)y = 0;
-			if(w==null)w = 100;
-			if(h==null)h = 100;
-			if(level==null)level = 0;
-			var map = LevelData.Terrain[level];
-			if(!map)return;
-			var tileWidth = w/map.length;
-			var tileHeight = h/map[0].length;
-			for(var i=0;i<map.length;i++)
-			for(var j=0;j<map[i].length;j++)
-			{
-				var img = Terrain_Data.TERRE[map[i][j]].Sprite[0];
-				if(img.Image().height>TILESIZE)
-				{
-					var xtra_height = img.Image().height-TILESIZE;
-					img.Draw(canvas,x+i*tileWidth,y+(((j-xtra_height/img.Image().height)*tileHeight)),tileWidth,tileHeight*(xtra_height/img.Image().height)+tileHeight);
-					continue;
-				}
-				img.Draw(canvas,x+i*tileWidth,y+j*tileHeight,tileWidth,tileHeight);
-			}
-		},
-		Data:function(num){
-			return LevelData.Terrain[num];
-		}
+
+	this.Name = function(lvl)
+	{
+		if(lvl>unlocked_levels || lvl<0)
+			return "Nah";
+		return LevelData.Name[lvl];
 	};
-	this.Names = function(num)
+	this.Data = function(lvl)
 	{
-		return LevelData.Names[num];
-	};
-	this.Players = function(num)
-	{
-		return LevelData.Players[num];
-	};
-	this.From_Name = function(name)
-	{
-		for(var i in LevelData.Names)
-		{
-			if(LevelData.Names[i]==name)
-			{
-				return i;
-			}
-		}
-	}
-	this.Units = function(num)
-	{
-		return LevelData.Units[num];
-	};
-	this.Rows = function(num)
-	{
-		return LevelData.Terrain[num].length;
-	};
-	this.Cols = function(num)
-	{
-		return LevelData.Terrain[num][0].length;
-	};
-	this.Run = function(Game, lvl)
-	{
-		if(!Levels.Unlocked(lvl))
+		if(lvl>unlocked_levels || lvl<0)
 			return;
-		Game.Name = LevelData.Names[lvl];
-		LevelData.Start(Game, lvl);
-	};
-	this.Play_Custom = function(Game, map_data)
-	{
-		if(!map_data.Valid)
-			return;
-		Game.Name = map_data.Name;
-		Game.Map = map_data.Map;
-		Game.id = map_data.id;
-		return map_data.Start(Game);
+			return LevelData.Map[lvl];
 	};
 	this.Unlocked = function(num)
 	{
@@ -98,13 +37,9 @@ var Levels_Class = function()
 	{
 		return unlocked_levels;
 	};
-	this.Length = function()
-	{
-		return LevelData.Terrain.length;
-	};
-	this.Next = function()
+	this.Unlock_Next = function()
 	{
 		return ++unlocked_levels;
-	}
+	};
 };
 var Levels = new Levels_Class();

@@ -125,7 +125,7 @@ function Tile_Holder(x_len, y_len, func)
 
 var Map_Holder = function(map)
 {
-	if(map==null)map = Levels.Random();
+	if(map==null)return Levels.Blank;
 	var rows = map.length;
 	var cols = map[0].length;
 

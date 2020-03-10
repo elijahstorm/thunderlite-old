@@ -1662,13 +1662,18 @@ var Engine_Class = function(input, is_sample)
 		};
 
 		if(input.Valid)
-		{		/// input is map_data
+		{		/// input is map data
+			if(!input.Valid)
+				return;
 
 		// takes some time, 50 - 100 ms
-			var data = Levels.Play_Custom(this, input);
-			var __terre = data[0];
-			var __units = data[1];
-			var __cities = data[2];
+			let data = input.Start(this);
+			this.Name = input.Name;
+			this.Map = input.Map;
+			this.id = input.id;
+			let __terre = data[0];
+			let __units = data[1];
+			let __cities = data[2];
 			if(__terre==null)return;
 			global_weather = data[3];
 			this.Weather = global_weather;

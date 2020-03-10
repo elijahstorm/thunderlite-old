@@ -574,6 +574,7 @@ window.onload = function(){
 		scroller = g_list_scroller;
 	});
 	socket.emit('gamedata get', {mapowner:'freemaps'}, 0, 5);
+	socket.emit('userdata get', "progress");
 
 	if(window.parent.mobilecheck())
 	{
@@ -726,7 +727,7 @@ function init_map(map, players, game_id, skip_pregame, test_game){
 	}
 	INTERFACE.Display_Menu(Menu.PreGame);
 }
-function new_custom_game(game_data, name, testing, save_data_index)
+function new_custom_game(game_data, name, skippingLobby, save_data_index)
 {
 	if(!name)return;
 
@@ -736,8 +737,8 @@ function new_custom_game(game_data, name, testing, save_data_index)
 	else data = Map_Reader.Read(game_data);
 	if(!data.Valid)return;
 
-	init_map(data, null, null, testing, [testing, save_data_index]);
-	if(testing)return;
+	init_map(data, null, null, skippingLobby, [skippingLobby, save_data_index]);
+	if(skippingLobby)return;
 
 	if(online){
 		socket.emit("open", data.id, name, data.Player_Amount());
@@ -762,6 +763,9 @@ function load_game(gameData){
 
 function openLevelSelect(){
 	INTERFACE.Open_Level_Select();
+}
+function openStory(){
+	INTERFACE.Open_Story();
 }
 function openMapEditor(game_data, data_index, testing_won){
 	document.getElementById("mainMenu").style.display="none";

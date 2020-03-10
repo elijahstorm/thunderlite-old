@@ -302,7 +302,8 @@ window.onload = function(){
 
 			/** loading published games */
 		else if(data.type==500)
-		{	// error requesting mapdata
+		{	// error requesting data
+			console.error("Could not get data request. CODE:",data.type);
 		}
 		else if(data.type==501)
 		{	// map index does not exist
@@ -320,6 +321,10 @@ window.onload = function(){
 		else if(data.type==503)
 		{	// recieved a list of game data that matched the query
 			game.Menu.LevelSelect.Update_Map_Search(data.data);
+		}
+		else if(data.type==504)
+		{	// report total unlocked story levels
+			game.Levels = game.Levels.Report_Unlocked(data.unlocked_levels);
 		}
 
 			/** client saved custom map data */

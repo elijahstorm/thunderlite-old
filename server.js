@@ -941,7 +941,6 @@ io.on('connection', function(socket){
 		});
 	});
 
-
 	socket.on('new user', function(username, password, email){
 		if(socket.vars.online)return;
 		db.users.find({username:username}, function(err, data){
@@ -954,6 +953,7 @@ io.on('connection', function(socket){
 					username:username,
 					password:password,
 					email:email,
+					story_prog:1,
 					level:1,
 					points:0,
 					totalGames:0,
@@ -1027,15 +1027,64 @@ io.on('connection', function(socket){
 		}
 		Connections.Disconnect(socket.index);
 	});
+	socket.on('userdata get', function(query){
+		db.users.find({username:socket.username}, function(err, data){
+			if(err){
+				socket.send({type:500});
+				return;
+			}
+			if(data.length==0){
+				socket.send({type:500});
+				return;
+			}
+			if(query=="progress")
+			{	// unlocked story levels
+				socket.send({type:504, unlocked_levels:data.story_prog});
+			}
+		});
+	});
+	socket.on('userdata add', function(query){
+		db.users.find({username:socket.username}, function(err, data){
+			if(err){
+				socket.send({type:500});
+				return;
+			}
+			if(data.length==0){
+				socket.send({type:500});
+				return;
+			}
+			if(query=="progress")
+			{	// unlock next story level
+				if(data.story_prog>15)
+				{	// cannot grow level further
+					socket.send({type:601, unlocked_levels:data.story_prog});
+				}
+				data.story_prog++;
+				socket.send({type:600, unlocked_levels:data.story_prog});
+			}
+		});
+	});
 
 	socket.on('print data', function(){
+		timestamp("!** Request to print data by:", socket.username);
+		if(socket.username!="storm")
+			return;	// check for admin permission
+		timestamp("Request permitted to:", socket.username);
+
+
+
 		db.users.find({}, function(err, data){
 			if(err||!data){
 				timestamp("***Error printing user data.");
 			}else{
 				timestamp("***user data: ");
 				data.forEach(function(cur){
+
+								db.users.update({username:cur.username}, {$set:{
+									story_prog:1
+								}});
 					console.log(cur.username, cur.password);
+					console.log(cur);
 				});
 			}
 		});
@@ -1049,7 +1098,6 @@ io.on('connection', function(socket){
 				});
 			}
 		});
-		timestamp("Printing data");
 		console.log("Connections",Connections.Amount());
 		for(var i=0;i<Connections.Length();i++)
 		{

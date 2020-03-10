@@ -27,31 +27,29 @@ var Interface_Class = function()
 
 	self.setGame = function(g)
 	{
+		var __X,__Y;
+		if(g.Terrain_Map!=null)
+		{
+			__X = g.Terrain_Map.Width;
+			__Y = g.Terrain_Map.Height;
+		}
+		else return 1;
+
 		game = g;
 		self.Game = g;
 		if(g==null){
 			self.Tiles = null;
 			terrain_disp = null;
-			return;
+			return 2;
 		}
 		game.Set_Interface(self);
-		var __X,__Y;
-		if(g.Terrain_Map==null)
-		{
-			__X = Levels.Cols(g.Map);
-			__Y = Levels.Rows(g.Map);
-		}
-		else
-		{
-			__X = g.Terrain_Map.Width;
-			__Y = g.Terrain_Map.Height;
-		}
 		self.Tiles = new Tile_Holder(__X, __Y, function(ui, x, y){
 			if(ui.Check_Controls())ui.Select_Tile(x, y);
 		});
 		self.Tiles.Interface = self;
 		terrain_disp = new Tiling;
 		terrain_disp.setup(600, 600, game.Terrain_Map.Width*TILESIZE, game.Terrain_Map.Height*TILESIZE, TILESIZE, TILESIZE);
+		return 0;
 	};
 	self.Slide_Up = HUD_Display.Add_Drawable(Shape.Rectangle, "up", 100, 0, 400, 20, "#FF0", Canvas.Clear, 0);
 	self.Slide_Down = HUD_Display.Add_Drawable(Shape.Rectangle, "down", 100, 580, 400, 20, "#FF0", Canvas.Clear, 0);
@@ -1488,6 +1486,16 @@ let t1,t2,t = at;
 		self.Set_Controls(document.getElementById("inputHandler"));
 		self.Allow_Controls(true);
 		self.Display_Menu(Menu.LevelSelect);
+	};
+	self.Open_Story = function()
+	{
+		if(game)return;
+		Menu.StoryScreen.Load();
+		document.getElementById("mainMenu").style.display="none";
+		self.Close_Menu();
+		self.Set_Controls(document.getElementById("inputHandler"));
+		self.Allow_Controls(true);
+		self.Display_Menu(Menu.StoryScreen);
 	};
 	self.Open_Unit_Create_Menu = function(player, resources, onBuildFnc, onCloseFnc)
 	{
