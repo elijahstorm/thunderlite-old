@@ -1038,8 +1038,8 @@ io.on('connection', function(socket){
 				return;
 			}
 			if(query=="progress")
-			{	// unlocked story levels
-				socket.send({type:504, unlocked_levels:data.story_prog});
+			{	// unlocked story level
+				socket.send({type:504, story_prog:data[0].story_prog});
 			}
 		});
 	});
@@ -1055,12 +1055,15 @@ io.on('connection', function(socket){
 			}
 			if(query=="progress")
 			{	// unlock next story level
-				if(data.story_prog>15)
+				if(data[0].story_prog>15)
 				{	// cannot grow level further
-					socket.send({type:601, unlocked_levels:data.story_prog});
+					socket.send({type:601, story_prog:data[0].story_prog});
+					return;
 				}
-				data.story_prog++;
-				socket.send({type:600, unlocked_levels:data.story_prog});
+				db.users.update({username:socket.username}, {$set:{
+					story_prog:data[0].story_prog+1
+				}});
+				socket.send({type:600, story_prog:data[0].story_prog+1});
 			}
 		});
 	});
@@ -1071,8 +1074,6 @@ io.on('connection', function(socket){
 			return;	// check for admin permission
 		timestamp("Request permitted to:", socket.username);
 
-
-
 		db.users.find({}, function(err, data){
 			if(err||!data){
 				timestamp("***Error printing user data.");
@@ -1080,7 +1081,6 @@ io.on('connection', function(socket){
 				timestamp("***user data: ");
 				data.forEach(function(cur){
 					console.log(cur.username, cur.password);
-					console.log(cur);
 				});
 			}
 		});

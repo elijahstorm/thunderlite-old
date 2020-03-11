@@ -607,11 +607,11 @@ window.onload = function(){
 	Stats_Display.Background.State.Set("#F49097");
 	Stats_Display.Background.Alpha.Set(1);
 
+	INTERFACE = new Interface_Class;
 	dialogCanvas = initiateCanvas("dialogCanvas");
 	Dialog_Display = Canvas.Create_Canvas(dialogCanvas, "dialog");
-	// Dialog = new Dialog_Class(dialogCanvas);
 
-	INTERFACE = new Interface_Class;
+	Dialog = new Dialog_Class(dialogCanvas);
 	for(var i in onInterfaceLoadedList){
 		onInterfaceLoadedList[i](INTERFACE);
 	}
@@ -660,14 +660,20 @@ function decrypt_game_data(data)
 	return encrypted;
 }
 
-function init_map(map, players, game_id, skip_pregame, test_game){
+function init_map(map, players, game_id, skip_pregame, offline_game){
 	document.getElementById("mainMenu").style.display="none";
 	var Game = new Engine_Class(map);
-	if(test_game!=null)
-	if(test_game[0])
+	if(offline_game!=null)
+	if(offline_game[0])
 	{
 		Game.game_data[0] = true;
-		Game.game_data[2] = test_game[1];
+		Game.game_data[2] = offline_game[1];
+		if(offline_game[2]==1)
+			Game.game_data[3] = 1;
+		else if(offline_game[2]==2)
+			Game.game_data[3] = 2;
+		else if(offline_game[2]==3)
+			Game.game_data[3] = 3;
 	}
 	Animations.Retrieve("Load").Remove_All();
 	Game.id = game_id;
@@ -682,6 +688,7 @@ function init_map(map, players, game_id, skip_pregame, test_game){
 	Canvas.Start_All();
 	gameInProgress = true;
 	window.parent.setConnection(2);
+	Levels.Run_Script(Game, map.Data.Get().__script);
 
 	if(skip_pregame)
 	{
@@ -727,7 +734,7 @@ function init_map(map, players, game_id, skip_pregame, test_game){
 	}
 	INTERFACE.Display_Menu(Menu.PreGame);
 }
-function new_custom_game(game_data, name, skippingLobby, save_data_index)
+function new_custom_game(game_data, name, skippingLobby, save_data_index, story_progress)
 {
 	if(!name)return;
 
@@ -737,7 +744,7 @@ function new_custom_game(game_data, name, skippingLobby, save_data_index)
 	else data = Map_Reader.Read(game_data);
 	if(!data.Valid)return;
 
-	init_map(data, null, null, skippingLobby, [skippingLobby, save_data_index]);
+	init_map(data, null, null, skippingLobby, [skippingLobby, save_data_index, story_progress]);
 	if(skippingLobby)return;
 
 	if(online){

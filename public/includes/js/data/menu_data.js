@@ -1141,7 +1141,7 @@ Menu.MapEditor.Open = function()
 				return;
 			}
 
-			new_custom_game(Map_Data_To_Str(), name, true, local_saved_map);
+			new_custom_game(Map_Data_To_Str(), name, true, local_saved_map, 1);
 		}, {
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
@@ -2036,7 +2036,7 @@ with(Menu.LevelSelect){
 Menu.StoryScreen = new Menu.Menu_Class("#77a8bc");
 with(Menu.StoryScreen){
 	Add(new Canvas.Drawable(new Text_Class("32pt Impact", "#A349A4"), null, 30, 10, 600, 45, "Story Mode"));
-	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 65, 600, 45, "Battle of Torral"));
+	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 65, 600, 45, "Battle of Torrial"));
 	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 270, 600, 45, "Ancient Europe"));
 	Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 260, 230, 3, "#000000", null, .6));
 	Add(new Canvas.Drawable(new Text_Class("18pt Impact", "#642D64"), null, 50, 470, 600, 45, "Han Dynasty"));
@@ -2064,7 +2064,7 @@ with(Menu.StoryScreen){
 
 	let h_index = 0;
 	let remove_index = new Array(3);
-	let _width = window.parent.mobilecheck() ? 200 : 150;
+	let _width = window.parent.mobilecheck() ? 125 : 150;
 	let loaded_ = false;
 	Menu.StoryScreen.Load = function()
 	{	// data, y row index
@@ -2133,11 +2133,11 @@ with(Menu.StoryScreen){
 		};
 		let clicker = function(level){
 			Animations.Retrieve("Load").Remove_All();
-			new_custom_game(_read_game_data[level], Levels.Name(level), true);
+			new_custom_game(_read_game_data[level], Levels.Name(level), true, null, Levels.Current()==level+1 ? 2 : 3);
 		};
 		for(var i=0;i<__unlocked;i++){
-			loaders[i] = Animations.Retrieve("Load").New(menuCanvas, 30+((_width+10+(_width/3))*(__unlocked-i-1)), (150+y_loc)*Menu.StoryScreen.yScale, _width/3*Menu.StoryScreen.xScale, 50*Menu.StoryScreen.yScale, (y_loc!=0));
-			let _index = Add(new Canvas.Drawable(drawer, null, 30+((_width+10)*(__unlocked-i-1)), 100+y_loc, _width, 150, i), clicker, new Canvas.Drawable(Shape.Box, null, 30+((_width+10)*(__unlocked-i-1)), 100+y_loc, _width, 150, "#F2F5FF", null, .5));
+			loaders[i] = Animations.Retrieve("Load").New(menuCanvas, 30+((_width+10+(_width/3))*(i)), (150+y_loc)*Menu.StoryScreen.yScale, _width/3*Menu.StoryScreen.xScale, 50*Menu.StoryScreen.yScale, (y_loc!=0));
+			let _index = Add(new Canvas.Drawable(drawer, null, 30+((_width+10)*(i)), 100+y_loc, _width, 150, i), clicker, new Canvas.Drawable(Shape.Box, null, 30+((_width+10)*(i)), 100+y_loc, _width, 150, "#F2F5FF", null, .5));
 			if(i==0)
 				remove_index[h_index] = _index;
 		}

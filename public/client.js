@@ -277,7 +277,7 @@ window.onload = function(){
 			if(!lobby_open)return;
 			lobby.contentWindow.add_game(data.name,data.map,data.game);
 			lobby.contentWindow._openGames.add();
-			// if(game.LOG)game.LOG.add(Levels.Names(data.map)+" opened with id "+data.game,"#F00");
+			// if(game.LOG)game.LOG.add(game.Levels.Names(data.map)+" opened with id "+data.game,"#F00");
 		}
 		else if(data.type==28)
 		{	// player lost connection
@@ -324,7 +324,23 @@ window.onload = function(){
 		}
 		else if(data.type==504)
 		{	// report total unlocked story levels
-			game.Levels = game.Levels.Report_Unlocked(data.unlocked_levels);
+			game.Levels.Report_Unlocked(data.story_prog);
+		}
+
+			/** client saved custom map data */
+		else if(data.type==600)
+		{	// Unlocked the next story level
+			alert("Unlocked the next level!");
+			game.Levels.Report_Unlocked(data.story_prog);
+		}
+		else if(data.type==601)
+		{	// Unlocked all the story levels
+			alert("You've reached the max level!");
+			game.Levels.Report_Unlocked(data.story_prog);
+		}
+		else if(data.type==605)
+		{	// CONGRATS for leveling up!
+			
 		}
 
 			/** client saved custom map data */

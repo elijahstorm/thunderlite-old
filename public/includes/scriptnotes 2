@@ -1,0 +1,80 @@
+<start>
+
+talk Link: "Wow thank you!!", "Oh fuck..."
+talk Torrial: "We're not out of the woods yet!"
+talk Gannon: "I have way too many units compared to you, and resources vast! This is a fertile land, and I have the better ground."
+
+hl: 10, 7
+wait: 1
+talk Torrial: "Link this seems like trouble! Gannon has more resources and more troops as well. And that large Tank is called a Warmachine. It can build reinforcements using recourses it collects from the ground."
+unhl: 10, 7
+
+hl: 7, 2
+hl: 7, 3
+hl: 8, 6
+hl: 10, 1
+hl: 11, 0
+hl: 11, 2
+
+wait: 1
+
+unhl: 7, 2
+unhl: 7, 3
+unhl: 8, 6
+unhl: 10, 1
+unhl: 11, 0
+unhl: 11, 2
+
+
+talk Torrial: "We have to use effective strategy to avoid dying here. Let's have our troops build a trench along the coast so that we can bunker down and create a defensive position."
+
+move: 0, 0
+wait: 1
+terrain: "Canyon", 2, 0
+wait: 1
+terrain: "Canyon", 2, 1
+wait: 1
+terrain: "Canyon", 2, 2
+wait: 1
+
+talk Torrial: "Canyons provide good defense to your troops in one, and also stop long ranged weaponry from being effective against your troops in the trenches."
+talk Torrial: "Bridges and Roads provide very little defense, so consider this while you maneuver your troops. Use this to your advantage at this choke point."
+talk Torrial: "Choke the enemy position out, and don't let them advance on you! Your Heavy Commandos are equipped to deal with Heavy Armor tanks like those pesky Annihilator's that gave us trouble before."
+talk Torrial: "Be careful, this won't be easy as the enemy Warmachine can still build. Stay alive while you can and don't lose the pivotal position! Good luck here, I'm going to go call for reinforcements."
+talk Torrial: "I'll be back soon, be sure to keep the area below the roads clear so we have space to bring in the reinforcements."
+
+</start>
+
+<turn 3>
+
+add unit: 1, "Stealth Tank", 0,8
+talk Torrial: "Hey! I'm back. And with a present you're gonna love! These bad boys are Stealth Tanks."
+talk Torrial: "After they move, they will turn invisible to the enemy if there is no enemy troop near them. This means they can be used to block incoming attacks, if the enemy runs into it! This unit will change the battle field here. Do not lose it!"
+talk Torrial: "And remember, it's location will become compromised if it attacks an enemy troop. You'll have to move it again to hide it. However a surprise attack will deal 2x damage, but they are not the most powerful Tank so don't toss them straight into battle."
+talk Torrial: "You're doing good, but keep holding out. I'll be back in a little bit more with more reinforcements."
+
+</turn>
+
+<turn 6>
+
+add unit: 1, "Stealth Tank", 0,8
+add unit: 1, "Annihilator Tank", 1,8
+add unit: 1, "Rocket Truck", 0,9
+add unit: 1, "Flak Tank", 0,10
+talk Torrial: "Wow! You're doing so well without me. Good for you!! Here's more troops. I'll be back soon again!"
+
+
+</turn>
+
+<turn 8>
+
+add unit: 1, "Stealth Tank", 0,8
+add unit: 1, "Annihilator Tank", 1,8
+add unit: 1, "Rocket Truck", 0,9
+add unit: 1, "Scorpion Tank", 0,10
+add unit: 1, "Scorpion Tank", 1,9
+talk Torrial: "This is it. This is all I could bring. This might be a tough battle still to come."
+wait: 1
+talk Torrial: "But I have faith in you."
+
+</turn>

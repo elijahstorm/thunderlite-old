@@ -1,0 +1,73 @@
+<start>
+
+hurt unit: 8,7, 20
+talk Link: "help me!"
+talk Gannon: "Hahaha!", "I hope you're ready to lose."
+add unit: 2, "Annihilator Tank", 8,6
+wait: 0.5
+kill unit: 8,5
+wait: 0.5
+kill unit: 7,6
+wait: 1
+add unit: 2, "Scorpion Tank", 9,7
+add unit: 2, "Scorpion Tank", 8,8
+add unit: 2, "Scorpion Tank", 9,9
+add unit: 2, "Scorpion Tank", 11,10
+wait: 0.5
+talk Link: "Ugh!"
+talk Gannon: "Ahaha!"
+
+wait: 1
+talk Torrial: "Link! I'm here to help!"
+talk Link: "Who are you?"
+talk Torrial: "I'll have time to explain after we get out of this situation."
+hl: 8,6
+talk Torrial: "First of all that big tank that just destroy your troops is called the Annihilator Tank."
+talk Torrial: "Don't try to take him on with the troops you have left in this battle, it has Heavy Defense and needs to be taken on by a Heavy Attacker."
+unhl: 8,6
+hl: 0,1
+hl: 1,2
+hl: 2,3
+hl: 0,3
+hl: 3,0
+talk Torrial: "Your infantry troops attack with Light Attack, which is super ineffective."
+unhl: 0,1
+unhl: 1,2
+unhl: 2,3
+unhl: 0,3
+unhl: 3,0
+hl: 1,1
+hl: 1,4
+talk Torrial: "Your tank and mortar attack with Medium Attack, which is neutral, but those two not enough to kill him."
+unhl: 1,1
+unhl: 1,4
+hl: 7,2
+talk Torrial: "The best plan of action here would be to target their Capital. If you capture their Capital, the enemies morales will deplete completely and they will give up."
+talk Torrial: "You can capture enemy buildings by targeting your infantry troops over them."
+hl: 2,3
+talk Torrial: "Send this infantry troop over there, and reinforce him with your other troops."
+talk Torrial: "In this terrain, your troops will be hidden by the mountains, because tanks and trucks cannot drive over mountains."
+unhl: 7,2
+unhl: 2,3
+
+talk Torrial: "That's all for now. Good luck."
+
+</start>
+
+<win>
+talk Gannon: "Arrrg!"
+talk Torrial: "Yes! I knew you could do it. Quick, let's move and I'll explain everything."
+</win>
+
+<lose>
+talk Torrial: "Here's a battle tip: Light Attacks are super effective to Light Armor, Heavy Attacks are very ineffective against Light Armor. Medium Attacks are neutral."
+talk Torrial: "Click a Troop to see info about it's health, attack power, attack type, and armor type."
+talk Torrial: "Try again! You were just so close this time."
+</lose>
+
+
+<turn 4>
+
+talk Torrial: "You're doing well. Keep it up!"
+
+</turn>

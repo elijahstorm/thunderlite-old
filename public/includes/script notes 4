@@ -1,0 +1,100 @@
+<start>
+
+talk Torrial: "Here it is! The unused stronghold!! Thank goodness we were quick enough. We need to capture this before Gannon does!", "We should have a chance, use your infantry troops to capture the key locations."
+
+move: 16,4
+hl: 9, 11
+hl: 9, 14
+hl: 11, 14
+hl: 12, 13
+hl: 12, 9
+hl: 13, 9
+hl: 15, 13
+hl: 14, 15
+hl: 17, 12
+
+wait: 2
+talk Torrial: "These oil buildings provide income for you to use during battle."
+
+unhl: 9, 11
+unhl: 9, 14
+unhl: 11, 14
+unhl: 12, 13
+unhl: 12, 9
+unhl: 13, 9
+unhl: 15, 13
+unhl: 14, 15
+unhl: 17, 12
+
+
+hl: 9, 9
+hl: 11, 7
+
+wait: 2
+talk Torrial: "These spots will be where you can build extra troops to help this fight."
+
+unhl: 9, 9
+unhl: 11, 7
+
+
+hl: 10, 11
+hl: 11, 11
+
+wait: 2
+talk Torrial: "However, oil alone isn't enough to finance troops. These locations offer intel and part supply required to build Ground troops or Air troops.", "Each building is required for their respective to be built."
+
+unhl: 10, 11
+unhl: 11, 11
+
+
+</start>
+
+
+<turn 2>
+
+talk Torrial: "Ahh! Oh no!"
+
+move: 5, 0
+wait: 1
+add unit: 2, "Strike Commando", 4, 6
+add unit: 2, "Strike Commando", 5, 3
+add unit: 2, "Strike Commando", 7, 4
+wait: 1
+add unit: 2, "Strike Commando", 8, 3
+add unit: 2, "Strike Commando", 12, 3
+add unit: 2, "Strike Commando", 14, 6
+add unit: 2, "Strike Commando", 13, 1
+wait: 1
+
+move: 18, 14
+wait: 1
+add unit: 2, "Strike Commando", 16, 16
+add unit: 2, "Strike Commando", 17, 14
+add unit: 2, "Strike Commando", 18, 15
+wait: 1
+add unit: 2, "Strike Commando", 18, 13
+add unit: 2, "Strike Commando", 18, 11
+add unit: 2, "Strike Commando", 17, 8
+add unit: 2, "Strike Commando", 18, 6
+wait: 1
+
+move: 8, 0
+wait: 1
+add unit: 2, "Spider Tank", 9, 2
+wait: .5
+add unit: 2, "Spider Tank", 11, 2
+wait: 1
+
+
+talk Torrial: "Oh no! They ambushed us! We weren't quick enough."
+
+talk Link: "What are we going to do?"
+
+talk Torrial: "We have to press on, if we go back now they'll just follow us and end us back at the Peninsula. Our forces are too weakened at the moment."
+talk Torrial: "Our only hope is to quickly capture the stronghold here before their infantry troops capture it."
+
+wait: .5
+talk Torrial: "You've pulled miracles before these past few weeks. Keep it up, our end is almost in sight!"
+
+
+</turn>

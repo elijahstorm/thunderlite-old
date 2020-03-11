@@ -715,7 +715,7 @@ Terrain_Data.TERRE[CURTERRE++] = {
 	Description:"Dips down, but ranged units cannot target here",
 	Terrain:0,
 	Type:5,
-	Protection:0,
+	Protection:.3,
 	Damage:0,
 	Height:-10,
 	Drag:1,

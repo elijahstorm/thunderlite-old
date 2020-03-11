@@ -1,0 +1,23 @@
+<start>
+
+talk Torrial: "We have to keep going! There is an unused strategic stronghold up ahead!", "If we can quickly get up there we can capture some of the unused resources and use it to survive for time until the Navel army arrives and helps us turn the battle between us and Gannon."
+
+
+hl: 1, 5
+talk Torrial: "Here is a really strategic unit for bottlenecked positions, like we used last time.", "It will blast through the enemy you attack, and damage whatever is directly behind it as well."
+hl: 4, 5
+talk Torrial: "Use this to your advantage along with the Rocket Truck to damage little by little."
+unhl: 1, 5
+unhl: 4, 5
+talk Torrial: "The enemy also has a few Stealth Tanks as well this time."
+
+hl: 7, 5
+
+talk Torrial: "This is called a Jammer Truck.", "It will detect any Hidden vehicles in the surrounding area.", "It can't attack, but it's still a useful piece of machinery."
+
+unhl: 7, 5
+
+talk Torrial: "It looks like it's going to rain soon.. This slows down troops and reduces attacks."
+talk Torrial: "Please, stay safe out there.."
+
+</start>

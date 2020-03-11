@@ -376,7 +376,7 @@ var Engine_Data = function(data)
 		}
 };
 
-var Engine_Class = function(input, is_sample)
+var Engine_Class = function(input, is_sample, is_local)
 {
 	var UI = Fast_Fake_Interface;
 	this.Interface = UI;
@@ -396,6 +396,7 @@ var Engine_Class = function(input, is_sample)
 	function sentGameMove()
 	{	// if player doesn't move for a whole minute, force end their turn
 		if(!online)return;
+		if(_self.game_data[0])return;
 		last_move_time = new Date();
 		const this_move_time = last_move_time;
 
@@ -467,6 +468,7 @@ var Engine_Class = function(input, is_sample)
 	var Cities = [];
 	var Players = [];
 	var Connected_Players = [];
+	let Script = Levels.Blank_Script;
 	var turn = 0;
 	var cur_player = 0;
 	var client = null;
@@ -493,6 +495,8 @@ var Engine_Class = function(input, is_sample)
 	}
 	this.End_Game = function(client_won)
 	{
+		Script.Do(client_won ? "win" : "lose");
+
 		this.Game_Over = true;
 		this.Active_Weather.Stop(UI);
 		if(UI!=Fast_Fake_Interface)
@@ -522,8 +526,11 @@ var Engine_Class = function(input, is_sample)
 			if(self.game_data[0]!=false)
 			{
 				if(UI!=Fast_Fake_Interface)
-					UI.End_Game(client_won);
-				openMapEditor(self.game_data[1], self.game_data[2], client_won);
+					UI.End_Game(client_won, Players, turn);
+				if(self.game_data[3]==1)
+					openMapEditor(self.game_data[1], self.game_data[2], client_won);
+				else if(self.game_data[3]==2 && client_won)
+					socket.emit('userdata add','progress');
 			}
 			else if(UI!=Fast_Fake_Interface)
 				UI.End_Game(client_won, Players, turn);
@@ -1216,9 +1223,14 @@ var Engine_Class = function(input, is_sample)
 		if(online)socket.emit('start');
 		this.Start();
 	};
+	this.Script = function(__script)
+	{
+		Script = __script;
+	};
 	this.Start = function()
 	{
 		currently_playing = true;
+
 		if(UI!=Fast_Fake_Interface)
 		{
 			UI.Close_Menu();
@@ -1234,6 +1246,10 @@ var Engine_Class = function(input, is_sample)
 				UI.Select_Tile();
 				UI.Set_Next_Player(active_player, function(){
 					active_player.Start_Turn(socket.index==Connected_Players[cur_player], function(){
+						Script.Do("start");
+
+						Script.Do("turn", ""+(turn+1));
+						Script.Do("player", ""+cur_player+","+(turn+1));
 						sentGameMove();
 						if(Connected_Players[cur_player]==null)
 						{	/// start AI
@@ -1246,6 +1262,13 @@ var Engine_Class = function(input, is_sample)
 			}
 			else UI.Set_Next_Player(Players[cur_player]);
 			if(!online)console.log("Offline game started.");
+		}
+		else
+		{
+			Script.Do("start");
+
+			Script.Do("turn", ""+(turn+1));
+			Script.Do("player", ""+cur_player+","+(turn+1));
 		}
 		animationCanvas.clearRect(0, 0, 900, 900);
 		if(Cities.length==0)
@@ -1447,6 +1470,10 @@ var Engine_Class = function(input, is_sample)
 			UI.Select_Tile();
 			UI.Set_Next_Player(active_player, function(){
 				active_player.Start_Turn(socket.index==Connected_Players[cur_player], function(){
+					if(cur_player==0)
+						Script.Do("turn", ""+(turn+1));
+					Script.Do("player", ""+cur_player);
+
 					sentGameMove();
 					if(Connected_Players[cur_player]==null)
 					{	/// start AI

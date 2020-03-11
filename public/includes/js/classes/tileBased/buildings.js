@@ -25,6 +25,9 @@ var Buildings = {
 		this.Protection = BuildData.Protection;
 		this.Stature = {
 			value:BuildData.Stature,
+			Percent:function(){
+				return this.value/BuildData.Stature;
+			},
 			Get:function(){
 					return this.value;
 			},

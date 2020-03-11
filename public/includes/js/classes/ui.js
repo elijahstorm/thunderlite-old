@@ -27,16 +27,15 @@ var Interface_Class = function()
 
 	self.setGame = function(g)
 	{
-		var __X,__Y;
-		if(g.Terrain_Map!=null)
-		{
-			__X = g.Terrain_Map.Width;
-			__Y = g.Terrain_Map.Height;
-		}
-		else return 1;
-
 		game = g;
 		self.Game = g;
+
+		if(g==null)return 1;
+		if(g.Terrain_Map==null)return 1;
+
+		let __X = g.Terrain_Map.Width,
+			__Y = g.Terrain_Map.Height;
+
 		if(g==null){
 			self.Tiles = null;
 			terrain_disp = null;
@@ -772,6 +771,8 @@ let t1,t2,t = at;
 	const ___touchend = function(e){
 		e.preventDefault();
 
+		if(e.touches.length==0)return;
+
 		var x = Math.round(e.touches[0].clientX);
 		var y = Math.round(e.touches[0].clientY);
 
@@ -905,11 +906,9 @@ let t1,t2,t = at;
 		handler.addEventListener("mousemove", function(e){
 			do_current_interaction(7, e);
 		});
-		// handler.addEventListener(navigator.userAgent.indexOf("Firefox") > -1 ? "DOMMouseScroll" :  "mousewheel", function(e){
-		// 	scroller.doMouseZoom(e.detail ?(e.detail * -120) : e.wheelDelta, e.timeStamp, e.pageX, e.pageY);
-		// }, false);
 	};
 	self.Clickable = {
+		Overlay:new Canvas.Drawable("UI Overlay", null, 0, 0, 1000, 1000),
 		Button_Class:function(drawable, response, name){
 			this.Name = name;
 			this.Overlap = function(x, y)

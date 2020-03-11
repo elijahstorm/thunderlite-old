@@ -1,0 +1,12 @@
+<start>
+
+talk Torrial: "This should be our final standoff. We need to survive this battle."
+talk Torrial: "We have entrenched the area and secured some important buildings and cities for defense."
+
+wait: .5
+
+talk Torrial: "Unfortunately it looks like Gannon did the same.. this is not going to be an easy fight."
+talk Torrial: "The enemy here seems to have fortified a strong defense with these bottlenecks up ahead. And it seems their Navel abilities have come early. Be care of potshots coming from the seas."
+talk Torrial: "...Good luck and stay strong."
+
+</start>

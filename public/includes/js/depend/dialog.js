@@ -1,12 +1,36 @@
-/* function Dialog_Class(canvas){
+function Dialog_Class(canvas)
+{
 	var Cur_Drawing_Dialog = false;
 	var abrupt_finish = false;
 	var Display_Prompt_In = false;
 	var Queued_Speakers = [];
 	var Queued_Texts = [];
-	function Draw(text,speaker,index,newlines)
+	var OverlayBtn;
+	let disp_X = INTERFACE.IS_MOBILE_GAME ? 20 : 70,
+		disp_Y = INTERFACE.IS_MOBILE_GAME ? 300 : 520,
+		disp_W = INTERFACE.IS_MOBILE_GAME ? 300 : 675,
+		disp_H = INTERFACE.IS_MOBILE_GAME ? 100 : 115,
+		maxTextWidth = INTERFACE.IS_MOBILE_GAME ? 35 : 200,
+		maxTextHeight = INTERFACE.IS_MOBILE_GAME ? 150 : 200;
+
+	function Draw(text,speaker,index,newlines,lastLines)
 	{
-		if(!curently_playing)return;
+		with(canvas)
+		{
+			clearRect(0,0,Canvas.Width,Canvas.Height);
+			fillStyle = "blue";
+			globalAlpha = 0.35;
+			fillRect(disp_X,disp_Y,disp_W,disp_H);
+			fillRect(disp_X+30,disp_Y-30,150,30);
+			globalAlpha = 1;
+			strokeStyle = "turquoise";
+			strokeRect(disp_X,disp_Y,disp_W,disp_H);
+			strokeRect(disp_X+30,disp_Y-30,150,30);
+			font = "20pt Times New Roman";
+			fillStyle = "white";
+			fillText(speaker,disp_X+35,disp_Y-5);
+			font = "12pt Times New Roman";
+		}
 		if(index==null)
 		{
 			if(Cur_Drawing_Dialog)
@@ -18,11 +42,11 @@
 			Cur_Drawing_Dialog = true;
 			index = 1;
 			newlines = 0;
-			canvas.clearRect(0,0,Canvas.Width,Canvas.Height);
-			if(text.length>200)
+			lastLines = new Array();
+			if(text.length>maxTextHeight)
 			{ // to fix texts that would overflow
-				var i=190,found = false;
-				for(;i<text.length&&i<=200;i++)
+				var i=maxTextHeight-20,found = false;
+				for(;i<text.length&&i<=maxTextHeight;i++)
 				{
 					if(text[i]==' '||text[i]=='\n')
 					{
@@ -38,9 +62,9 @@
 				}
 				else
 				{
-					Queue_At_Start(text.substring(200,text.length));
+					Queue_At_Start(text.substring(maxTextHeight,text.length));
 					Queue_Speaker_At_Start(speaker);
-					text = text.substring(0,200)+'...';
+					text = text.substring(0,maxTextHeight)+'...';
 				}
 			}
 			for(var i=0,last_newline=0;i<text.length;i++)
@@ -55,10 +79,10 @@
 				{
 					last_newline = i;
 				}
-				if(i-last_newline>50)
+				if(i-last_newline>maxTextWidth)
 				{
 					var j=i,found = false;
-					for(;j<text.length&&j-i<=5;j++)
+					for(;j<text.length&&j-i<=15;j++)
 					{
 						if(text[j]==' '||text[j]=='\n')
 						{
@@ -79,41 +103,42 @@
 					}
 				}
 			}
-			with(canvas)
-			{
-				clearRect(0,0,Canvas.Width,Canvas.Height);
-				fillStyle = "blue";
-				globalAlpha = 0.35;
-				fillRect(70,520,675,115);
-				fillRect(100,490,150,30);
-				globalAlpha = 1;
-				strokeStyle = "turquoise";
-				strokeRect(70,520,675,115);
-				strokeRect(100,490,150,30);
-				font = "20pt Times New Roman";
-				fillStyle = "white";
-				fillText(speaker,110,513);
-			}
 		}
 		while(text[index]==' ')
 			index++;
 		if(!abrupt_finish)
 		{
-			canvas.fillText(text.substring(0,index),100,550+newlines);
+			with(canvas)
+			{
+				fillStyle = "white";
+				for(let __i=0;__i<lastLines.length;__i++)
+				{
+					fillText(lastLines[__i],disp_X+10,disp_Y+(25*__i)+20);
+				}
+				fillText(text.substring(0,index),disp_X+10,disp_Y+newlines+20);
+			}
 		}
 		else
 		{
 			var loc = text.indexOf('\n');
 			index = 0;
+			canvas.fillStyle = "white";
 			while(loc!=-1)
 			{
 				var line = text.substring(0,loc);
-				canvas.fillText(line,100,550+newlines);
+				canvas.fillText(line,disp_X+10,disp_Y+newlines+20);
 				newlines+=25;
 				text = text.substring(loc+1,text.length);
 				loc = text.indexOf('\n');
 			}
-			canvas.fillText(text,100,550+newlines);
+			with(canvas)
+			{
+				for(let __i=0;__i<lastLines.length;__i++)
+				{
+					fillText(lastLines[__i],disp_X+10,disp_Y+(25*__i)+20);
+				}
+				fillText(text,disp_X+10,disp_Y+newlines+20);
+			}
 			Cur_Drawing_Dialog = false;
 			return;
 		}
@@ -124,33 +149,34 @@
 		}
 		if(text[index]=='\n')
 		{
-			text = text.substring(index+1,text.length);
+			lastLines.push(text.substring(0, index));
+			text = text.substring(index+1, text.length);
 			index = 0;
 			newlines+=25;
 		}
-		setTimeout(function(){Draw(text,speaker,index+1,newlines);},25);
+		setTimeout(function(){Draw(text,speaker,index+1,newlines,lastLines);},25);
 	}
 	function Slide_In(text,speaker,i)
 	{
+		Display_Prompt_In = true;
 		with(canvas)
 		{
 			clearRect(0,0,Canvas.Width,Canvas.Height);
 			fillStyle = "blue";
 			globalAlpha = 0.35;
-			fillRect(70,520+i,675,115);
-			fillRect(100,490+i,150,30);
+			fillRect(disp_X,disp_Y+i,disp_W,disp_H);
+			fillRect(disp_X+30,disp_Y-30+i,150,30);
 			globalAlpha = 1;
 			strokeStyle = "turquoise";
-			strokeRect(70,520+i,675,115);
-			strokeRect(100,490+i,150,30);
+			strokeRect(disp_X,disp_Y+i,disp_W,disp_H);
+			strokeRect(disp_X+30,disp_Y-30+i,150,30);
 		}
 		if(i<=0)
 		{
-			Display_Prompt_In = true;
 			Draw(text,speaker);
-			Clickable.Add_Button("Dialog_Next",function(){
+			OverlayBtn = INTERFACE.Clickable.Add_Button(INTERFACE.Clickable.Overlay,function(){
 				Dialog.Next();
-			},675,600,50,20,"Next");
+			},"Next Overlay");
 			return;
 		}
 		setTimeout(function(){Slide_In(text,speaker,i-=5);},15);
@@ -159,7 +185,7 @@
 	{
 		if(i==null)
 		{
-			Clickable.Delete_Button("Dialog_Next");
+			INTERFACE.Clickable.Delete_Button(OverlayBtn);
 			i = 0;
 		}
 		with(canvas)
@@ -167,16 +193,22 @@
 			clearRect(0,0,Canvas.Width,Canvas.Height);
 			fillStyle = "blue";
 			globalAlpha = 0.35;
-			fillRect(70,520+i,675,115);
-			fillRect(100,490+i,150,30);
+			fillRect(disp_X,disp_Y+i,disp_W,disp_H);
+			fillRect(disp_X+30,disp_Y-30+i,150,30);
 			globalAlpha = 1;
 			strokeStyle = "turquoise";
-			strokeRect(70,520+i,675,115);
-			strokeRect(100,490+i,150,30);
+			strokeRect(disp_X,disp_Y+i,disp_W,disp_H);
+			strokeRect(disp_X+30,disp_Y-30+i,150,30);
 		}
-		if(i>=200)
+		if(i>200)
 		{
 			Display_Prompt_In = false;
+			canvas.clearRect(0,0,Canvas.Width,Canvas.Height);
+			if(!finished)
+			{
+				finished = true;
+				onFinishFnc();
+			}
 			return;
 		}
 		setTimeout(function(){Slide_Out(i+=5);},15);
@@ -221,6 +253,10 @@
 		Queued_Speakers.splice(0,1);
 		return temp;
 	}
+
+	let onFinishFnc = function(){},
+		finished = false;
+
 	this.Write = function(speaker,text,animate)
 	{
 		if(animate==null)
@@ -228,7 +264,7 @@
 		if(!Display_Prompt_In)
 		{
 			if(animate)
-				Slide_In(text,speaker,200);
+				Slide_In(text, speaker, INTERFACE.IS_MOBILE_GAME ? 100 : 200);
 			else
 				Slide_In(text,speaker,0);
 		}
@@ -237,7 +273,7 @@
 			Queue(text);
 			Queue_Speaker(speaker);
 		}
-	}
+	};
 	this.Next = function()
 	{
 		if(Cur_Drawing_Dialog)
@@ -255,10 +291,19 @@
 			}
 			Draw(text,speaker);
 		}
-	}
+	};
 	this.Currently_Drawing = function()
 	{
 		return Cur_Drawing_Dialog;
-	}
+	};
+	this.Displaying = function()
+	{
+		return Display_Prompt_In;
+	};
+	this.On_Finish = function(fnc)
+	{
+		onFinishFnc = fnc;
+		finished = false;
+	};
 }
-var Dialog; */
+var Dialog;
