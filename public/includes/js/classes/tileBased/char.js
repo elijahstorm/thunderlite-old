@@ -173,7 +173,7 @@ var Characters = {
 					repair_ani.set({
 						show:true,
 						x:x,
-						y:y+40
+						y:y+(40*TILESIZE/60)
 					});
 				}
 			}

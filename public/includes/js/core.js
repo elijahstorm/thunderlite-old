@@ -299,21 +299,36 @@ var Core = {
 		Core.Smooth_Changer(drawable,drawable.Y,change,frames,function(){});
 	},
 	Exploding:false,
-	Point:function(x, y)
+	Point:function(Game, x, y)
 	{
+		let terrain = Game.Terrain_Map.At(x, y);
+		if(terrain.pointer!=null)return;
+
 		let ani = Animations.Retrieve("Pointer Animation");
 		let d = ani.New(HUD_Display.Context,
-			x*TILESIZE-INTERFACE.X_Offset()-12,
-			y*TILESIZE-INTERFACE.Y_Offset()-12, null, null, true);
-			ani.Stop = false;
-		return [ani, d.values.index];
+			(x*TILESIZE-INTERFACE.X_Offset())-(18*TILESIZE/60),
+			(y*TILESIZE-INTERFACE.Y_Offset())-(18*TILESIZE/60), ani.Width*TILESIZE/60, ani.Height*TILESIZE/60, true);
+		ani.Stop = false;
+		terrain.pointer = d;
+	},
+	Unpoint:function(Game, x, y)
+	{
+		let terrain = Game.Terrain_Map.At(x, y);
+		if(terrain.pointer==null)return;
+
+		let ani = Animations.Retrieve("Pointer Animation");
+		let values = terrain.pointer.values;
+		values.show = false;
+		ani.Clear(HUD_Display.Context, values.x, values.y, ani.Width*TILESIZE/60, ani.Height*TILESIZE/60);
+		terrain.pointer = null;
+		ani.Remove(values.index);
 	},
 	Explode:function(selectable, callback)
 	{
 		let ani = Animations.Retrieve("Explosion");
 		let d = ani.New(HUD_Display.Context,
 			selectable.X*TILESIZE-INTERFACE.X_Offset()+2,
-			(selectable.Y-.7)*TILESIZE-INTERFACE.Y_Offset(), null, null, true);
+			(selectable.Y-.7)*TILESIZE-INTERFACE.Y_Offset(), ani.Width*TILESIZE/60, ani.Height*TILESIZE/60, true);
 		ani.Stop = false;
 		selectable.Fade(0, 6);
 		ani.onEnd(function(){
@@ -326,7 +341,7 @@ var Core = {
 
 		if(Core.Exploding)return;
 		Core.Exploding = true;
-		SFXs.Retrieve('explosion').Play();
+		SFXs.Retrieve('explosion').Play(Math.floor(Math.random()*4));
 	},
 	Array:{
 		Clone:function(arr)

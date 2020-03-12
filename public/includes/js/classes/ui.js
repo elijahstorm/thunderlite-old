@@ -131,7 +131,7 @@ var Interface_Class = function()
 		var at = game.Paint_Off_Map[mapX][mapY];
 		var zoomedTile = TILESIZE;
 		var left = null; // true if overflow, false if overflow in opposite direction
-		var overlay = "rgba(0, 0, 0, 0.2)";
+		var overlay = "rgba(0, 0, 0, 0.45)";
 		if(mapX==0&&drawX>0){
 			for(var lastDrawLeft=drawX,i=1;lastDrawLeft>0;i++,lastDrawLeft-=zoomedTile){
 				at = game.Paint_Off_Map[mapX+self.Outside_Map-Math.min(i, outside)][mapY];
@@ -1817,6 +1817,7 @@ let t1,t2,t = at;
 		document.getElementById("gameHelpers").style.display = "none";
 		Canvas.Stop_All();
 		Canvas.Set_Game(null);
+		Dialog.Next();
 		socket.game_id = null;
 		if(players!=null)
 		{

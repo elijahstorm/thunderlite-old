@@ -85,6 +85,15 @@ var Terrain = {
 
 			if(duplicate)return;
 
+			if(this.pointer!=null)
+			{
+				this.pointer.set({
+					show:true,
+					x:x,
+					y:y
+				});
+			}
+
 			if(this.Hidden)
 			{
 				canvas.save();
@@ -101,6 +110,12 @@ var Terrain = {
 		};
 		this.Hide_Animation_Display = function()
 		{
+			if(this.pointer!=null)
+			{
+				this.pointer.set({
+					show:false
+				});
+			}
 			if(sprite.set==null)return;
 			sprite.set({
 				show:false

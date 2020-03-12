@@ -71,6 +71,8 @@ function Sound_list_class(LOCATION)
 			if(muted)return this;
 			if(sprite!=null)
 				sprite = ""+sprite;
+			else if(sprite==-1)
+				sprite = ""+(Math.floor(Math.random()*this.Sprite_Amount()));
 
 			try {
 				snd.play(sprite);

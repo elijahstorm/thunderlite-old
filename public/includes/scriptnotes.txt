@@ -32,13 +32,13 @@ hl: 0,1
 hl: 1,2
 hl: 2,3
 hl: 0,3
-hl: 3,0
+hl: 2,0
 talk Torrial: "Your infantry troops attack with Light Attack, which is super ineffective."
 unhl: 0,1
 unhl: 1,2
 unhl: 2,3
 unhl: 0,3
-unhl: 3,0
+unhl: 2,0
 hl: 1,1
 hl: 1,4
 talk Torrial: "Your tank and mortar attack with Medium Attack, which is neutral, but those two not enough to kill him."
