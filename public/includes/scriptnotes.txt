@@ -2,18 +2,21 @@
 
 hurt unit: 8,7, 20
 talk Link: "help me!"
+move: 8,8
 talk Gannon: "Hahaha!", "I hope you're ready to lose."
 add unit: 2, "Annihilator Tank", 8,6
-wait: 0.5
+wait: 1
 kill unit: 8,5
-wait: 0.5
+wait: 1
 kill unit: 7,6
+wait: 1
+move: 12, 12
 wait: 1
 add unit: 2, "Scorpion Tank", 9,7
 add unit: 2, "Scorpion Tank", 8,8
-add unit: 2, "Scorpion Tank", 9,9
-add unit: 2, "Scorpion Tank", 11,10
-wait: 0.5
+add unit: 2, "Scorpion Tank", 10,5
+add unit: 2, "Scorpion Tank", 11,4
+wait: 1
 talk Link: "Ugh!"
 talk Gannon: "Ahaha!"
 

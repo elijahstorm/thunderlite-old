@@ -1,23 +1,25 @@
 function Dialog_Class(canvas)
 {
-	var Cur_Drawing_Dialog = false;
-	var abrupt_finish = false;
-	var Display_Prompt_In = false;
-	var Queued_Speakers = [];
-	var Queued_Texts = [];
-	var OverlayBtn;
-	let disp_X = INTERFACE.IS_MOBILE_GAME ? 20 : 70,
-		disp_Y = INTERFACE.IS_MOBILE_GAME ? 300 : 520,
-		disp_W = INTERFACE.IS_MOBILE_GAME ? 300 : 675,
+	let Cur_Drawing_Dialog = false;
+	let abrupt_finish = false;
+	let Display_Prompt_In = false;
+	let Queued_Speakers = [];
+	let Queued_Texts = [];
+	let OverlayBtn;
+	this.canvas = canvas;
+	let disp_X = INTERFACE.IS_MOBILE_GAME ? 20 : 30,
+		disp_Y = INTERFACE.IS_MOBILE_GAME ? 350 : 450,
+		disp_W = INTERFACE.IS_MOBILE_GAME ? 400 : 550,
 		disp_H = INTERFACE.IS_MOBILE_GAME ? 100 : 115,
 		maxTextWidth = INTERFACE.IS_MOBILE_GAME ? 35 : 200,
-		maxTextHeight = INTERFACE.IS_MOBILE_GAME ? 150 : 200;
+		maxTextHeight = INTERFACE.IS_MOBILE_GAME ? 150 : 200,
+		fontTextSize = INTERFACE.IS_MOBILE_GAME ? 12 : 19 + "pt Times New Roman";
 
 	function Draw(text,speaker,index,newlines,lastLines)
 	{
 		with(canvas)
 		{
-			clearRect(0,0,Canvas.Width,Canvas.Height);
+			clearRect(0,0,1000,1000);
 			fillStyle = "blue";
 			globalAlpha = 0.35;
 			fillRect(disp_X,disp_Y,disp_W,disp_H);
@@ -29,7 +31,7 @@ function Dialog_Class(canvas)
 			font = "20pt Times New Roman";
 			fillStyle = "white";
 			fillText(speaker,disp_X+35,disp_Y-5);
-			font = "12pt Times New Roman";
+			font = fontTextSize;
 		}
 		if(index==null)
 		{
@@ -161,7 +163,7 @@ function Dialog_Class(canvas)
 		Display_Prompt_In = true;
 		with(canvas)
 		{
-			clearRect(0,0,Canvas.Width,Canvas.Height);
+			clearRect(0,0,1000,1000);
 			fillStyle = "blue";
 			globalAlpha = 0.35;
 			fillRect(disp_X,disp_Y+i,disp_W,disp_H);
@@ -190,7 +192,7 @@ function Dialog_Class(canvas)
 		}
 		with(canvas)
 		{
-			clearRect(0,0,Canvas.Width,Canvas.Height);
+			clearRect(0,0,1000,1000);
 			fillStyle = "blue";
 			globalAlpha = 0.35;
 			fillRect(disp_X,disp_Y+i,disp_W,disp_H);
@@ -203,10 +205,11 @@ function Dialog_Class(canvas)
 		if(i>200)
 		{
 			Display_Prompt_In = false;
-			canvas.clearRect(0,0,Canvas.Width,Canvas.Height);
+			canvas.clearRect(0,0,1000,1000);
 			if(!finished)
 			{
 				finished = true;
+				canvas.restore();
 				onFinishFnc();
 			}
 			return;
@@ -263,6 +266,8 @@ function Dialog_Class(canvas)
 			animate = true;
 		if(!Display_Prompt_In)
 		{
+			canvas.save();
+			canvas.scale(INTERFACE.gameXScale, INTERFACE.gameYScale);
 			if(animate)
 				Slide_In(text, speaker, INTERFACE.IS_MOBILE_GAME ? 100 : 200);
 			else

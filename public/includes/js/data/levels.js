@@ -125,6 +125,7 @@ var Levels_Class = function()
 				}
 				else if(actions[i][0]=="wait")
 				{
+					if(actions[i][1]==NaN)return;
 					let overlay_btn = INTERFACE.Clickable.Add_Button(INTERFACE.Clickable.Overlay,function(){
 						return false;
 					},"Dialog_Stop_Wait");
@@ -163,11 +164,13 @@ var Levels_Class = function()
 					if(actions[i][2]=="unit")
 					{
 						let troop = Game.Units_Map.At(actions[i][1][0], actions[i][1][1]);
-						troop.Hurt(actions[i][1][2]);
+						if(troop!=null)
+							troop.Hurt(actions[i][1][2]);
 					}
 					else if(actions[i][2]=="city")
 					{
 						let city = Game.Cities_Map.At(actions[i][1][0], actions[i][1][1]);
+						if(city!=null)
 						if(city.Stature.Percent()<1)
 						{
 							city.Raid(actions[i][1][2]);
@@ -178,11 +181,43 @@ var Levels_Class = function()
 				{
 					if(actions[i][2]=="unit")
 					{
-						Game.Add_Unit(Characters.New(Game,actions[i][1][1]), actions[i][1][2], actions[i][1][3], actions[i][1][0]-1);
+						let troop = Game.Units_Map.At(actions[i][1][0], actions[i][1][1]);
+						if(troop==null)
+						{
+							troop = Characters.New(Game,actions[i][1][1]);
+							SFXs.Retrieve("build").Play();
+							troop.Alpha.data = 0;
+							troop.Set_Active(Game.Active_Player().Team==actions[i][1][0]-1);
+							troop.Idle = false;
+							Game.Add_Unit(troop, actions[i][1][2], actions[i][1][3], actions[i][1][0]-1);
+							Game.Interface.Set_Unit_Focus(troop);
+							Core.Fade_Drawable(troop, 255, 7, function(){
+								Game.Interface.Set_Unit_Focus();
+								troop.Alpha.data = 255;
+								Game.Interface.Draw();
+								self.Do_Event(i+1);
+							});
+							return;
+						}
 					}
 					else if(actions[i][2]=="city")
 					{
-						Game.Add_Unit(Buildings.New(Game,actions[i][1][1]), actions[i][1][2], actions[i][1][3], actions[i][1][0]-1);
+						let city = Game.Cities_Map.At(actions[i][1][0], actions[i][1][1]);
+						if(cities!=null)
+							city.Die();
+						city = Buildings.New(Game,actions[i][1][1]);
+						SFXs.Retrieve("build").Play();
+						city.Alpha.data = 0;
+						city.Set_Active(Game.Active_Player().Team==actions[i][1][0]-1);
+						Game.Add_Building(city, actions[i][1][2], actions[i][1][3], actions[i][1][0]-1);
+						Game.Interface.Set_Unit_Focus(city);
+						Core.Fade_Drawable(city, 255, 7, function(){
+							Game.Interface.Set_Unit_Focus();
+							city.Alpha.data = 255;
+							Game.Interface.Draw();
+							self.Do_Event(i+1);
+						});
+						return;
 					}
 				}
 				else if(actions[i][0]=="kill")
@@ -190,12 +225,14 @@ var Levels_Class = function()
 					if(actions[i][2]=="unit")
 					{
 						let troop = Game.Units_Map.At(actions[i][1][0], actions[i][1][1]);
-						troop.Die();
+						if(troop!=null)
+							troop.Die();
 					}
 					else if(actions[i][2]=="city")
 					{
 						let city = Game.Cities_Map.At(actions[i][1][0], actions[i][1][1]);
-						city.Die();
+						if(city!=null)
+							city.Die();
 					}
 				}
 
@@ -257,7 +294,7 @@ var Levels_Class = function()
 	let LevelData = {
 		Name:["Intro", "Choke Points", "Stealth", "Resource Planning", "End Of The World"],
 		Map:[
-			"fctfjgvmz Rz¥mcdmcdmclelclclclelflflclclclelelclclcldlglglglglglclclglglglglglglflclclglglclclclclclelflflelclelglclflclcclclflflflflclclglclflflflflflcdlcdlchlchlclglclclelclflflclcdlcdlcdlcdlglelclelclelcclflglglchlcdlcilcdlclclelelflclglclchlcdlglcdlclclcblflflglgldlcdlchlglchlelclflclglglcdlcdlcdlclclclclelflclglclcdlclclclelclmlt§lmc^k^b^clc^cc^d^clc^cc^k^clc^cc^cc^clc^j^cb^clc^c^d^blc^d^e^blc^b^e^blc^d^b^blc^b^c^bli^c^c^blf^c^f^blg^i^h^bli^j^g^blc^e^k^blc^d^cc^blc^f^cc^bld^cb^cb^cld^cb^e^clf^cc^i^clmc^b^b^blc^i^d^clmbbb_hlbc_hlbd_hlbe_hlcf_hlcg_hlmn¥¦¤¦p<<§¤¦R§ ¦lRj^i^Rdb<¦R~ lRT¢RST<¦Ry  ¡ lRTzST^RT{R¡¢R«¡§Y¤R¤«R¦¡R¡¥`T<R§ ¦lRd^RTs  ¦¡¤R T^Rj^h<©¦lRb`g<R§ ¦lRj^g<©¦lRb`g<R§ ¦lRi^h<©¦lRc<R§ ¦lRd^RT¡¤¢¡ R T^Rk^i<R§ ¦lRd^RT¡¤¢¡ R T^Rj^j<R§ ¦lRd^RT¡¤¢¡ R T^Rk^k<R§ ¦lRd^RT¡¤¢¡ R T^Rcc^cb<©¦lRb`g<¦R~ lRTST<¦Ry  ¡ lRTsST<<©¦lRc<¦R¡¤¤lRT~ SR{YR¤R¦¡R¢ST<¦R~ lRT¡R¤R«¡§qT<¦R¡¤¤lRT{YR¨R¦R¦¡Rª¢ R¦¤R©R¦R¡§¦R¡R¦¥R¥¦§¦¡ `T<lRj^h<¦R¡¤¤lRTx¤¥¦R¡RR¦¦RR¦ R¦¦R§¥¦R¥¦¤¡«R«¡§¤R¦¤¡¡¢¥R¥RR¦Rs  ¦¡¤R `T<¦R¡¤¤lRTv¡ Y¦R¦¤«R¦¡R¦RR¡ R©¦R¦R¦¤¡¡¢¥R«¡§R¨R¦R R¦¥R¦¦^R¦R¥Rz¨«Rv ¥R R ¥R¦¡RR¦ R¡ R«RRz¨«Rs¦¦¤`T<§ lRj^h<lRb^c<lRc^d<lRd^e<lRb^e<lRe^b<¦R¡¤¤lRT¡§¤R  ¦¤«R¦¤¡¡¢¥R¦¦R©¦R~¦Rs¦¦^R©R¥R¥§¢¤R ¦¨`T<§ lRb^c<§ lRc^d<§ lRd^e<§ lRb^e<§ lRe^b<lRc^c<lRc^f<¦R¡¤¤lRT¡§¤R¦ R R¡¤¦¤R¦¦R©¦R§Rs¦¦^R©R¥R §¦¤^R§¦R¦¡¥R¦©¡R ¡¦R ¡§R¦¡RR`T<§ lRc^c<§ lRc^f<lRi^d<¦R¡¤¤lRTR¥¦R¢ R¡R¦¡ R¤R©¡§RR¦¡R¦¤¦R¦¤Ru¢¦`R{R«¡§R¢¦§¤R¦¤Ru¢¦^R¦R ¥R¡¤¥R©R¢¦R¡¢¦«R R¦«R©R¨R§¢`T<¦R¡¤¤lRT¡§R R¢¦§¤R «R§ ¥R«R¦¤¦ R«¡§¤R  ¦¤«R¦¤¡¡¢¥R¡¨¤R¦`T<lRd^e<¦R¡¤¤lRT R¦¥R  ¦¤«R¦¤¡¡¢R¡¨¤R¦¤^R R¤ ¡¤RR©¦R«¡§¤R¡¦¤R¦¤¡¡¢¥`T<¦R¡¤¤lRT{ R¦¥R¦¤¤ ^R«¡§¤R¦¤¡¡¢¥R©RR R«R¦R¡§ ¦ ¥^R§¥R¦ ¥R R¦¤§¥R  ¡¦R¤¨R¡¨¤R¡§ ¦ ¥`T<§ lRi^d<§ lRd^e<<¦R¡¤¤lRT¦Y¥RR¡¤R ¡©`Ry¡¡R§`T<<na¥¦¤¦p<<n© p<¦Ry  ¡ lRTs¤¤¤ST<¦R¡¤¤lRT¥SR{R ©R«¡§R¡§R¡R¦`R§^R¦Y¥R¡¨R R{YRª¢ R¨¤«¦ `T<na© p<<n¡¥p<¦R¡¤¤lRTz¤Y¥RR¦¦R¦¢lR~¦Rs¦¦¥R¤R¥§¢¤R¦¨R¦¡R~¦Rs¤¡¤^Rz¨«Rs¦¦¥R¤R¨¤«R ¦¨R ¥¦R~¦Rs¤¡¤`R§Rs¦¦¥R¤R §¦¤`T<¦R¡¤¤lRTuRR¤¡¡¢R¦¡R¥R ¡R¡§¦R¦Y¥R¦^R¦¦R¢¡©¤^R¦¦R¦«¢^R R¤¡¤R¦«¢`T<¦R¡¤¤lRT¤«R SR¡§R©¤R§¥¦R¥¡R¡¥R¦¥R¦`T<na¡¥p<<<n¦§¤ Rfp<<¦R¡¤¤lRT¡§Y¤R¡ R©`R}¢R¦R§¢ST<<na¦§¤ p<m",
+			"fctfjgvmz Rz¥mcdmcdmclelclclclelflflclclclelelclclcldlglglglglglclclglglglglglglflclclglglclclclclclelflflelclelglclflclcclclflflflflclclglclflflflflflcdlcdlchlchlclglclclelclflflclcdlcdlcdlcdlglelclelclelcclflglglchlcdlcilcdlclclelelflclgldlchlcdlglcdlclclcblflflglglglcdlchlglchlelclflclglglcdlglcdlglglclclelflclglclcdlglglglelclmlt§lmc^k^b^clc^cc^d^clc^cc^k^clc^cc^cc^clc^j^cb^clc^c^d^blc^d^e^blc^b^e^blc^d^b^blc^b^c^bli^c^c^blf^c^f^blg^i^h^bli^j^g^blc^e^k^blc^d^cc^blc^f^cc^bld^cb^cb^cld^cb^e^clf^cc^i^clh^j^i^clmc^b^b^blc^i^d^clmbbb_hlbc_hlbd_hlbe_hlcf_hlcg_hlmn¥¦¤¦p<<§¤¦R§ ¦lRj^i^Rdb<¦R~ lRT¢RST<¡¨lRj^j<¦Ry  ¡ lRTzST^RT{R¡¢R«¡§Y¤R¤«R¦¡R¡¥`T<R§ ¦lRd^RTs  ¦¡¤R T^Rj^h<©¦lRc<R§ ¦lRj^g<©¦lRc<R§ ¦lRi^h<©¦lRc<¡¨lRcd^Rcd<©¦lRc<R§ ¦lRd^RT¡¤¢¡ R T^Rk^i<R§ ¦lRd^RT¡¤¢¡ R T^Rj^j<R§ ¦lRd^RT¡¤¢¡ R T^Rcb^g<R§ ¦lRd^RT¡¤¢¡ R T^Rcc^f<©¦lRc<¦R~ lRTST<¦Ry  ¡ lRTsST<<©¦lRc<¦R¡¤¤lRT~ SR{YR¤R¦¡R¢ST<¦R~ lRT¡R¤R«¡§qT<¦R¡¤¤lRT{YR¨R¦R¦¡Rª¢ R¦¤R©R¦R¡§¦R¡R¦¥R¥¦§¦¡ `T<lRj^h<¦R¡¤¤lRTx¤¥¦R¡RR¦¦RR¦ R¦¦R§¥¦R¥¦¤¡«R«¡§¤R¦¤¡¡¢¥R¥RR¦Rs  ¦¡¤R `T<¦R¡¤¤lRTv¡ Y¦R¦¤«R¦¡R¦RR¡ R©¦R¦R¦¤¡¡¢¥R«¡§R¨R¦R R¦¥R¦¦^R¦R¥Rz¨«Rv ¥R R ¥R¦¡RR¦ R¡ R«RRz¨«Rs¦¦¤`T<§ lRj^h<lRb^c<lRc^d<lRd^e<lRb^e<lRe^b<¦R¡¤¤lRT¡§¤R  ¦¤«R¦¤¡¡¢¥R¦¦R©¦R~¦Rs¦¦^R©R¥R¥§¢¤R ¦¨`T<§ lRb^c<§ lRc^d<§ lRd^e<§ lRb^e<§ lRe^b<lRc^c<lRc^f<¦R¡¤¤lRT¡§¤R¦ R R¡¤¦¤R¦¦R©¦R§Rs¦¦^R©R¥R §¦¤^R§¦R¦¡¥R¦©¡R ¡¦R ¡§R¦¡RR`T<§ lRc^c<§ lRc^f<lRi^d<¦R¡¤¤lRTR¥¦R¢ R¡R¦¡ R¤R©¡§RR¦¡R¦¤¦R¦¤Ru¢¦`R{R«¡§R¢¦§¤R¦¤Ru¢¦^R¦R ¥R¡¤¥R©R¢¦R¡¢¦«R R¦«R©R¨R§¢`T<¦R¡¤¤lRT¡§R R¢¦§¤R «R§ ¥R«R¦¤¦ R«¡§¤R  ¦¤«R¦¤¡¡¢¥R¡¨¤R¦`T<lRd^e<¦R¡¤¤lRT R¦¥R  ¦¤«R¦¤¡¡¢R¡¨¤R¦¤^R R¤ ¡¤RR©¦R«¡§¤R¡¦¤R¦¤¡¡¢¥`T<¦R¡¤¤lRT{ R¦¥R¦¤¤ ^R«¡§¤R¦¤¡¡¢¥R©RR R«R¦R¡§ ¦ ¥^R§¥R¦ ¥R R¦¤§¥R  ¡¦R¤¨R¡¨¤R¡§ ¦ ¥`T<§ lRi^d<§ lRd^e<<¦R¡¤¤lRT¦Y¥RR¡¤R ¡©`Ry¡¡R§`T<<na¥¦¤¦p<<n© p<¦Ry  ¡ lRTs¤¤¤ST<¦R¡¤¤lRT¥SR{R ©R«¡§R¡§R¡R¦`R§^R¦Y¥R¡¨R R{YRª¢ R¨¤«¦ `T<na© p<<n¡¥p<¦R¡¤¤lRTz¤Y¥RR¦¦R¦¢lR~¦Rs¦¦¥R¤R¥§¢¤R¦¨R¦¡R~¦Rs¤¡¤^Rz¨«Rs¦¦¥R¤R¨¤«R ¦¨R ¥¦R~¦Rs¤¡¤`R§Rs¦¦¥R¤R §¦¤`T<¦R¡¤¤lRTuRR¤¡¡¢R¦¡R¥R ¡R¡§¦R¦Y¥R¦^R¦¦R¢¡©¤^R¦¦R¦«¢^R R¤¡¤R¦«¢`T<¦R¡¤¤lRT¤«R SR¡§R©¤R§¥¦R¥¡R¡¥R¦¥R¦`T<na¡¥p<<<n¦§¤ Rfp<<¦R¡¤¤lRT¡§Y¤R¡ R©`R}¢R¦R§¢ST<<na¦§¤ p<m",
 
 
 			"h {s}jm¡ ¡R¡¤mcdmcdmclclclclclclclclglclclelclclglglglglglglglclelflglglglcdlcdlcdlcdlcdlclclclcdlcdlcilcdlchlflflflchlcdlcdlcdlcdlclclclflflflflflflcdlcglcdldlcldlclflflfljlflflcdlcdlclelclclclflflflflflflchlclclcblklclclclclflflflflelclclclclclcblclclflflflclelclclclclclclclclflflelcblclclclclclcclclclclflcblclklclclclclclclclclflmlt§lmd^b^b^bld^c^f^blc^b^e^blc^c^j^blg^c^h^blf^b^j^blh^b^k^blce^i^i^clce^j^j^clce^i^h^clce^i^g^clce^k^k^clce^cb^cb^clce^cc^cb^clce^j^f^clce^cb^f^clce^cc^f^clce^k^f^clcd^cb^i^clcc^k^b^clcc^h^c^clcc^j^d^cld^k^d^cld^h^e^cld^cc^c^cld^cb^b^cld^b^d^bld^c^cb^blme^cc^k^cld^cb^j^clmbmn¥¦¤¦p<<¦R~ lRT¡©R¦ R«¡§SST^RTR§```T<¦R¡¤¤lRTY¤R ¡¦R¡§¦R¡R¦R©¡¡¥R«¦ST<¦Ry  ¡ lRT{R¨R©«R¦¡¡R «R§ ¦¥R¡¢¤R¦¡R«¡§^R R¤¥¡§¤¥R¨¥¦SR¥R¥RR¤¦R ^R R{R¨R¦R¦¦¤R¤¡§ `T<<lRcb^Ri<©¦lRc<¦R¡¤¤lRT~ R¦¥R¥¥RR¦¤¡§SRy  ¡ R¥R¡¤R¤¥¡§¤¥R R¡¤R¦¤¡¡¢¥R¥R©`Rs R¦¦R¤R R¥RRR¤ `R{¦R R§R¤ ¡¤ ¦¥R§¥ R¤¡§¤¥¥R¦R¡¦¥R¤¡R¦R¤¡§ `T<§ lRcb^Ri<<lRi^Rd<lRi^Re<lRj^Rh<lRcb^Rc<lRcc^Rb<lRcc^Rd<<©¦lRc<<§ lRi^Rd<§ lRi^Re<§ lRj^Rh<§ lRcb^Rc<§ lRcc^Rb<§ lRcc^Rd<<<¦R¡¤¤lRTR¨R¦¡R§¥R¦¨R¥¦¤¦«R¦¡R¨¡R« R¤`R~¦Y¥R¨R¡§¤R¦¤¡¡¢¥R§RR¦¤ R¡ R¦R¡¥¦R¥¡R¦¦R©R R§ ¤R¡© R R¤¦RR ¥¨R¢¡¥¦¡ `T<<¡¨lRb^bR<©¦lRc<¦¤¤ lRTu «¡ T^Rd^Rb<©¦lRc<¦¤¤ lRTu «¡ T^Rd^Rc<©¦lRc<¦¤¤ lRTu «¡ T^Rd^Rd<©¦lRc<<¦R¡¤¤lRTu «¡ ¥R¢¤¡¨R¡¡R ¥R¦¡R«¡§¤R¦¤¡¡¢¥R R¡ ^R R¥¡R¥¦¡¢R¡ R¤ R©¢¡ ¤«R¤¡R R¦¨R ¥¦R«¡§¤R¦¤¡¡¢¥R R¦R¦¤ ¥`T<¦R¡¤¤lRTt¤¥R R¡¥R¢¤¡¨R¨¤«R¦¦R ¥^R¥¡R¡ ¥¤R¦¥R©R«¡§R §¨¤R«¡§¤R¦¤¡¡¢¥`R¥R¦¥R¦¡R«¡§¤R¨ ¦R¦R¦¥R¡R¢¡ ¦`T<¦R¡¤¤lRTu¡R¦R «R¢¡¥¦¡ R¡§¦^R R¡ Y¦R¦R¦R¨ R¡ R«¡§SR¡§¤Rz¨«Ru¡ ¡¥R¤R£§¢¢R¦¡RR©¦Rz¨«Rs¤¡¤R¦ ¥RR¦¡¥R¢¥«Rs  ¦¡¤Y¥R¦¦R¨R§¥R¦¤¡§R¡¤`T<¦R¡¤¤lRTtR¤§^R¦¥R©¡ Y¦RR¥«R¥R¦R «R¤ R R¥¦R§`R¦«R¨R©R«¡§R R R¡ Y¦R¡¥R¦R¢¨¡¦R¢¡¥¦¡ SRy¡¡R§R¤^R{YR¡ R¦¡R¡RR¡¤R¤ ¡¤ ¦¥`T<¦R¡¤¤lRT{YRRR¥¡¡ ^RR¥§¤R¦¡R¢R¦R¤R¡©R¦R¤¡¥R¤R¥¡R©R¨R¥¢R¦¡R¤ R R¦R¤ ¡¤ ¦¥`T<<na¥¦¤¦p<<n¦§¤ Rep<<R§ ¦lRc^RT¦¦R T^Rb^j<¦R¡¤¤lRTz«SR{YR`Rs R©¦RR¢¤¥ ¦R«¡§Y¤R¡  R¡¨SR¥RR¡«¥R¤R¦¦R ¥`T<¦R¡¤¤lRTs¦¤R¦«R¡¨^R¦«R©R¦§¤ R ¨¥R¦¡R¦R «RR¦¤R¥R ¡R «R¦¤¡¡¢R ¤R¦`R¥R ¥R¦«R RR§¥R¦¡R¡R ¡ R¦¦¥^RR¦R «R¤§ ¥R ¦¡R¦SR¥R§ ¦R©R R¦R¦¦RR¤`Rv¡R ¡¦R¡¥R¦ST<¦R¡¤¤lRTs R¤¤^R¦Y¥R¡¦¡ R©R¡R¡¢¤¡¥RR¦R¦¦¥R R «R¦¤¡¡¢`R¡§YR¨R¦¡R¡¨R¦R R¦¡RR¦`Rz¡©¨¤RR¥§¤¢¤¥R¦¦R©RRdªR^R§¦R¦«R¤R ¡¦R¦R¡¥¦R¢¡©¤§R R¥¡R¡ Y¦R¦¡¥¥R¦R¥¦¤¦R ¦¡R¦¦`T<¦R¡¤¤lRT¡§Y¤R¡ R¡¡^R§¦R¢R¡ R¡§¦`R{YRRR RR¦¦R¦R¡¤R©¦R¡¤R¤ ¡¤ ¦¥`T<<na¦§¤ p<<n¦§¤ Rhp<<R§ ¦lRc^RT¦¦R T^Rb^j<R§ ¦lRc^RTs  ¦¡¤R T^Rc^j<R§ ¦lRc^RT¡¦R¤§T^Rb^k<R§ ¦lRc^RTxR T^Rb^cb<¦R¡¤¤lRT¡©SR¡§Y¤R¡ R¥¡R©R©¦¡§¦R`Ry¡¡R¡¤R«¡§SSRz¤Y¥R¡¤R¦¤¡¡¢¥`R{YRRR¥¡¡ R ST<<<na¦§¤ p<<n¦§¤ Rjp<<R§ ¦lRc^RT¦¦R T^Rb^j<R§ ¦lRc^RTs  ¦¡¤R T^Rc^j<R§ ¦lRc^RT¡¦R¤§T^Rb^k<R§ ¦lRc^RT¡¤¢¡ R T^Rb^cb<R§ ¦lRc^RT¡¤¢¡ R T^Rc^k<¦R¡¤¤lRT¥R¥R¦`R¥R¥RR{R¡§R¤ `R¥R¦RRR¦¡§R¦¦R¥¦R¦¡R¡`T<©¦lRc<¦R¡¤¤lRTt§¦R{R¨R¦R R«¡§`T<<na¦§¤ p<m",

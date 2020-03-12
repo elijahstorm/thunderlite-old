@@ -1936,7 +1936,7 @@ with(Menu.LevelSelect){
 
 	let h_index = 0;
 	let remove_index = new Array(3);
-	let _width = window.parent.mobilecheck() ? 200 : 150;
+	let _width = window.parent.mobilecheck() ? 125 : 150;
 	Menu.LevelSelect.Prep = function(input)
 	{
 		switch (input){

@@ -301,14 +301,11 @@ var Core = {
 	Exploding:false,
 	Explode:function(selectable, callback)
 	{
-		if(Core.Exploding)return;
-		Core.Exploding = true;
-		SFXs.Retrieve('explosion').Play();
 		let ani = Animations.Retrieve("Explosion");
-		ani.Stop = false;
 		let d = ani.New(HUD_Display.Context,
 			selectable.X*TILESIZE-INTERFACE.X_Offset()+2,
 			(selectable.Y-.7)*TILESIZE-INTERFACE.Y_Offset(), null, null, true);
+		ani.Stop = false;
 		selectable.Fade(0, 6);
 		ani.onEnd(function(){
 			selectable.Remove_From_Game();
@@ -317,6 +314,10 @@ var Core = {
 			if(callback!=null)
 				callback();
 		});
+
+		if(Core.Exploding)return;
+		Core.Exploding = true;
+		SFXs.Retrieve('explosion').Play();
 	},
 	Array:{
 		Clone:function(arr)
