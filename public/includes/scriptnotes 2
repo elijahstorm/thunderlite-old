@@ -16,7 +16,7 @@ hl: 10, 1
 hl: 11, 0
 hl: 11, 2
 
-wait: 1
+wait: 4
 
 unhl: 7, 2
 unhl: 7, 3

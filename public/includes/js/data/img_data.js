@@ -1,6 +1,6 @@
 var _IMAGE_LIST = [];
 var BLANKIMG = Images.Declare("Misc/empty.png","empty");;
-Animations.Declare(Images.Declare("Misc/Loading.png","Load"),"Load", 3, true).Frame_Size(4, 4).Stop = false;
+Animations.Declare(Images.Declare("Sheets/animations/Loading.png","Load"),"Load", 3, true).Frame_Size(4, 4).Stop = false;
 
 Images.Declare("Misc/idle_overlay.png","Idle Overlay");
 Images.Declare("Misc/lock_icon.png","Locked");
@@ -36,6 +36,7 @@ Images.Declare("Weather/Fog/one tile.png","fog tile");
 Images.Declare("Icons/map editor border.png","map editor border");
 
 Animations.Declare(Images.Declare("Sheets/animations/ExplosionSheet.png", "Expl Sheet"), "Explosion", 2, false).Frame_Size(4, 3);
+Animations.Declare(Images.Declare("Sheets/animations/PointerAnimation.png", "pointerAni"), "Pointer Animation", 10, true).Frame_Size(4, 1);
 
 Animations.Declare(Images.Declare("Weather/Rain/Sheet.png", "Rain"), "Rain", 3, true).Frame_Size(4, 1);
 Animations.Declare(Images.Declare("Weather/Rain/Particles.png", "Droplets"), "Rain Particles", 2, false).Frame_Size(4, 1).onEnd(function(ani){

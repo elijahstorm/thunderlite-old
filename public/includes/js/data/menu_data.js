@@ -1936,7 +1936,7 @@ with(Menu.LevelSelect){
 
 	let h_index = 0;
 	let remove_index = new Array(3);
-	let _width = window.parent.mobilecheck() ? 125 : 150;
+	let _width = window.parent.mobilecheck() ? 125 : 125;
 	Menu.LevelSelect.Prep = function(input)
 	{
 		switch (input){
@@ -2064,7 +2064,7 @@ with(Menu.StoryScreen){
 
 	let h_index = 0;
 	let remove_index = new Array(3);
-	let _width = window.parent.mobilecheck() ? 125 : 150;
+	let _width = window.parent.mobilecheck() ? 125 : 125;
 	let loaded_ = false;
 	Menu.StoryScreen.Load = function()
 	{	// data, y row index

@@ -51,6 +51,7 @@ function Animation_Display_Class()
 		var loaded_images=0;
 		var loop_index=0,delay_index=0;
 		var places = [];
+		let __index = 0;
 		let callback;
 
 		this.Width = imgs[0].Width;
@@ -124,20 +125,20 @@ function Animation_Display_Class()
 			if(H==null)
 				W = imgs[0].Height;
 			var i = places.length;
-			places[i] = new places_class(this,C,X,Y,W,H,S,i);
+			places[i] = new places_class(this,C,X,Y,W,H,S,__index++);
 			__PLACES.push(places[i]);
 			if(S)this.Draw(C,X,Y,W,H);
 			return places[i];
 		};
 		this.Remove = function(index)
 		{
-			if(places[index])
+			for(let i=0;i<places.length;i++)
 			{
-				let value = places.splice(index,1)[0];
-				__PLACES.splice(__PLACES.indexOf(value),1);
-				for(var i=index;i<places.length;i++)
+				if(places[i].values.index==index)
 				{
-					places[i].values.index--;
+					let value = places.splice(i,1)[0];
+					__PLACES.splice(__PLACES.indexOf(value),1);
+					break;
 				}
 			}
 			return this;
@@ -187,6 +188,7 @@ function Animation_Display_Class()
 		var _auto = auto_repeat;
 		var loop_index=0,delay_index=0;
 		var places = [];
+		let __index = 0;
 		let frame_w, frame_h;
 		let _width, _height;
 		let callback;
@@ -251,22 +253,23 @@ function Animation_Display_Class()
 			if(H==null)
 				H = frame_h;
 			var i = places.length;
-			places[i] = new places_class(self,C,X,Y,W,H,S,i);
+			places[i] = new places_class(self,C,X,Y,W,H,S,__index++);
 			__PLACES.push(places[i]);
 			if(S)self.Draw(C,X,Y,W,H);
 			return places[i];
 		};
 		self.Remove = function(index)
 		{
-			if(places[index])
+			for(let i=0;i<places.length;i++)
 			{
-				let value = places.splice(index,1)[0];
-				__PLACES.splice(__PLACES.indexOf(value),1);
-				for(var i=index;i<places.length;i++)
+				if(places[i].values.index==index)
 				{
-					places[i].values.index--;
+					let value = places.splice(i,1)[0];
+					__PLACES.splice(__PLACES.indexOf(value),1);
+					break;
 				}
 			}
+			return this;
 		};
 		self.Remove_All = function(stopper)
 		{

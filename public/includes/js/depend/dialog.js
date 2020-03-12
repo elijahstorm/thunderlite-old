@@ -7,11 +7,11 @@ function Dialog_Class(canvas)
 	let Queued_Texts = [];
 	let OverlayBtn;
 	this.canvas = canvas;
-	let disp_X = INTERFACE.IS_MOBILE_GAME ? 20 : 30,
+	let disp_X = INTERFACE.IS_MOBILE_GAME ? 10 : 30,
 		disp_Y = INTERFACE.IS_MOBILE_GAME ? 350 : 450,
-		disp_W = INTERFACE.IS_MOBILE_GAME ? 400 : 550,
+		disp_W = INTERFACE.IS_MOBILE_GAME ? 505 : 550,
 		disp_H = INTERFACE.IS_MOBILE_GAME ? 100 : 115,
-		maxTextWidth = INTERFACE.IS_MOBILE_GAME ? 35 : 200,
+		maxTextWidth = INTERFACE.IS_MOBILE_GAME ? 35 : 45,
 		maxTextHeight = INTERFACE.IS_MOBILE_GAME ? 150 : 200,
 		fontTextSize = INTERFACE.IS_MOBILE_GAME ? 12 : 19 + "pt Times New Roman";
 
@@ -21,7 +21,7 @@ function Dialog_Class(canvas)
 		{
 			clearRect(0,0,1000,1000);
 			fillStyle = "blue";
-			globalAlpha = 0.35;
+			globalAlpha = 0.75;
 			fillRect(disp_X,disp_Y,disp_W,disp_H);
 			fillRect(disp_X+30,disp_Y-30,150,30);
 			globalAlpha = 1;
@@ -47,7 +47,8 @@ function Dialog_Class(canvas)
 			lastLines = new Array();
 			if(text.length>maxTextHeight)
 			{ // to fix texts that would overflow
-				var i=maxTextHeight-20,found = false;
+				var i = maxTextHeight-20,
+					found = false;
 				for(;i<text.length&&i<=maxTextHeight;i++)
 				{
 					if(text[i]==' '||text[i]=='\n')
@@ -165,7 +166,7 @@ function Dialog_Class(canvas)
 		{
 			clearRect(0,0,1000,1000);
 			fillStyle = "blue";
-			globalAlpha = 0.35;
+			globalAlpha = 0.75;
 			fillRect(disp_X,disp_Y+i,disp_W,disp_H);
 			fillRect(disp_X+30,disp_Y-30+i,150,30);
 			globalAlpha = 1;
@@ -194,7 +195,7 @@ function Dialog_Class(canvas)
 		{
 			clearRect(0,0,1000,1000);
 			fillStyle = "blue";
-			globalAlpha = 0.35;
+			globalAlpha = 0.75;
 			fillRect(disp_X,disp_Y+i,disp_W,disp_H);
 			fillRect(disp_X+30,disp_Y-30+i,150,30);
 			globalAlpha = 1;

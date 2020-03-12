@@ -1,22 +1,3 @@
 
-
-
-making map data
-
-all data should be seperated by a comma ,
-
-data should follow this pattern:
-
-0) id -- server save ID
-1) name
-2) terrain width
-3) terrain height
-4) terrain values (x,y pattern)
-5) players
-	name
-6) units (array of 4)
-	[id, x, y, player]
-7) cities (array of 4)
-	[id, x, y, player]
 8) weather
 	[fog, rain, snow]

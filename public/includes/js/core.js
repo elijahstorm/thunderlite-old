@@ -299,6 +299,15 @@ var Core = {
 		Core.Smooth_Changer(drawable,drawable.Y,change,frames,function(){});
 	},
 	Exploding:false,
+	Point:function(x, y)
+	{
+		let ani = Animations.Retrieve("Pointer Animation");
+		let d = ani.New(HUD_Display.Context,
+			x*TILESIZE-INTERFACE.X_Offset()-12,
+			y*TILESIZE-INTERFACE.Y_Offset()-12, null, null, true);
+			ani.Stop = false;
+		return [ani, d.values.index];
+	},
 	Explode:function(selectable, callback)
 	{
 		let ani = Animations.Retrieve("Explosion");
