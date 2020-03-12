@@ -28,6 +28,8 @@ hl: 8,6
 talk Torrial: "First of all that big tank that just destroy your troops is called the Annihilator Tank."
 talk Torrial: "Don't try to take him on with the troops you have left in this battle, it has Heavy Defense and needs to be taken on by a Heavy Attacker."
 unhl: 8,6
+
+move: 0, 0
 hl: 0,1
 hl: 1,2
 hl: 2,3
@@ -44,9 +46,13 @@ hl: 1,4
 talk Torrial: "Your tank and mortar attack with Medium Attack, which is neutral, but those two not enough to kill him."
 unhl: 1,1
 unhl: 1,4
+
+
+move: 7, 2
 hl: 7,2
 talk Torrial: "The best plan of action here would be to target their Capital. If you capture their Capital, the enemies morales will deplete completely and they will give up."
 talk Torrial: "You can capture enemy buildings by targeting your infantry troops over them."
+move: 0, 0
 hl: 2,3
 talk Torrial: "Send this infantry troop over there, and reinforce him with your other troops."
 talk Torrial: "In this terrain, your troops will be hidden by the mountains, because tanks and trucks cannot drive over mountains."

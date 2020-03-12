@@ -77,6 +77,7 @@ var Terrain = {
 				sprite.Draw(canvas, x, y, TILESIZE, sprite.Image().height*TILESIZE/60);
 				return;
 			}
+
 			canvas.putImageData(sprite, x, y);
 		};
 		this.UI_Draw = function(canvas, x, y, duplicate)

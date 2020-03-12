@@ -1282,6 +1282,24 @@ let t1,t2,t = at;
 		}
 		return imageHolderCanvas.getImageData(0, 0, fullWidth, fullHeight);
 	};
+	self.Get_Terrain_Image = function(sampledGame)
+	{
+		if(sampledGame==null)return;
+		if(!sampledGame.valid)return;
+		var fullWidth = sampledGame.Terrain_Map.Width*TILESIZE;
+		var fullHeight = sampledGame.Terrain_Map.Height*TILESIZE;
+		imageHolderCanvas.clearRect(0, 0, fullWidth, fullHeight);
+		for(var i=0;i<sampledGame.Terrain_Map.Width;i++)
+		for(var j=0;j<sampledGame.Terrain_Map.Height;j++){
+			var at = sampledGame.Terrain_Map.At(i,j);
+			if(at!=null){
+				at.UI_Draw(imageHolderCanvas, i*TILESIZE, j*TILESIZE, 1);
+				// at = at.Building;
+				// if(at!=null)at.UI_Draw(imageHolderCanvas, i*TILESIZE, j*TILESIZE, 1);
+			}
+		}
+		return imageHolderCanvas.getImageData(0, 0, fullWidth, fullHeight);
+	};
 	self.Update_Player_Info = function()
 	{
 		Avatar.Display(game.Active_Player());

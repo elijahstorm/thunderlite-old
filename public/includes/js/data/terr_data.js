@@ -38,11 +38,8 @@ var Terrain_Data = {
 						if(_map[x][y+1]==index)
 						{	// connection to bottom
 							__img = Terrain_Data.TERRE[index].Sprite[5];
-							__sprite = __img.Image();
-							__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-							__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE)
 
-							return __sprite;
+							return __img;
 						}
 						__img = Terrain_Data.TERRE[index].Sprite[4];
 						__sprite = __img.Image();
@@ -72,11 +69,8 @@ var Terrain_Data = {
 						return __sprite;
 					}
 					__img = Terrain_Data.TERRE[index].Sprite[2];
-					__sprite = __img.Image();
-					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 
-					return __sprite;
+					return __img;
 				}
 				if(y!=0)
 				if(_map[x][y-1]==index)
@@ -85,18 +79,12 @@ var Terrain_Data = {
 					if(_map[x][y+1]==index)
 					{	// connection to bottom
 						__img = Terrain_Data.TERRE[index].Sprite[4];
-						__sprite = __img.Image();
-						__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-						__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 
-						return __sprite;
+						return __img;
 					}
 					__img = Terrain_Data.TERRE[index].Sprite[3];
-					__sprite = __img.Image();
-					__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-					__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 
-					return __sprite;
+					return __img;
 				}
 				if(y!=_map[x].length-1)
 				if(_map[x][y+1]==index)
@@ -114,11 +102,8 @@ var Terrain_Data = {
 					return __sprite;
 				}
 				__img = Terrain_Data.TERRE[index].Sprite[1];
-				__sprite = __img.Image();
-				__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-				__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
 
-				return __sprite;
+				return __img;
 			}
 			if(x!=_map.length-1)
 			if(_map[x+1][y]==index)
@@ -214,6 +199,7 @@ var Terrain_Data = {
 			if(_map[x][y+1]==index)
 			{	// connection to bottom
 				__img = Terrain_Data.TERRE[index].Sprite[1];
+
 				__sprite = __img.Image();
 				imageHolderCanvas.save();
 				imageHolderCanvas.rotate(3*90*Math.PI/180);
@@ -226,17 +212,21 @@ var Terrain_Data = {
 				return __sprite;
 			}
 			__img = Terrain_Data.TERRE[index].Sprite[0];
-			__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-			__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-			return __sprite;
+
+			return __img;
 		}
+
+
+
+
+
 		if(type==2)
 		{	// random
 			__img = Terrain_Data.TERRE[index].Sprite[Math.floor(Math.random()*4)];
-			__sprite = __img.Image();
-			__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-			__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-			return __sprite;
+			// __sprite = __img.Image();
+			// __img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
+			// __sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
+			return __img;
 		}
 		if(type==3)
 		{	// sea border and animation
@@ -572,17 +562,12 @@ var Terrain_Data = {
 				return __sprite;
 			}
 			__img = Terrain_Data.TERRE[index].Sprite[0];
-			__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-			__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-			return __sprite;
+			return __img;
 		}
 
 			// singular
 		__img = Terrain_Data.TERRE[index].Sprite[0];
-		__sprite = __img.Image();
-		__img.Draw(imageHolderCanvas,0,0,TILESIZE,TILESIZE);
-		__sprite = imageHolderCanvas.getImageData(0,0,TILESIZE,TILESIZE);
-		return __sprite;
+		return __img;
 	},
 	Is_Reachable:function(terrain_type, unit_type)
 	{

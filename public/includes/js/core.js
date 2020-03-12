@@ -306,8 +306,8 @@ var Core = {
 
 		let ani = Animations.Retrieve("Pointer Animation");
 		let d = ani.New(HUD_Display.Context,
-			(x*TILESIZE-INTERFACE.X_Offset())-(18*TILESIZE/60),
-			(y*TILESIZE-INTERFACE.Y_Offset())-(18*TILESIZE/60), ani.Width*TILESIZE/60, ani.Height*TILESIZE/60, true);
+			x*TILESIZE-INTERFACE.X_Offset(),
+			y*TILESIZE-INTERFACE.Y_Offset(), ani.Width*TILESIZE/60, ani.Height*TILESIZE/60, true);
 		ani.Stop = false;
 		terrain.pointer = d;
 	},
