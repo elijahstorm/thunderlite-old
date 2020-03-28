@@ -2140,14 +2140,32 @@ with(Menu.StoryScreen){
 				Owner.Draw(c,x+5,y+140,w,10,names[_load]);
 			}
 		};
+		let Mystery = { // level display
+			Draw:function(c,x,y,w,h,_load){
+				c.globalAlpha = .2;
+				Shape.Rectangle.Draw(c,x,y,w,h,"#E5D1D0");
+				c.globalAlpha = .7;
+				Shape.Rectangle.Draw(c,x,y+120,w,30,"#57634E");
+				Shape.Rectangle.Draw(c,x,y+120,w,1,"#F4EFEB");
+				c.globalAlpha = 1;
+				Shape.Box.Draw(c,x,y,w,h,"#73877B");
+				Caption.Draw(c,x+5,y+123,w,25,"Locked");
+				Images.Retrieve("Locked").Draw(c,x+w/3,y+h/3,w/3,h/3);
+			}
+		};
 		let clicker = function(level){
 			Animations.Retrieve("Load").Remove_All();
 			new_custom_game(_read_game_data[level], Levels.Name(level), true, null, __unlocked==level+1 ? 2 : 3, __section);
 		};
-		for(var j=0;j<3;j++)
-		for(var i=0;i<5;i++){
+		let i=0;
+		for(;i<__unlocked;i++){
 			loaders[i] = Animations.Retrieve("Load").New(menuCanvas, 30+((_width+10+(_width/3))*(i)), (150+y_loc)*Menu.StoryScreen.yScale, _width/3*Menu.StoryScreen.xScale, 50*Menu.StoryScreen.yScale, (y_loc!=0));
 			let _index = Add(new Canvas.Drawable(drawer, null, 30+((_width+10)*(i)), 100+y_loc, _width, 150, i), clicker, new Canvas.Drawable(Shape.Box, null, 30+((_width+10)*(i)), 100+y_loc, _width, 150, "#F2F5FF", null, .5));
+			if(i==0)
+				remove_index[section_index] = _index;
+		}
+		for(;i<5;i++){
+			let _index = Add(new Canvas.Drawable(Mystery, null, 30+((_width+10)*(i)), 100+y_loc, _width, 150, i), clicker, new Canvas.Drawable(Shape.Box, null, 30+((_width+10)*(i)), 100+y_loc, _width, 150, "#F2F5FF", null, .5));
 			if(i==0)
 				remove_index[section_index] = _index;
 		}

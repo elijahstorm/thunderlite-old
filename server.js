@@ -1089,10 +1089,6 @@ io.on('connection', function(socket){
 				data.forEach(function(cur){
 					console.log("-->",cur.username);
 					console.log(cur);
-
-							db.users.update({username:cur.username}, {$set:{
-								story_prog:[1,1,1]///COME BACK
-							}});
 				});
 			}
 		});

@@ -333,6 +333,7 @@ window.onload = function(){
 			alert("Unlocked the next level!");
 			game.Levels.Report_Unlocked(data.story_prog);
 			Menu.StoryScreen.Prep(data.section);
+			Menu.StoryScreen.Load();
 		}
 		else if(data.type==601)
 		{	// Unlocked all the story levels

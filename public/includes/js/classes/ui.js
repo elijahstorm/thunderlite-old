@@ -1474,6 +1474,10 @@ var Interface_Class = function()
 		///COME BACK
 		Menu.StoryScreen.Prep(0);
 		Menu.StoryScreen.Load();
+		Menu.StoryScreen.Prep(1);
+		Menu.StoryScreen.Load();
+		Menu.StoryScreen.Prep(2);
+		Menu.StoryScreen.Load();
 		document.getElementById("mainMenu").style.display="none";
 		self.Close_Menu();
 		self.Set_Controls(document.getElementById("inputHandler"));
