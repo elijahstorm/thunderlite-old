@@ -200,27 +200,12 @@ var Interface_Class = function()
 		}
 	}
 
-// let perfTile = [], indexTile = [];
-// function performaceText(t, t1, t2) {
-// 	if(perfTile[t]==null){
-// 		perfTile[t] = 0;
-// 		indexTile[t] = 0;
-// 	}
-// 	perfTile[t]+=(Math.round((t2-t1)*100)/100);
-// 	indexTile[t]++;
-// 	return (Math.round((t2-t1)*100)/100);
-// }
-
 	var paint = function(x, y, left, top, w, h, zoom){
 		if(game==null)return;
 		/// y and x are flipped when called from scroller, due to nature of canvas data
 
 		var at = game.Terrain_Map.At(y,x);
 		if(at==null)return;
-
-let t1,t2,t = at;
-
-		t1 = performance.now();
 
 		at.UI_Draw(terrainCanvas, left, top);
 		paintOffMap(y,x,left,top);
@@ -240,10 +225,6 @@ let t1,t2,t = at;
 		if(at!=null&&at!=moving_unit)at.UI_Draw(charCanvas, left, top);
 		at = self.Tiles.At(y,x);
 		if(at!=null)at.Draw(tileCanvas, left, top, w, h);
-
-
-		// t2 = performance.now();
-		// let txt = performaceText(t.Source,t1,t2);
 	};
 	var simplePaint = function(x, y, left, top, w, h, zoom){
 		if(game==null)return;
@@ -257,8 +238,6 @@ let t1,t2,t = at;
 	let allow_render = true;
 	var render = function(left, top, zoom, simple){
 		if(game==null)return;
-
-// console.log(scroller);
 
 		zoom = 1;
 
@@ -282,7 +261,6 @@ let t1,t2,t = at;
 		}
 
 		if(!allow_render)return;
-		// TILESIZE = Math.floor((window.parent.mobilecheck() ? 30 : 60 )*zoom);
 		self.zoom = zoom;
 		backCanvas.fillStyle = "#3C6BBE";
 		backCanvas.fillRect(0, 0, 600, 600);
@@ -296,24 +274,10 @@ let t1,t2,t = at;
 		charCanvas.clearRect(0,0,600,600);
 		// weatherCanvas.clearRect(0,0,600,600);
 
-
-// indexTile = [];
-// perfTile = [];
-// let t2, t = performance.now();
-
 			// hide offscreen terrain animations, if shown then it will unhide them in Draw fnc
 		game.Hide_Terrain_Anis();
 		terrain_disp.render(left, top, zoom, paint);
 		Animations.Tick();
-
-// t2 = performance.now();
-// if(t2-t>fps)
-// 	console.error("took "+(Math.round((t2-t)*100)/100)+"ms");
-// else return;
-// for(let i in indexTile)
-// {
-// 	console.log("tile index",Terrain_Data.Reverse_Get(i).Name,"took",(Math.round((perfTile[i]/indexTile[i])*100)/100)+"ms");
-// }
 	};
 
 	var Avatar,Status;
@@ -1507,6 +1471,8 @@ let t1,t2,t = at;
 	self.Open_Story = function()
 	{
 		if(game)return;
+		///COME BACK
+		Menu.StoryScreen.Prep(0);
 		Menu.StoryScreen.Load();
 		document.getElementById("mainMenu").style.display="none";
 		self.Close_Menu();

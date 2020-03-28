@@ -1934,20 +1934,20 @@ with(Menu.LevelSelect){
 	let Caption = new Text_Class("15pt Impact", "#D7EFD0");
 	let Owner = new Text_Class("9pt Impact", "#C2D8BC");
 
-	let h_index = 0;
+	let section_index = 0;
 	let remove_index = new Array(3);
 	let _width = window.parent.mobilecheck() ? 125 : 125;
 	Menu.LevelSelect.Prep = function(input)
 	{
 		switch (input){
 			case 0:
-				h_index = 0;
+				section_index = 0;
 				break;
 			case 1:
-				h_index = 1;
+				section_index = 1;
 				break;
 			case 2:
-				h_index = 2;
+				section_index = 2;
 				break;
 		}
 	};
@@ -1958,11 +1958,11 @@ with(Menu.LevelSelect){
 		_game_imgs = new Array(_data_text.length),
 		names = new Array(_data_text.length),
 		loaders = new Array(_data_text.length);
-		let y_loc = h_index*200;
-		if(remove_index[h_index]!=null)
+		let y_loc = section_index*200;
+		if(remove_index[section_index]!=null)
 		{
-			Menu.LevelSelect.Remove(remove_index[h_index], _data_text.length);
-			remove_index[h_index] = null;
+			Menu.LevelSelect.Remove(remove_index[section_index], _data_text.length);
+			remove_index[section_index] = null;
 		}
 
 			/// start load maps
@@ -2023,7 +2023,7 @@ with(Menu.LevelSelect){
 			loaders[i] = Animations.Retrieve("Load").New(menuCanvas, 30+((_width+10+(_width/3))*(_data_text.length-i-1)), (150+y_loc)*Menu.LevelSelect.yScale, _width/3*Menu.LevelSelect.xScale, 50*Menu.LevelSelect.yScale, (y_loc!=0));
 			let _index = Add(new Canvas.Drawable(drawer, null, 30+((_width+10)*(_data_text.length-i-1)), 100+y_loc, _width, 150, i), clicker, new Canvas.Drawable(Shape.Box, null, 30+((_width+10)*(_data_text.length-i-1)), 100+y_loc, _width, 150, "#F2F5FF", null, .5));
 			if(i==0)
-				remove_index[h_index] = _index;
+				remove_index[section_index] = _index;
 		}
 		if(INTERFACE.Open_Menu()==Menu.LevelSelect)
 			Draw();
@@ -2062,30 +2062,39 @@ with(Menu.StoryScreen){
 	let Caption = new Text_Class("15pt Impact", "#D7EFD0");
 	let Owner = new Text_Class("9pt Impact", "#C2D8BC");
 
-	let h_index = 0;
 	let remove_index = new Array(3);
 	let _width = window.parent.mobilecheck() ? 125 : 125;
 	let loaded_ = false;
+	let section_index = 0;
+
+	Menu.StoryScreen.Prep = function(input)
+	{
+		if(input<0 || input>=Levels.Current().length)return;
+		loaded_ = false;
+		section_index = input;
+	};
 	Menu.StoryScreen.Load = function()
 	{	// data, y row index
 		if(loaded_)return;
-		let __unlocked = Levels.Current();
+		let __unlocked_data = Levels.Current();
+		let __unlocked = __unlocked_data[section_index];
+		let __section = section_index;
 
-		var _read_game_data = new Array(__unlocked),
+		let _read_game_data = new Array(__unlocked),
 		_game_imgs = new Array(__unlocked),
 		names = new Array(__unlocked),
 		loaders = new Array(__unlocked);
-		let y_loc = h_index*200;
-		if(remove_index[h_index]!=null)
+		let y_loc = section_index*200;
+		if(remove_index[section_index]!=null)
 		{
-			Menu.StoryScreen.Remove(remove_index[h_index], __unlocked);
-			remove_index[h_index] = null;
+			Menu.StoryScreen.Remove(remove_index[section_index], __unlocked);
+			remove_index[section_index] = null;
 		}
 
 			/// start load maps
 		for(let index=0;index<__unlocked;index++)
 		{
-			let _data_text = Levels.Data(index);
+			let _data_text = Levels.Data(section_index, index);
 
 			names[index] = Levels.Name(index);
 			_data_text = decrypt_game_data(_data_text);
@@ -2133,13 +2142,14 @@ with(Menu.StoryScreen){
 		};
 		let clicker = function(level){
 			Animations.Retrieve("Load").Remove_All();
-			new_custom_game(_read_game_data[level], Levels.Name(level), true, null, Levels.Current()==level+1 ? 2 : 3);
+			new_custom_game(_read_game_data[level], Levels.Name(level), true, null, __unlocked==level+1 ? 2 : 3, __section);
 		};
-		for(var i=0;i<__unlocked;i++){
+		for(var j=0;j<3;j++)
+		for(var i=0;i<5;i++){
 			loaders[i] = Animations.Retrieve("Load").New(menuCanvas, 30+((_width+10+(_width/3))*(i)), (150+y_loc)*Menu.StoryScreen.yScale, _width/3*Menu.StoryScreen.xScale, 50*Menu.StoryScreen.yScale, (y_loc!=0));
 			let _index = Add(new Canvas.Drawable(drawer, null, 30+((_width+10)*(i)), 100+y_loc, _width, 150, i), clicker, new Canvas.Drawable(Shape.Box, null, 30+((_width+10)*(i)), 100+y_loc, _width, 150, "#F2F5FF", null, .5));
 			if(i==0)
-				remove_index[h_index] = _index;
+				remove_index[section_index] = _index;
 		}
 		loaded_ = true;
 	};
@@ -2260,7 +2270,7 @@ Menu.PostGame.Set = function(map, players, turn, close_func){
 			Add(new Canvas.Drawable(Shape.Rectangle, null, 490, 160+i*60, 2, 40, "#000"));
 			Add(new Canvas.Drawable(caption_txt, null, 495, 170+i*60, 54, 30, ""+cur.data.turns_alive));
 			Add(new Canvas.Drawable(Shape.Rectangle, null, 565, 160+i*60, 2, 40, "#000"));
-			Add(new Canvas.Drawable(caption_txt, null, 575, 170+i*60, 54, 30, ""+cur.data.damage_delt));
+			Add(new Canvas.Drawable(caption_txt, null, 575, 170+i*60, 200, 30, ""+cur.data.damage_delt));
 		}
 
 		Add(new Canvas.Drawable({ // default display

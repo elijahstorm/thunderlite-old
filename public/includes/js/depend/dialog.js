@@ -13,7 +13,9 @@ function Dialog_Class(canvas)
 		disp_H = INTERFACE.IS_MOBILE_GAME ? 100 : 115,
 		maxTextWidth = INTERFACE.IS_MOBILE_GAME ? 35 : 45,
 		maxTextHeight = INTERFACE.IS_MOBILE_GAME ? 150 : 200,
-		fontTextSize = INTERFACE.IS_MOBILE_GAME ? 12 : 19 + "pt Times New Roman";
+		fontTextSize = INTERFACE.IS_MOBILE_GAME ? 12 : 19 + "pt Times New Roman",
+		Slide_Distance = INTERFACE.IS_MOBILE_GAME ? 100 : 200,
+		Slide_Rate = 7;
 
 	function Draw(text,speaker,index,newlines,lastLines)
 	{
@@ -182,7 +184,7 @@ function Dialog_Class(canvas)
 			},"Next Overlay");
 			return;
 		}
-		setTimeout(function(){Slide_In(text,speaker,i-=5);},15);
+		setTimeout(function(){Slide_In(text,speaker,i-=Slide_Rate);},15);
 	}
 	function Slide_Out(i)
 	{
@@ -203,7 +205,7 @@ function Dialog_Class(canvas)
 			strokeRect(disp_X,disp_Y+i,disp_W,disp_H);
 			strokeRect(disp_X+30,disp_Y-30+i,150,30);
 		}
-		if(i>200)
+		if(i>Slide_Distance)
 		{
 			Display_Prompt_In = false;
 			canvas.clearRect(0,0,1000,1000);
@@ -215,7 +217,7 @@ function Dialog_Class(canvas)
 			}
 			return;
 		}
-		setTimeout(function(){Slide_Out(i+=5);},15);
+		setTimeout(function(){Slide_Out(i+=Slide_Rate);},15);
 	}
 	function Queue_At_Start(addition)
 	{
@@ -270,7 +272,7 @@ function Dialog_Class(canvas)
 			canvas.save();
 			canvas.scale(INTERFACE.gameXScale, INTERFACE.gameYScale);
 			if(animate)
-				Slide_In(text, speaker, INTERFACE.IS_MOBILE_GAME ? 100 : 200);
+				Slide_In(text, speaker, Slide_Distance);
 			else
 				Slide_In(text,speaker,0);
 		}

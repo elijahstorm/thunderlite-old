@@ -953,7 +953,7 @@ io.on('connection', function(socket){
 					username:username,
 					password:password,
 					email:email,
-					story_prog:1,
+					story_prog:[1,1,1],
 					level:1,
 					points:0,
 					totalGames:0,
@@ -1038,7 +1038,7 @@ io.on('connection', function(socket){
 				return;
 			}
 			if(query=="progress")
-			{	// unlocked story level
+			{	// unlocked story data
 				socket.send({type:504, story_prog:data[0].story_prog});
 			}
 		});
@@ -1053,17 +1053,24 @@ io.on('connection', function(socket){
 				socket.send({type:500});
 				return;
 			}
-			if(query=="progress")
+			if(query.type=="progress")
 			{	// unlock next story level
-				if(data[0].story_prog>15)
-				{	// cannot grow level further
-					socket.send({type:601, story_prog:data[0].story_prog});
+				if(query.section<0 || query.section>=3)
+				{	// invalid input error
+					socket.send({type:601});
 					return;
 				}
+				if(data[0].story_prog[query.section]>=5)
+				{	// cannot grow level further
+					socket.send({type:601});
+					return;
+				}
+				let __update = data[0].story_prog;
+				__update[query.section]++;
+				socket.send({type:600, story_prog:__update, section:query.section});
 				db.users.update({username:socket.username}, {$set:{
-					story_prog:data[0].story_prog+1
+					story_prog:__update
 				}});
-				socket.send({type:600, story_prog:data[0].story_prog+1});
 			}
 		});
 	});
@@ -1080,7 +1087,12 @@ io.on('connection', function(socket){
 			}else{
 				timestamp("***user data: ");
 				data.forEach(function(cur){
-					console.log(cur.username, cur.password);
+					console.log("-->",cur.username);
+					console.log(cur);
+
+							db.users.update({username:cur.username}, {$set:{
+								story_prog:[1,1,1]///COME BACK
+							}});
 				});
 			}
 		});

@@ -696,7 +696,10 @@ function init_map(map, players, game_id, skip_pregame, offline_game){
 		if(offline_game[2]==1)
 			Game.game_data[3] = 1;
 		else if(offline_game[2]==2)
+		{
 			Game.game_data[3] = 2;
+			Game.game_data[4] = offline_game[4];
+		}
 		else if(offline_game[2]==3)
 			Game.game_data[3] = 3;
 	}
@@ -759,7 +762,7 @@ function init_map(map, players, game_id, skip_pregame, offline_game){
 	}
 	INTERFACE.Display_Menu(Menu.PreGame);
 }
-function new_custom_game(game_data, name, skippingLobby, save_data_index, story_progress)
+function new_custom_game(game_data, name, skippingLobby, save_data_index, story_progress, story_section)
 {
 	if(!name)return;
 
@@ -769,7 +772,7 @@ function new_custom_game(game_data, name, skippingLobby, save_data_index, story_
 	else data = Map_Reader.Read(game_data);
 	if(!data.Valid)return;
 
-	init_map(data, null, null, skippingLobby, [skippingLobby, save_data_index, story_progress]);
+	init_map(data, null, null, skippingLobby, [skippingLobby, save_data_index, story_progress, story_section]);
 	if(skippingLobby)return;
 
 	if(online){
