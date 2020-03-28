@@ -330,14 +330,12 @@ window.onload = function(){
 			/** client saved custom map data */
 		else if(data.type==600)
 		{	// Unlocked the next story level
-			alert("Unlocked the next level!");
 			game.Levels.Report_Unlocked(data.story_prog);
-			Menu.StoryScreen.Prep(data.section);
-			Menu.StoryScreen.Load();
+			game.Menu.StoryScreen.Prep(data.section);
+			game.Menu.StoryScreen.Load();
 		}
 		else if(data.type==601)
 		{	// Unlocked all the story levels
-			alert("You've reached the max level!");
 		}
 		else if(data.type==605)
 		{	// CONGRATS for leveling up!

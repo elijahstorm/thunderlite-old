@@ -180,10 +180,15 @@ var Engine_Class = function(input, is_sample, is_local)
 				if(self.game_data[3]==1)
 					openMapEditor(self.game_data[1], self.game_data[2], client_won);
 				else if(self.game_data[3]==2 && client_won)
+			{
+				console.log(self.game_data);
+				console.log(self.game_data[4]);
 					socket.emit('userdata add', {
 						type:'progress',
 						section:self.game_data[4]
 					});
+
+				}
 			}
 			else if(UI!=Fast_Fake_Interface)
 				UI.End_Game(client_won, Players, turn);

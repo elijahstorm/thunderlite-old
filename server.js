@@ -1057,19 +1057,19 @@ io.on('connection', function(socket){
 			{	// unlock next story level
 				if(query.section<0 || query.section>=3)
 				{	// invalid input error
-					socket.send({type:601});
+					socket.send({type:500,info:socket.username+": level campaign progress of "+query.section});
 					return;
 				}
-				if(data[0].story_prog[query.section]>=5)
+				let __progress = data[0].story_prog;
+				if(__progress[query.section]>=5)
 				{	// cannot grow level further
 					socket.send({type:601});
 					return;
 				}
-				let __update = data[0].story_prog;
-				__update[query.section]++;
-				socket.send({type:600, story_prog:__update, section:query.section});
+				__progress[query.section]++;
+				socket.send({type:600, story_prog:__progress, section:query.section});
 				db.users.update({username:socket.username}, {$set:{
-					story_prog:__update
+					story_prog:__progress
 				}});
 			}
 		});

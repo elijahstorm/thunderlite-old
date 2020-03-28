@@ -299,10 +299,11 @@ var Core = {
 		Core.Smooth_Changer(drawable,drawable.Y,change,frames,function(){});
 	},
 	Exploding:false,
-	Point:function(Game, x, y)
+	Point:function(Game, terrain)
 	{
-		let terrain = Game.Terrain_Map.At(x, y);
 		if(terrain.pointer!=null)return;
+		let x = terrain.X,
+			y = terrain.Y;
 
 		let ani = Animations.Retrieve("Pointer Animation");
 		let d = ani.New(HUD_Display.Context,
@@ -311,10 +312,11 @@ var Core = {
 		ani.Stop = false;
 		terrain.pointer = d;
 	},
-	Unpoint:function(Game, x, y)
+	Unpoint:function(Game, terrain)
 	{
-		let terrain = Game.Terrain_Map.At(x, y);
 		if(terrain.pointer==null)return;
+		let x = terrain.X,
+			y = terrain.Y;
 
 		let ani = Animations.Retrieve("Pointer Animation");
 		let values = terrain.pointer.values;
@@ -698,7 +700,7 @@ function init_map(map, players, game_id, skip_pregame, offline_game){
 		else if(offline_game[2]==2)
 		{
 			Game.game_data[3] = 2;
-			Game.game_data[4] = offline_game[4];
+			Game.game_data[4] = offline_game[3];
 		}
 		else if(offline_game[2]==3)
 			Game.game_data[3] = 3;

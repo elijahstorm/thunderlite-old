@@ -4,6 +4,7 @@ talk Link: "Wow thank you!!", "Oh fuck..."
 talk Torrial: "We're not out of the woods yet!"
 talk Gannon: "I have way too many units compared to you, and resources vast! This is a fertile land, and I have the better ground."
 
+move: 10, 7
 hl: 10, 7
 wait: 1
 talk Torrial: "Link this seems like trouble! Gannon has more resources and more troops as well. And that large Tank is called a Warmachine. It can build reinforcements using recourses it collects from the ground."
@@ -26,9 +27,14 @@ unhl: 11, 0
 unhl: 11, 2
 
 
+move: 0, 0
+
 talk Torrial: "We have to use effective strategy to avoid dying here. Let's have our troops build a trench along the coast so that we can bunker down and create a defensive position."
 
-move: 0, 0
+hl: 2, 0
+hl: 2, 1
+hl: 2, 2
+move: 0,0
 wait: 1
 terrain: "Canyon", 2, 0
 wait: 1
