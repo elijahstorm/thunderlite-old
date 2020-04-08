@@ -764,25 +764,37 @@ var Interface_Class = function()
 		in_hl_path = false;
 	};
 	const ___mousedown = function(e){
-		HUD_Avoid_Mouse.interact();
-		if(!self.Click(e.layerX,e.layerY))return;
-		if(e.target.tagName.match(/input|textarea|select/i)) {
-			return;
+		try {
+			HUD_Avoid_Mouse.interact();
+			if(!self.Click(e.layerX,e.layerY))return;
+			if(e.target.tagName.match(/input|textarea|select/i)) {
+				return;
+			}
+			scroller.doTouchStart([{
+				pageX: e.pageX,
+				pageY: e.pageY
+			}], e.timeStamp);
+			mousedown = true;
+			return false;
+		} catch (e) {
+
+		} finally {
+			return false;
 		}
-		scroller.doTouchStart([{
-			pageX: e.pageX,
-			pageY: e.pageY
-		}], e.timeStamp);
-		mousedown = true;
-		return false;
 	};
 	const ___mouseup = function(e){
-		if(e.which==3)return true;
-		self.Release(e.layerX,e.layerY);
-		if(!mousedown)return;
-		scroller.doTouchEnd(e.timeStamp);
-		mousedown = false;
-		return false;
+		try {
+			if(e.which==3)return true;
+			self.Release(e.layerX,e.layerY);
+			if(!mousedown)return;
+			scroller.doTouchEnd(e.timeStamp);
+			mousedown = false;
+			return false;
+		} catch (e) {
+
+		} finally {
+			return false;
+		}
 	};
 	const ___contextmenu = function(e){
 		e.preventDefault();
@@ -975,6 +987,7 @@ var Interface_Class = function()
 	 	HUD_Avoid_Mouse = {
 			avatar_down:true,
 			avatar_right:true,
+			time_without_interaction:200,
 			idle_time:0,
 			avoid:20,
 			speed:10,
@@ -1068,7 +1081,7 @@ var Interface_Class = function()
 			},
 			tick:function(){
 				HUD_Avoid_Mouse.Switch_X();
-				if(HUD_Avoid_Mouse.idle_time>200)
+				if(HUD_Avoid_Mouse.idle_time>HUD_Avoid_Mouse.time_without_interaction)
 				{
 					if(_avatar.style.opacity>0)
 					{
@@ -1089,14 +1102,107 @@ var Interface_Class = function()
 		};
 		Canvas.Add_Ticker(HUD_Avoid_Mouse.tick);
 	}
-	else HUD_Avoid_Mouse = {
-		scared:function(x, y){
+	else
+	{
+		let _avatar = document.getElementById('avatarCanvas'),
+			_status = document.getElementById('statsCanvas'),
+			_helpers = document.getElementById('gameHelpers');
+	 	HUD_Avoid_Mouse = {
+			avatar_right:true,
+			idle_time:0,
+			time_without_interaction:100,
+			avoid:20,
+			speed:10,
+			adjust:-1,
+			Switch_X:function(){
+				if(HUD_Avoid_Mouse.adjust<0)return;
+				if(HUD_Avoid_Mouse.adjust==0)
+				{
+					if(HUD_Avoid_Mouse.avatar_right)
+					{
+						_avatar.style.right = null;
+						_avatar.style.left = 0;
+						HUD_Avoid_Mouse.avatar_right = false;
+						HUD_Avoid_Mouse.adjust-=HUD_Avoid_Mouse.speed;
+						return;
+					}
+					_avatar.style.left = null;
+					_avatar.style.right = 0;
+					HUD_Avoid_Mouse.avatar_right = true;
+					HUD_Avoid_Mouse.adjust-=HUD_Avoid_Mouse.speed;
+					return;
+				}
+				if(HUD_Avoid_Mouse.avatar_right)
+				{
+					if(HUD_Avoid_Mouse.adjust>=_avatar.clientWidth/2)
+					{
+						_avatar.style.right = (-(_avatar.clientWidth-HUD_Avoid_Mouse.adjust)*2)+"px";
+						_avatar.style.left = "";
+						if(Math.abs(parseInt(_avatar.style.right))>=_avatar.clientWidth)
+						{
+							_avatar.style.right = "";
+							_avatar.style.left = -_avatar.clientWidth+"px";
+						}
+					}
+					else
+					{
+						_avatar.style.left = (-(HUD_Avoid_Mouse.adjust*2))+"px";
+						_avatar.style.right = "";
+					}
+				}
+				else
+				{
+					if(HUD_Avoid_Mouse.adjust>=_avatar.clientWidth/2)
+					{
+						_avatar.style.left = (-(_avatar.clientWidth-HUD_Avoid_Mouse.adjust)*2)+"px";
+						_avatar.style.right = "";
+						if(Math.abs(parseInt(_avatar.style.left))>=_avatar.clientWidth)
+						{
+							_avatar.style.left = "";
+							_avatar.style.right = -_avatar.clientWidth+"px";
+						}
+					}
+					else
+					{
+						_avatar.style.right = (-(HUD_Avoid_Mouse.adjust*2))+"px";
+						_avatar.style.left = "";
+					}
+				}
 
-		},
-		interact:function(){
+				HUD_Avoid_Mouse.adjust-=HUD_Avoid_Mouse.speed;
+			},
+			scared:function(x, y){
 
-		}
-	};
+			},
+			interact:function(){
+				HUD_Avoid_Mouse.idle_time = 0;
+				_avatar.style.opacity = 1;
+				_status.style.opacity = 1;
+				_helpers.style.opacity = 1;
+			},
+			tick:function(){
+				HUD_Avoid_Mouse.Switch_X();
+				if(HUD_Avoid_Mouse.idle_time>HUD_Avoid_Mouse.time_without_interaction)
+				{
+					if(_avatar.style.opacity>0.3)
+					{
+						_avatar.style.opacity-=.035;
+						_status.style.opacity-=.035;
+						_helpers.style.opacity-=.025;
+					}
+					else
+					{
+						_avatar.style.opacity = .3;
+						_status.style.opacity = .3;
+						_helpers.style.opacity = .5;
+					}
+					return;
+				}
+				HUD_Avoid_Mouse.idle_time++;
+			}
+		};
+		Canvas.Add_Ticker(HUD_Avoid_Mouse.tick);
+	}
 	var m_move_fnc = function(x, y){
 		HUD_Avoid_Mouse.scared(x, y);
 		if(!allow_input)return;
@@ -1453,37 +1559,297 @@ var Interface_Class = function()
 		canvas.restore();
 	}
 
+	let Map_Data = {
+		Searching:0,
+		Next_Search:[],
+		All_Data:[],
+		Caption: new Text_Class("25pt Raleway", "#D7EFD0"),
+		Owner: new Text_Class("20pt Raleway", "#C2D8BC")
+	};
+	self.Update_Map_Search = function(_data_text)
+	{			// data, y row index
+		if(Map_Data.Next_Search.length==0)return;
+		Map_Data.Searching = Map_Data.Next_Search.shift();
 
-	var lastScroller;
+		let _read_game_data = new Array(_data_text.length),
+			_game_imgs = new Array(_data_text.length),
+			names = new Array(_data_text.length);
+
+		let id_start = document.getElementById("MAPSELECTIONROW").childNodes[Map_Data.Searching*2+1].childNodes[0];
+		id_start = id_start.childNodes[id_start.childNodes.length-1].id;
+
+		Map_Data.All_Data[id_start] = new Array();
+
+		for(let ii=0;ii<5;ii++)
+		{
+			let row_holder = document.getElementById(id_start+ii);
+			for(let jj=0;jj<row_holder.childNodes.length;jj++)
+			{
+				if(row_holder.childNodes[jj].className=="MAPCHOICEIMG")
+				{
+					row_holder.removeChild(row_holder.childNodes[jj]);
+					jj--;
+				}
+			}
+		}
+
+			/// start load maps
+		for(let index in _data_text)
+		{
+			names[index] = _data_text[index].name;
+			_data_text[index] = decrypt_game_data(_data_text[index].game);
+			_read_game_data[index] = Map_Reader.Read(_data_text[index]);
+
+			if(_read_game_data[index].Valid)
+			{
+				setTimeout(function(index){
+					var sampledGame = new Engine_Class(_read_game_data[index], true);
+					sampledGame.Set_Interface(INTERFACE);
+					sampledGame.FORCE_MERGE_DISPLAY = true;
+					_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
+					imageHolderCanvas.clearRect(0, 0, 900, 900);
+					worldCanvas.clearRect(0, 0, 900, 900);
+
+						///** Create and draw image **//
+					let canvas = document.createElement("canvas");
+					canvas.width = 600;
+					canvas.height = 600;
+					let ctx = canvas.getContext("2d");
+
+					Canvas.ScaleImageData(ctx, _game_imgs[index], 0, 0, 10/sampledGame.Terrain_Map.Width, 10/sampledGame.Terrain_Map.Height);
+					sampledGame.End_Game();
+
+					ctx.globalAlpha = .2;
+					Shape.Rectangle.Draw(ctx,0,0,600,600,"#E5D1D0");
+					ctx.globalAlpha = .7;
+					Shape.Rectangle.Draw(ctx,50,20,500,100,"#57634E");
+					ctx.globalAlpha = 1;
+					Shape.Box.Draw(ctx,0,0,600,600,"#73877B");
+
+					Map_Data.Caption.Draw(ctx,65,30,500,40,_read_game_data[index].Name);
+					if(names[index]!=null)
+						Map_Data.Owner.Draw(ctx,65,80,500,40,"by "+names[index]);
+
+					let img = document.createElement("img");
+					img.src = canvas.toDataURL("image/png");
+					img.className = "MAPCHOICEIMG";
+					Map_Data.All_Data[id_start].push(_read_game_data[index]);
+					// img.onclick = function() {
+					// 	onClick(img);
+					// };
+
+					let row_holder = document.getElementById(id_start+index);
+					row_holder.appendChild(img);
+					row_holder.onclick = function() {
+						onClick(img);
+					};
+				}, 10, index);
+			}
+		}
+	};
+
 	let menuCloser;
+
+	let __map_choice = "";
+	let __map_game_setup = false;
+	let last_q, query_type = 2;
+	let search_fnc = function(index, query)
+	{
+		if(last_q==query)
+			return;
+		if(query.length==0)
+			return;
+		if(query.includes("'") || query.includes('"'))
+			return;
+		if(query.includes(".") || query.includes(';'))
+			return;
+
+		last_q = query;
+		let QUERY = {};
+		switch (query_type) {
+			case 0:
+				QUERY.mapowner = "^"+query;
+				break;
+			case 1:
+				QUERY.Map_Id = query;
+				break;
+			case 2:
+				QUERY.mapname = "^"+query;
+				break;
+			default:
+				return;
+		}
+		if(index==0)
+			QUERY.mapowner = "freemaps";
+
+		Map_Data.Next_Search.push(index);
+		socket.emit('gamedata get', QUERY, 0, 5);
+	};
+	function makeElement(_id)
+	{
+		let el = document.createElement('div');
+		el.className = "MAPCHOICE";
+		el.id = _id;
+		return el;
+	}
+	function makeList(third, name, searchFunc, searchindex)
+	{
+		let insertTag = document.createElement('div');
+		let text_tag = document.createElement('h4');
+		text_tag.innerHTML = name;
+		text_tag.id = name;
+		insertTag.style = "padding-left:15%";
+		insertTag.style.height = "40px";
+		third.appendChild(insertTag);
+		for(let i=0;i<5;i++)
+			third.appendChild(makeElement(name+i));
+
+		if(searchFunc)
+		{
+			insertTag.style.cursor = "pointer";
+			let search = document.createElement('div');
+			search.className = "search-wrapper";
+			text_tag.style = "padding-left:60px";
+
+			let div = document.createElement('div');
+			div.className = "search-container";
+			let input = document.createElement('input');
+			input.className = "search-input";
+			input.placeholder = "Search";
+			input.type = "text";
+			div.appendChild(input);
+			let icon = document.createElement('i');
+			icon.className = "fa fa-search";
+			div.appendChild(icon);
+
+				// search icon slide functionality
+			insertTag.onclick = function() {
+				div.className+=" active";
+				input.className+=" active";
+				input.focus();
+				text_tag.innerHTML = "&nbsp;";
+			};
+			input.onblur = function() {
+				div.className = "search-container";
+				input.className = "search-input";
+				text_tag.innerHTML = name;
+
+				search_fnc(searchindex, input.value);
+			};
+			input.onkeyup = function(e) {
+				if(e.keyCode!=13)return;
+				search_fnc(searchindex, input.value);
+			};
+
+			search.appendChild(div);
+			insertTag.appendChild(search);
+		}
+
+
+		insertTag.appendChild(text_tag);
+	}
+
+	self.Map_Choice = function(__choice)
+	{
+		__map_choice = __choice;
+	};
 	self.Open_Level_Select = function()
 	{
 		if(game)return;
-		Menu.LevelSelect.Activate();
-		Menu.LevelSelect.Prep(1);
-		socket.emit('gamedata get', {}, 0, 5);
-		document.getElementById("mainMenu").style.display="none";
 		self.Close_Menu();
-		self.Set_Controls(document.getElementById("inputHandler"));
-		self.Allow_Controls(true);
-		self.Display_Menu(Menu.LevelSelect);
+
+		Map_Data.All_Data = [];
+		Map_Data.Next_Search = [];
+		__map_game_setup = true;
+
+		let third1 = document.getElementById("third-1");
+		let third2 = document.getElementById("third-2");
+		let third3 = document.getElementById("third-3");
+
+		for(let i=0;i<third1.childNodes.length;)
+			third1.removeChild(third1.childNodes[0]);
+		for(let i=0;i<third2.childNodes.length;)
+			third2.removeChild(third2.childNodes[0]);
+		for(let i=0;i<third3.childNodes.length;)
+			third3.removeChild(third3.childNodes[0]);
+
+		makeList(third1, "Free Maps", true, 0);
+		makeList(third2, "Recent Uploads");
+		makeList(third3, "Search", true, 2);
+
+		Map_Data.Next_Search.push(0);
+		socket.emit('gamedata get', {mapowner:'freemaps'}, 0, 5);
+		Map_Data.Next_Search.push(1);
+		socket.emit('gamedata get', {}, 0, 5);
 	};
 	self.Open_Story = function()
 	{
 		if(game)return;
-		///COME BACK
-		Menu.StoryScreen.Prep(0);
-		Menu.StoryScreen.Load();
-		Menu.StoryScreen.Prep(1);
-		Menu.StoryScreen.Load();
-		Menu.StoryScreen.Prep(2);
-		Menu.StoryScreen.Load();
-		document.getElementById("mainMenu").style.display="none";
 		self.Close_Menu();
-		self.Set_Controls(document.getElementById("inputHandler"));
-		self.Allow_Controls(true);
-		self.Display_Menu(Menu.StoryScreen);
+
+		Map_Data.All_Data = [];
+		Map_Data.Next_Search = [];
+		__map_game_setup = false;
+
+		let third1 = document.getElementById("third-1");
+		let third2 = document.getElementById("third-2");
+		let third3 = document.getElementById("third-3");
+
+		for(let i=0;i<third1.childNodes.length;)
+			third1.removeChild(third1.childNodes[0]);
+		for(let i=0;i<third2.childNodes.length;)
+			third2.removeChild(third2.childNodes[0]);
+		for(let i=0;i<third3.childNodes.length;)
+			third3.removeChild(third3.childNodes[0]);
+
+		makeList(third1, "U vs The World");
+		makeList(third2, "Ancient Europe");
+		makeList(third3, "Han Dynasty");
+
+		let __unlocked_data = Levels.Current();
+		let __data = new Array(__unlocked_data.length);
+
+		for(let i=0;i<__data.length;i++)
+		{
+			__data[i] = new Array(__unlocked_data[i]);
+			for (let j=0;j<__unlocked_data[i];j++) {
+				__data[i][j] = {game:Levels.Data(i, j), name:null};
+			}
+		}
+
+		Map_Data.Next_Search.push(0);
+		Map_Data.Next_Search.push(1);
+		Map_Data.Next_Search.push(2);
+		self.Update_Map_Search(__data[0]);
+		self.Update_Map_Search(__data[1]);
+		self.Update_Map_Search(__data[2]);
 	};
+	self.Open_Game = function()
+	{
+		let DATA = Map_Data.All_Data[__map_choice.substring(0, __map_choice.length-1)][parseInt(__map_choice.charAt(__map_choice.length-1))];
+
+		if(__map_game_setup)
+		{
+			let gameName = "";
+			while(gameName=="")gameName = prompt("Name the game ");
+			if(!gameName)return;
+			changeContent("GAME PLAY", gameName);
+			new_custom_game(DATA, gameName);
+			return;
+		}
+
+		let section = 0;
+		for(let index in Map_Data.All_Data)
+		{
+			if(__map_choice.substring(0, __map_choice.length-1)==index)
+				break;
+			section++;
+		}
+		changeContent("GAME PLAY", DATA.Name);
+		new_custom_game(DATA, DATA.Name, true, null, Levels.Current()[section]==parseInt(__map_choice.charAt(__map_choice.length-1))+1 ? 2 : 3, section);
+	};
+
+
 	self.Open_Unit_Create_Menu = function(player, resources, onBuildFnc, onCloseFnc)
 	{
 		if(player.Game.Client_Player()!=player)return;

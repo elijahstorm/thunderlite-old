@@ -511,8 +511,6 @@ window.onload = function(){
 	if(window.parent)socket = window.parent.socket;
 	if(socket)online = true;
 
-	document.getElementById("gameLogo").src = "img/Logo "+(window.parent.mobilecheck() ? "Mobile" : "Desktop")+".png";
-
 	// game setup
 	FRAMERATEDISPLAY = document.getElementById("frames");
 	FRAMERATEDISPLAY.value = 0;
@@ -564,43 +562,6 @@ window.onload = function(){
 	HUD_Display = Canvas.Create_Canvas(hudCanvas, "hud");
 
 			/// LOAD FREE MAPS DATA
-	Menu.LevelSelect.Set_Scroller(function(){
-		let g_list = new Array();
-		let list_painter = function(x, y, left, top, w, h, zoom)
-		{
-			if(g_list[y][x]==null)return;
-			g_list[y][x].Y.Set(top+draw_top);
-			if(top<0)
-			{
-				g_list[y][x].Alpha.Set(1+(top/draw_height));
-				return;
-			}
-			if(top>450)
-			{
-				g_list[y][x].Alpha.Set(1-((top%draw_height)/draw_height));
-				return;
-			}
-			g_list[y][x].Alpha.Set(1);
-		};
-
-		let g_list_display = new Tiling;
-		g_list_display.setup(600, 5*draw_height, 3*draw_width, Math.max(Math.max(ground_index, air_index), sea_index)*draw_height, draw_width, draw_height);
-
-		let g_list_scroller = new Scroller(function(left, top, zoom)
-		{
-			top/=TILESIZE;
-			top*=draw_height;
-			g_list_display.render(left, top, zoom, list_painter);
-		}, {
-			locking:false,
-			zooming:false
-		});
-
-		g_list_scroller.setDimensions(draw_width, 80, 4, (Math.max(Math.max(ground_index, air_index), sea_index)-5)*TILESIZE);
-
-		scroller = g_list_scroller;
-	});
-	socket.emit('gamedata get', {mapowner:'freemaps'}, 0, 5);
 	socket.emit('userdata get', "progress");
 
 	if(window.parent.mobilecheck())
@@ -643,7 +604,6 @@ window.onload = function(){
 		onInterfaceLoadedList[i](INTERFACE);
 	}
 	onInterfaceLoadedList = null;
-	document.getElementById('overlay').style.display = 'none';
 	document.getElementById("menuButton").onclick = function(){
 		if(!confirm("Are you sure?\nYou will lose all current progress"))
 			return;
@@ -662,7 +622,13 @@ window.onload = function(){
 	Canvas.Reflow();
 	Canvas.Next_Tick();
 
-	mainMenu();
+	changeContent("MULTIPLAYER");
+
+	if(MUSIC!=Music.Retrieve("intro"))
+	{
+		Music.Stop_All();
+		MUSIC = Music.Retrieve("intro").Play();
+	}
 };
 
 var INTERFACE;
@@ -687,8 +653,8 @@ function decrypt_game_data(data)
 	return encrypted;
 }
 
-function init_map(map, players, game_id, skip_pregame, offline_game){
-	document.getElementById("mainMenu").style.display="none";
+function init_map(map, players, game_id, skip_pregame, offline_game)
+{
 	var Game = new Engine_Class(map);
 	if(offline_game!=null)
 	if(offline_game[0])
@@ -784,7 +750,6 @@ function new_custom_game(game_data, name, skippingLobby, save_data_index, story_
 	}
 }
 function load_game(gameData){
-	document.getElementById("mainMenu").style.display="none";
 	var Game = new Engine_Class(gameData);
 	if(!Game.valid)return;
 	INTERFACE.Close_Menu();
@@ -798,14 +763,7 @@ function load_game(gameData){
 	Game.Start();
 }
 
-function openLevelSelect(){
-	INTERFACE.Open_Level_Select();
-}
-function openStory(){
-	INTERFACE.Open_Story();
-}
 function openMapEditor(game_data, data_index, testing_won){
-	document.getElementById("mainMenu").style.display="none";
 	INTERFACE.Close_Menu();
 	INTERFACE.Set_Controls(document.getElementById("inputHandler"));
 	INTERFACE.Allow_Controls(true);
@@ -814,6 +772,45 @@ function openMapEditor(game_data, data_index, testing_won){
 	Menu.MapEditor.Open();
 	Menu.MapEditor.New(data_index, game_data, testing_won);
 	INTERFACE.Display_Menu(Menu.MapEditor);
+}
+
+function changeContent(choice, title) {
+	if(INTERFACE.Game!=null)
+	{
+		let ans = confirm("This will exit the game. Are you sure?");
+		if(!ans)return;
+		INTERFACE.Game.End_Game();
+	}
+
+	document.getElementById("GAMECONTENT").style.display = "none";
+	document.getElementById("MAPSELECTION").style.display = "none";
+	document.getElementById("CONTACT").style.display = "none";
+
+	switch (choice) {
+		case "MULTIPLAYER":
+			document.getElementById("MAPSELECTION").style.display = "inline";
+			document.getElementById("CONTENT_TITLE").innerHTML = "Multiplayer";
+			INTERFACE.Open_Level_Select();
+			break;
+		case "STORY":
+			document.getElementById("MAPSELECTION").style.display = "inline";
+			document.getElementById("CONTENT_TITLE").innerHTML = "Story";
+			INTERFACE.Open_Story();
+			break;
+		case "GAME PLAY":
+			document.getElementById("GAMECONTENT").style.display = "inline";
+			document.getElementById("CONTENT_TITLE").innerHTML = title;
+			break;
+		case "MAP EDITOR":
+			document.getElementById("GAMECONTENT").style.display = "inline";
+			document.getElementById("CONTENT_TITLE").innerHTML = "Map Editor";
+			openMapEditor();
+			break;
+		case "CONTACT US":
+			document.getElementById("CONTACT").style.display = "inline";
+			document.getElementById("CONTENT_TITLE").innerHTML = "Contact Us";
+			break;
+	}
 }
 
 function mainMenu(){
@@ -836,18 +833,9 @@ function mainMenu(){
 		MUSIC = Music.Retrieve("intro").Play();
 	}
 
-	document.getElementById("mainMenu").style.display="block";
 	window.parent.openLobby();
-	var elements = getElementsByClass("btn_super","div");
-	for(var i=0;i<elements.length;i++)
-	{
-		elements[i].style.display = "block";
-	}
-	elements = getElementsByClass("sub_menu","div");
-	for(var i=0;i<elements.length;i++)
-	{
-		elements[i].style.display = "none";
-	}
+
+	changeContent("MULTIPLAYER");
 }
 
 var paused = false;

@@ -307,7 +307,7 @@ window.onload = function(){
 		}
 		else if(data.type==501)
 		{	// map index does not exist
-			game.LOG.add("We could not find any of the maps that you were looking for. Try changing your search");
+			alert("We could not find any of the maps that you were looking for. Try changing your search");
 		}
 		else if(data.type==502)
 		{	// recieved game data
@@ -320,7 +320,7 @@ window.onload = function(){
 		}
 		else if(data.type==503)
 		{	// recieved a list of game data that matched the query
-			game.Menu.LevelSelect.Update_Map_Search(data.data);
+			game.INTERFACE.Update_Map_Search(data.data);
 		}
 		else if(data.type==504)
 		{	// report total unlocked story levels
