@@ -311,7 +311,7 @@ window.onload = function(){
 		}
 		else if(data.type==502)
 		{	// UNUSED
-
+			game.LOG.popup("Unsed, Server Status 502");
 		}
 		else if(data.type==503)
 		{	// recieved a list of game data that matched the query

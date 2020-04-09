@@ -917,19 +917,15 @@ io.on('connection', function(socket){
 	});
 	socket.on('gamedata get', function(sort_by, start_index, end_amt, userSearch){
 		sort_by.PUBLISHED = true;
-
-console.log(sort_by);
-
-		for(let i in sort_by)
-		{	/// let users search for things that just contain and aren't exact matches
-			if(sort_by[i].charAt==null)continue;
-			if(sort_by[i].charAt(0)=="^")
-			{
-				sort_by[i] = RegExp(".*" + sort_by[i].substring(1, sort_by[i].length) + ".*")
-			}
+			/// let users search for things that just contain and aren't exact matches
+		if(sort_by.mapowner!=null)
+		if(sort_by.mapowner.charAt(0)=="^")
+		{
+			sort_by.mapowner = RegExp(".*"+sort_by.mapowner.substring(1, sort_by.mapowner.length)+".*");
 		}
-
-console.log(sort_by);
+		let _search_name = sort_by.mapdata;
+		if(_search_name!=null)
+			sort_by.mapdata = null;
 
 		db.gamedata.find(sort_by, function(err, data){
 			if(err){
@@ -937,7 +933,35 @@ console.log(sort_by);
 				return;
 			}
 			if(data.length==0){
-				socket.send({type:501});
+				if(sort_by.mapowner==null)
+				{
+					socket.send({type:501});
+					return;
+				}
+				sort_by.mapdata = RegExp(".*" + _search_name + ".*");
+				sort_by.mapowner = null;
+				db.gamedata.find(sort_by, function(err, data){
+					if(err){
+						socket.send({type:500});
+						return;
+					}
+					if(data.length==0){
+						socket.send({type:501});
+						return;
+					}
+					let arr = new Array();
+
+					for(let i=0;i<end_amt && i<data.length;i++)
+					{
+						data[i]
+						arr.push({
+							game:data[i].mapdata,
+							name:data[i].mapowner
+						});
+					}
+
+					socket.send({type:503, data:arr});
+				});
 				return;
 			}
 			let arr = new Array();

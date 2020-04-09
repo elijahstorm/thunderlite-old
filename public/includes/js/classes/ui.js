@@ -1649,29 +1649,32 @@ var Interface_Class = function()
 
 	let __map_choice = "", __map_img;
 	let __map_game_setup = false;
-	let last_q, query_type = 2;
+	let last_q, query_type = 0;
 	let search_fnc = function(index, query)
 	{
 		if(last_q==query)
 			return;
-		if(query.length==0)
-			return;
+		if(query.length<=2)
+			return 1;
 		if(query.includes("'") || query.includes('"'))
-			return;
+			return 2;
 		if(query.includes(".") || query.includes(';'))
-			return;
+			return 2;
+		if(query.includes('\\') || query.includes('\/'))
+			return 2;
 
+		function escapeRegExp(string){
+			return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+		}
 		last_q = query;
 		let QUERY = {};
 		switch (query_type) {
 			case 0:
-				QUERY.mapowner = "^"+query;
+				QUERY.mapowner = "^"+escapeRegExp(query);
+				QUERY.mapdata = escapeRegExp(encrypt_game_data(query));
 				break;
 			case 1:
-				QUERY.Map_Id = query;
-				break;
-			case 2:
-				QUERY.mapname = "^"+query;
+				QUERY.Map_Id = query.replace(/-/g, "").replace(/ /g, "");
 				break;
 			default:
 				return;
@@ -1735,7 +1738,16 @@ var Interface_Class = function()
 			};
 			input.onkeyup = function(e) {
 				if(e.keyCode!=13)return;
-				search_fnc(searchindex, input.value);
+
+				let ER_CHECK = search_fnc(searchindex, input.value);
+				if(ER_CHECK==1)
+				{
+					LOG.popup("Search too short!");
+				}
+				if(ER_CHECK==2)
+				{
+					LOG.popup("Cannot search for some of those special characters");
+				}
 			};
 
 			search.appendChild(div);
