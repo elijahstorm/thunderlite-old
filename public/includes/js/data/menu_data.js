@@ -1789,7 +1789,6 @@ Menu.PreGame.AddStarter = function(mapName){
 	START.id = "HOSTGAMESTART";
 	START.innerHTML = INTERFACE.Game.Full() ? "Start Game" : "Start with AI";
 	START.onclick = function(){
-		changeContent("GAME PLAY", mapName);
 		INTERFACE.Game.Host_Game(socket.game_id);
 	};
 	START.className = "w3-button w3-block w3-black w3-margin-bottom";
@@ -1798,7 +1797,7 @@ Menu.PreGame.AddStarter = function(mapName){
 Menu.PreGame.Set = function(index,value){
 	if(index>=this.Slots.length)return;
 
-	document.getElementById("HOSTGAMEPLAYERLIST"+index).innerHTML = value;
+	document.getElementById("HOSTGAMEPLAYERLIST"+index).innerHTML = value=="" ? "---" : value;
 	this.Slots[index] = value;
 
 	if(document.getElementById("HOSTGAMESTART")==null)return;

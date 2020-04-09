@@ -47,7 +47,7 @@
 <div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
 
 <!-- !PAGE CONTENT! -->
-<div class="w3-main" style="margin-left:300px">
+<div class="w3-main" id="game-margin-content" style="margin-left:300px">
 
   <!-- Push down content on small screens -->
   <div class="w3-hide-large" style="margin-top:83px"></div>
@@ -99,7 +99,7 @@
 			<div class="canvas" id="moveUnitCanvas" style="width:600px;height:600px;"></div>
 			<div class="canvas" id="weatherCanvas" style="width:600px;height:600px;"></div>
 			<div class="canvas" id="animationCanvas" style="width:600px;height:600px;"></div>
-			<div class="canvas" id="hudCanvas" style="width:810px;height:665px;"></div>
+			<div class="canvas" id="hudCanvas" style="width:600px;height:600px;"></div>
 			<div class="canvas" id="overlayCanvas" style="width:600px;height:600px;"></div>
 			<div class="canvas" id="dialogCanvas" style="width:600px;height:600px;"></div>
 			<div class="canvas" id="devCanvas" style="width:600px;height:600px;"></div>
@@ -156,7 +156,7 @@
 					<div id="HOSTGAMERULES" class="w3-third" style="width:100%" >
 						<h3 class="w3-center">Game Rules</h3>
 						<b>
-							<ul style="list-style-type:none" >
+							<ul id="game-options-list" style="list-style-type:none" >
 								<li class="INFO-LIST">
 									Weather
 								</li>

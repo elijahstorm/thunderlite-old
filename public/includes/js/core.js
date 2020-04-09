@@ -83,13 +83,21 @@ var LOG = {
 		LOG.container.appendChild(POPUP);
 		POPUP.addEventListener('click', function() {
 			POPUP.style.opacity = '0';
-			POPUP.style.transform =  "translate(0, -200px)";
+			POPUP.style.transform =  "translate(-300px, 0px)";
+		});
+		let exitOnce = false;
+		POPUP.addEventListener('mouseover', function() {
+			if(exitOnce)return;
+			setTimeout(function() {
+				POPUP.style.opacity = '0';
+				POPUP.style.transform =  "translate(-300px, 0px)";
+			}, 2000);
 		});
 		POPUP.addEventListener('transitionend', () => POPUP.remove());
 		if(LOG.first_popup)
 		{
 			LOG.first_popup = false;
-			LOG.popup("Click to remove logs");
+			LOG.popup("Click to remove logs. Moving your mouse over a log will remove it after two seconds.");
 		}
 	},
 	first_popup:true
@@ -793,8 +801,6 @@ function new_custom_game(game_data, game_setup, skippingLobby, save_data_index, 
 
 	if(online){
 		socket.emit("open", data.id, game_setup[0], data.Player_Amount());
-		window.parent.lobby.contentWindow.add_game(game_setup[0],data.Map,data.id,true);
-		window.parent.lobby.contentWindow._openGames.add();
 	}
 }
 function load_game(gameData){
@@ -809,6 +815,38 @@ function load_game(gameData){
 	Canvas.Start_All();
 	gameInProgress = true;
 	Game.Start();
+}
+function join_game(data)
+{
+	let GAME = Map_Reader.Read(decrypt_game_data(data.map));
+
+	let sampledGame = new Engine_Class(GAME, true);
+	sampledGame.Set_Interface(INTERFACE);
+	sampledGame.FORCE_MERGE_DISPLAY = true;
+	imageHolderCanvas.clearRect(0, 0, 900, 900);
+	worldCanvas.clearRect(0, 0, 900, 900);
+	let _game_imgs = INTERFACE.Get_Sample(sampledGame);
+	imageHolderCanvas.clearRect(0, 0, 900, 900);
+	worldCanvas.clearRect(0, 0, 900, 900);
+
+		///** Create and draw image **//
+	let canvas = document.createElement("canvas");
+	canvas.width = 600;
+	canvas.height = 600;
+	let ctx = canvas.getContext("2d");
+
+	Canvas.ScaleImageData(ctx, _game_imgs, 0, 0, 10/sampledGame.Terrain_Map.Width, 10/sampledGame.Terrain_Map.Height);
+	sampledGame.End_Game();
+
+	ctx.globalAlpha = 1;
+	Shape.Box.Draw(ctx,0,0,600,600,"#73877B");
+
+	let img = document.createElement("img");
+	img.src = canvas.toDataURL("image/png");
+
+	changeContent("HOST GAME", [GAME.Name, img.src]);
+
+	init_map(GAME, data.players, data.game);
 }
 
 function openMapEditor(game_data, data_index, testing_won){
@@ -836,41 +874,50 @@ function changeContent(choice, title) {
 	document.getElementById("GAMELOBBY").style.display = "none";
 	document.getElementById("HOSTNEWGAME").style.display = "none";
 	document.getElementById("ENDGAME").style.display = "none";
+	document.getElementById("game-margin-content").style.marginLeft = "300px";
+	document.getElementById("mySidebar").style.left = "0px";
+	window.parent.document.getElementById("container").style.maxWidth = "";
+	window.parent.document.getElementById("container").style.maxHeight = "";
 
 	switch (choice) {
 		case "MULTIPLAYER":
-			document.getElementById("MAPSELECTION").style.display = "inline";
+			document.getElementById("MAPSELECTION").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = "Multiplayer";
 			INTERFACE.Open_Level_Select();
 			break;
 		case "STORY":
-			document.getElementById("MAPSELECTION").style.display = "inline";
+			document.getElementById("MAPSELECTION").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = "Story";
 			INTERFACE.Open_Story();
 			break;
 		case "GAME PLAY":
-			document.getElementById("GAMECONTENT").style.display = "inline";
+			document.getElementById("GAMECONTENT").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = title;
+			document.getElementById("game-margin-content").style.marginLeft = "0px";
+			document.getElementById("mySidebar").style.left = "-300px";
+			window.parent.document.getElementById("container").style.maxWidth = "810px";
+			window.parent.document.getElementById("container").style.maxHeight = "665px";
+			break;
 		case "GAME LOBBY":
-			document.getElementById("GAMELOBBY").style.display = "inline";
+			document.getElementById("GAMELOBBY").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = "Online Lobby";
 			break;
 		case "HOST GAME":
-			document.getElementById("HOSTNEWGAME").style.display = "inline";
+			document.getElementById("HOSTNEWGAME").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = title[0];
 			document.getElementById("HOSTGAMEIMG").src = title[1];
 			break;
 		case "END GAME":
-			document.getElementById("ENDGAME").style.display = "inline";
+			document.getElementById("ENDGAME").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = title;
 			break;
 		case "MAP EDITOR":
-			document.getElementById("GAMECONTENT").style.display = "inline";
+			document.getElementById("GAMECONTENT").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = "Map Editor";
 			openMapEditor();
 			break;
 		case "CONTACT US":
-			document.getElementById("CONTACT").style.display = "inline";
+			document.getElementById("CONTACT").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = "Contact Us";
 			break;
 	}
@@ -886,8 +933,6 @@ function mainMenu(){
 			var ctx = Canvas.Contexts[i];
 			ctx.clearRect(0, 0, ctx.width, ctx.height);
 		}
-		backCanvas.fillStyle = "#77a8bc";
-		backCanvas.fillRect(0,0,Canvas.Width,Canvas.Height);
 	});
 	INTERFACE.Close_Menu();
 	if(MUSIC!=Music.Retrieve("intro"))

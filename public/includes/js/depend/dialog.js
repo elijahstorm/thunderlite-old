@@ -9,7 +9,7 @@ function Dialog_Class(canvas)
 	this.canvas = canvas;
 	let disp_X = INTERFACE.IS_MOBILE_GAME ? 10 : 30,
 		disp_Y = INTERFACE.IS_MOBILE_GAME ? 30 : 40,
-		disp_W = INTERFACE.IS_MOBILE_GAME ? 505 : 550,
+		disp_W = INTERFACE.IS_MOBILE_GAME ? 500 : 500,
 		disp_H = INTERFACE.IS_MOBILE_GAME ? 100 : 115,
 		maxTextWidth = INTERFACE.IS_MOBILE_GAME ? 35 : 45,
 		maxTextHeight = INTERFACE.IS_MOBILE_GAME ? 150 : 200,

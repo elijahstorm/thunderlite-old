@@ -244,7 +244,7 @@ window.onload = function(){
 		}
 		else if(data.type==21)
 		{	// setup game to play
-			game.init_map(game.Map_Reader.Read(game.decrypt_game_data(data.map)), data.players, data.game);
+			game.join_game(data);
 		}
 		else if(data.type==22)
 		{	// starting game
@@ -534,7 +534,7 @@ function openChat(){
 		lobby = game.document.getElementById("lobbyFrame");
 	}
 	lobby_open = false;
-	document.getElementById("refreshLobby").href = "chat.html";
+	// document.getElementById("refreshLobby").href = "chat.html";
 	// lobby.src = "chat.html";
 }
 
@@ -568,6 +568,7 @@ function join_game(game_id){
 		game.INTERFACE.Game.End_Game(false);
 	}
 	socket.emit('join', game_id);
+	game.changeContent();
 }
 
 function timestamp(){

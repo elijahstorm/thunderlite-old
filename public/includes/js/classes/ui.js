@@ -50,16 +50,16 @@ var Interface_Class = function()
 		terrain_disp.setup(600, 600, game.Terrain_Map.Width*TILESIZE, game.Terrain_Map.Height*TILESIZE, TILESIZE, TILESIZE);
 		return 0;
 	};
-	self.Slide_Up = HUD_Display.Add_Drawable(Shape.Rectangle, "up", 100, 0, 400, 20, "#FF0", Canvas.Clear, 0);
-	self.Slide_Down = HUD_Display.Add_Drawable(Shape.Rectangle, "down", 100, 580, 400, 20, "#FF0", Canvas.Clear, 0);
-	self.Slide_Left = HUD_Display.Add_Drawable(Shape.Rectangle, "left", 0, 100, 20, 400, "#FF0", Canvas.Clear, 0);
-	self.Slide_Right = HUD_Display.Add_Drawable(Shape.Rectangle, "right", 580, 100, 20, 400, "#FF0", Canvas.Clear, 0);
+	// self.Slide_Up = HUD_Display.Add_Drawable(Shape.Rectangle, "up", 100, 0, 400, 20, "#FF0", Canvas.Clear, 0);
+	// self.Slide_Down = HUD_Display.Add_Drawable(Shape.Rectangle, "down", 100, 580, 400, 20, "#FF0", Canvas.Clear, 0);
+	// self.Slide_Left = HUD_Display.Add_Drawable(Shape.Rectangle, "left", 0, 100, 20, 400, "#FF0", Canvas.Clear, 0);
+	// self.Slide_Right = HUD_Display.Add_Drawable(Shape.Rectangle, "right", 580, 100, 20, 400, "#FF0", Canvas.Clear, 0);
 	function overSliders(x,y)
 	{
-		if(Canvas.overlappingDrawable(self.Slide_Up,x,y))return 0;
-		if(Canvas.overlappingDrawable(self.Slide_Down,x,(y*self.gameYScale+(TILESIZE*10-gameHeight))))return 1;
-		if(Canvas.overlappingDrawable(self.Slide_Left,x,y))return 2;
-		if(Canvas.overlappingDrawable(self.Slide_Right,(x*self.gameXScale+(TILESIZE*10-gameWidth)),y))return 3;
+		// if(Canvas.overlappingDrawable(self.Slide_Up,x,y))return 0;
+		// if(Canvas.overlappingDrawable(self.Slide_Down,x,(y*self.gameYScale+(TILESIZE*10-gameHeight))))return 1;
+		// if(Canvas.overlappingDrawable(self.Slide_Left,x,y))return 2;
+		// if(Canvas.overlappingDrawable(self.Slide_Right,(x*self.gameXScale+(TILESIZE*10-gameWidth)),y))return 3;
 		return -1;
 	}
 	var hovered_dir = [false,false,false,false];
@@ -132,68 +132,87 @@ var Interface_Class = function()
 		var zoomedTile = TILESIZE;
 		var left = null; // true if overflow, false if overflow in opposite direction
 		var overlay = "rgba(0, 0, 0, 0.45)";
+
+		let paintOffWidth = gameWidth;
+		if(paintOffWidth<600)
+		{
+			paintOffWidth+=210;
+		}
+		let paintOffHeight = gameHeight;
+		if(paintOffHeight<600)
+		{
+			paintOffHeight+=65;
+		}
+
+			// paint left
 		if(mapX==0&&drawX>0){
 			for(var lastDrawLeft=drawX,i=1;lastDrawLeft>0;i++,lastDrawLeft-=zoomedTile){
 				at = game.Paint_Off_Map[mapX+self.Outside_Map-Math.min(i, outside)][mapY];
-				at.UI_Draw(backCanvas, lastDrawLeft-zoomedTile, drawY, true);
-				backCanvas.fillStyle = overlay;
-				backCanvas.fillRect(lastDrawLeft-zoomedTile, drawY, zoomedTile, zoomedTile);
+				at.UI_Draw(worldCanvas, lastDrawLeft-zoomedTile, drawY, true);
+				worldCanvas.fillStyle = overlay;
+				worldCanvas.fillRect(lastDrawLeft-zoomedTile, drawY, zoomedTile, zoomedTile);
 			}
 			left = true;
 		}
-		else if(mapX+1==game.Terrain_Map.Width&&drawX+zoomedTile<gameWidth){
-			for(var lastDrawLeft=drawX+zoomedTile,i=1;lastDrawLeft<gameWidth;i++,lastDrawLeft+=zoomedTile){
+
+			// paint right
+		else if(mapX+1==game.Terrain_Map.Width&&drawX+zoomedTile<paintOffWidth){
+			for(var lastDrawLeft=drawX+zoomedTile,i=1;lastDrawLeft<paintOffWidth;i++,lastDrawLeft+=zoomedTile){
 				at = game.Paint_Off_Map[mapX+self.Outside_Map+Math.min(i, outside)][mapY];
-				at.UI_Draw(backCanvas, lastDrawLeft, drawY, true);
-				backCanvas.fillStyle = overlay;
-				backCanvas.fillRect(lastDrawLeft, drawY, zoomedTile, zoomedTile);
+				at.UI_Draw(worldCanvas, lastDrawLeft, drawY, true);
+				worldCanvas.fillStyle = overlay;
+				worldCanvas.fillRect(lastDrawLeft, drawY, zoomedTile, zoomedTile);
 			}
 			left = false;
 		}
+
+			// paint up
 		if(mapY==0&&drawY>0){
 			for(var lastDrawTop=drawY,i=1;lastDrawTop>0;i++,lastDrawTop-=zoomedTile){
 				at = game.Paint_Off_Map[mapX][mapY+self.Outside_Map-Math.min(i, outside)];
-				at.UI_Draw(backCanvas, drawX, lastDrawTop-zoomedTile, true);
-				backCanvas.fillStyle = overlay;
-				backCanvas.fillRect(drawX, lastDrawTop-zoomedTile, zoomedTile, zoomedTile);
+				at.UI_Draw(worldCanvas, drawX, lastDrawTop-zoomedTile, true);
+				worldCanvas.fillStyle = overlay;
+				worldCanvas.fillRect(drawX, lastDrawTop-zoomedTile, zoomedTile, zoomedTile);
 				if(left==null)continue;
 				if(left){
 					for(var lastDrawLeft=drawX,j=1;lastDrawLeft>0;j++,lastDrawLeft-=zoomedTile){
 						at = game.Paint_Off_Map[mapX+self.Outside_Map-Math.min(j, outside)][mapY+self.Outside_Map-Math.min(i, outside)];
-						at.UI_Draw(backCanvas, lastDrawLeft-zoomedTile, lastDrawTop-zoomedTile, true);
-						backCanvas.fillStyle = overlay;
-						backCanvas.fillRect(lastDrawLeft-zoomedTile, lastDrawTop-zoomedTile, zoomedTile, zoomedTile);
+						at.UI_Draw(worldCanvas, lastDrawLeft-zoomedTile, lastDrawTop-zoomedTile, true);
+						worldCanvas.fillStyle = overlay;
+						worldCanvas.fillRect(lastDrawLeft-zoomedTile, lastDrawTop-zoomedTile, zoomedTile, zoomedTile);
 					}
 				}else{
 					for(var lastDrawLeft=drawX+zoomedTile,j=1;lastDrawLeft<gameWidth;j++,lastDrawLeft+=zoomedTile){
 						at = game.Paint_Off_Map[mapX+self.Outside_Map+Math.min(j, outside)][mapY+self.Outside_Map-Math.min(i, outside)];
-						at.UI_Draw(backCanvas, lastDrawLeft, lastDrawTop-zoomedTile, true);
-						backCanvas.fillStyle = overlay;
-						backCanvas.fillRect(lastDrawLeft, lastDrawTop-zoomedTile, zoomedTile, zoomedTile);
+						at.UI_Draw(worldCanvas, lastDrawLeft, lastDrawTop-zoomedTile, true);
+						worldCanvas.fillStyle = overlay;
+						worldCanvas.fillRect(lastDrawLeft, lastDrawTop-zoomedTile, zoomedTile, zoomedTile);
 					}
 				}
 			}
 		}
-		else if(mapY+1==game.Terrain_Map.Height&&drawY+zoomedTile<gameHeight){
-			for(var lastDrawTop=drawY+zoomedTile,i=1;lastDrawTop<gameHeight;i++,lastDrawTop+=zoomedTile){
+
+			// paint down
+		else if(mapY+1==game.Terrain_Map.Height&&drawY+zoomedTile<paintOffHeight){
+			for(var lastDrawTop=drawY+zoomedTile,i=1;lastDrawTop<paintOffHeight;i++,lastDrawTop+=zoomedTile){
 				at = game.Paint_Off_Map[mapX][mapY+self.Outside_Map+Math.min(i, outside)];
-				at.UI_Draw(backCanvas, drawX, lastDrawTop, true);
-				backCanvas.fillStyle = overlay;
-				backCanvas.fillRect(drawX, lastDrawTop, zoomedTile, zoomedTile);
+				at.UI_Draw(worldCanvas, drawX, lastDrawTop, true);
+				worldCanvas.fillStyle = overlay;
+				worldCanvas.fillRect(drawX, lastDrawTop, zoomedTile, zoomedTile);
 				if(left==null)continue;
 				if(left){
 					for(var lastDrawLeft=drawX,j=1;lastDrawLeft>0;j++,lastDrawLeft-=zoomedTile){
 						at = game.Paint_Off_Map[mapX+self.Outside_Map-Math.min(j, outside)][mapY+self.Outside_Map+Math.min(i, outside)];
-						at.UI_Draw(backCanvas, lastDrawLeft-zoomedTile, lastDrawTop, true);
-						backCanvas.fillStyle = overlay;
-						backCanvas.fillRect(lastDrawLeft-zoomedTile, lastDrawTop, zoomedTile, zoomedTile);
+						at.UI_Draw(worldCanvas, lastDrawLeft-zoomedTile, lastDrawTop, true);
+						worldCanvas.fillStyle = overlay;
+						worldCanvas.fillRect(lastDrawLeft-zoomedTile, lastDrawTop, zoomedTile, zoomedTile);
 					}
 				}else{
 					for(var lastDrawLeft=drawX+zoomedTile,j=1;lastDrawLeft<gameWidth;j++,lastDrawLeft+=zoomedTile){
 						at = game.Paint_Off_Map[mapX+self.Outside_Map+Math.min(j, outside)][mapY+self.Outside_Map+Math.min(i, outside)];
-						at.UI_Draw(backCanvas, lastDrawLeft, lastDrawTop, true);
-						backCanvas.fillStyle = overlay;
-						backCanvas.fillRect(lastDrawLeft, lastDrawTop, zoomedTile, zoomedTile);
+						at.UI_Draw(worldCanvas, lastDrawLeft, lastDrawTop, true);
+						worldCanvas.fillStyle = overlay;
+						worldCanvas.fillRect(lastDrawLeft, lastDrawTop, zoomedTile, zoomedTile);
 					}
 				}
 			}
@@ -263,12 +282,12 @@ var Interface_Class = function()
 		if(!allow_render)return;
 		self.zoom = zoom;
 		backCanvas.fillStyle = "#3C6BBE";
-		backCanvas.fillRect(0, 0, 600, 600);
+		backCanvas.fillRect(0, 0, 810, 665);
+		worldCanvas.clearRect(0, 0, 600, 600);
 		devCanvas.clearRect(0,0,600,600);
 		hudCanvas.clearRect(0,0,600,600);
 		tileCanvas.clearRect(0,0,600,600);
 		uiCanvas.clearRect(0,0,600,600);
-		worldCanvas.clearRect(0,0,600,600);
 		terrainCanvas.clearRect(0,0,600,600);
 		buildingCanvas.clearRect(0,0,600,600);
 		charCanvas.clearRect(0,0,600,600);
@@ -1184,6 +1203,7 @@ var Interface_Class = function()
 				HUD_Avoid_Mouse.Switch_X();
 				if(HUD_Avoid_Mouse.idle_time>HUD_Avoid_Mouse.time_without_interaction)
 				{
+					if(gameWidth>=600)return;
 					if(_avatar.style.opacity>0.3)
 					{
 						_avatar.style.opacity-=.035;
@@ -1218,14 +1238,14 @@ var Interface_Class = function()
 				if(scroller.getValues().top!=0)
 				{
 					hovered_dir[0] = true;
-					self.Slide_Up.Alpha.Set(1);
+					// self.Slide_Up.Alpha.Set(1);
 					return;
 				}
 			}
 			else if(hovered_dir[0])
 			{
 				hovered_dir[0] = false;
-				self.Slide_Up.Alpha.Set(0);
+				// self.Slide_Up.Alpha.Set(0);
 			}
 			if(dir==1)
 			{
@@ -1233,14 +1253,14 @@ var Interface_Class = function()
 				if(scroller.getValues().top!=scroller.getScrollMax().top)
 				{
 					hovered_dir[1] = true;
-					self.Slide_Down.Alpha.Set(1);
+					// self.Slide_Down.Alpha.Set(1);
 					return;
 				}
 			}
 			else if(hovered_dir[1])
 			{
 				hovered_dir[1] = false;
-				self.Slide_Down.Alpha.Set(0);
+				// self.Slide_Down.Alpha.Set(0);
 			}
 			if(dir==2)
 			{
@@ -1248,14 +1268,14 @@ var Interface_Class = function()
 				if(scroller.getValues().left!=0)
 				{
 					hovered_dir[2] = true;
-					self.Slide_Left.Alpha.Set(1);
+					// self.Slide_Left.Alpha.Set(1);
 					return;
 				}
 			}
 			else if(hovered_dir[2])
 			{
 				hovered_dir[2] = false;
-				self.Slide_Left.Alpha.Set(0);
+				// self.Slide_Left.Alpha.Set(0);
 			}
 			if(dir==3)
 			{
@@ -1263,14 +1283,14 @@ var Interface_Class = function()
 				if(scroller.getValues().left!=scroller.getScrollMax().left)
 				{
 					hovered_dir[3] = true;
-					self.Slide_Right.Alpha.Set(1);
+					// self.Slide_Right.Alpha.Set(1);
 					return;
 				}
 			}
 			else if(hovered_dir[3])
 			{
 				hovered_dir[3] = false;
-				self.Slide_Right.Alpha.Set(0);
+				// self.Slide_Right.Alpha.Set(0);
 			}
 		}
 		self.Hover_Tile(Math.floor((x+scroller.getValues().left)/TILESIZE),Math.floor((y+scroller.getValues().top)/TILESIZE));
@@ -1603,7 +1623,7 @@ var Interface_Class = function()
 			if(_read_game_data[index].Valid)
 			{
 				setTimeout(function(index){
-					var sampledGame = new Engine_Class(_read_game_data[index], true);
+					let sampledGame = new Engine_Class(_read_game_data[index], true);
 					sampledGame.Set_Interface(INTERFACE);
 					sampledGame.FORCE_MERGE_DISPLAY = true;
 					_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
@@ -1619,8 +1639,8 @@ var Interface_Class = function()
 					Canvas.ScaleImageData(ctx, _game_imgs[index], 0, 0, 10/sampledGame.Terrain_Map.Width, 10/sampledGame.Terrain_Map.Height);
 					sampledGame.End_Game();
 
-					ctx.globalAlpha = .2;
-					Shape.Rectangle.Draw(ctx,0,0,600,600,"#E5D1D0");
+					// ctx.globalAlpha = .2;
+					// Shape.Rectangle.Draw(ctx,0,0,600,600,"#E5D1D0");
 					ctx.globalAlpha = .7;
 					Shape.Rectangle.Draw(ctx,50,20,500,100,"#57634E");
 					ctx.globalAlpha = 1;
@@ -1633,7 +1653,11 @@ var Interface_Class = function()
 					let img = document.createElement("img");
 					img.src = canvas.toDataURL("image/png");
 					img.className = "MAPCHOICEIMG";
-					Map_Data.All_Data[id_start].push(_read_game_data[index]);
+					try {
+						Map_Data.All_Data[id_start].push(_read_game_data[index]);
+					} catch (e) {
+
+					}
 
 					let row_holder = document.getElementById(id_start+index);
 					row_holder.appendChild(img);
@@ -2130,6 +2154,8 @@ var Interface_Class = function()
 	};
 	self.Start = function()
 	{
+		changeContent("GAME PLAY", game.Name);
+
 		HUD_Avoid_Mouse.interact();
 		Animations.kill = false;
 		for(var x=1;x<Terrain_Data.TERRE.length;x++)
@@ -2193,11 +2219,11 @@ var Interface_Class = function()
 				return index.data.money_spent;
 			});
 			self = this;
-			Menu.PostGame.Set(game.Name, players, turns, function(){
-				self.Close_Menu();
-				game = null;
-				mainMenu();
-			});
+			// Menu.PostGame.Set(game.Name, players, turns, function(){
+			// 	self.Close_Menu();
+			// 	game = null;
+			// 	mainMenu();
+			// });
 			self.Display_Menu(Menu.PostGame);
 		}
 		this.setGame(null);
