@@ -1784,12 +1784,12 @@ Menu.Game_Prompt = new Menu.Menu_Class();
 /*** Game Internal Lobby Menu ***/
 Menu.PreGame = {};
 Menu.PreGame.Slots = [];
-Menu.PreGame.AddStarter = function(){
+Menu.PreGame.AddStarter = function(mapName){
 	let START = document.createElement('button');
 	START.id = "HOSTGAMESTART";
 	START.innerHTML = INTERFACE.Game.Full() ? "Start Game" : "Start with AI";
 	START.onclick = function(){
-		changeContent("GAME PLAY");
+		changeContent("GAME PLAY", mapName);
 		INTERFACE.Game.Host_Game(socket.game_id);
 	};
 	START.className = "w3-button w3-block w3-black w3-margin-bottom";

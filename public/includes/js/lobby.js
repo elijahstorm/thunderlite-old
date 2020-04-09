@@ -1,5 +1,9 @@
+let PARENT;
+
 window.onload = function()
 {
+	PARENT = window.parent.window.parent;
+	
 	var data_handler = function(node){
 		this.value = 0;
 		this.add = function(){
@@ -32,7 +36,7 @@ window.onload = function()
 		};
 		this.Join = function(){
 			if(cantJoin)return;
-			if(window.parent)window.parent.join_game(id);
+			if(PARENT)PARENT.join_game(id);
 		};
 	};
 
@@ -72,12 +76,12 @@ window.onload = function()
 			var node = document.createElement('div');
 			node.setAttribute('class', 'gameList');
 			node.setAttribute('id', game_info.ID());
-			
+
 			var name = document.createElement('div');
 			name.setAttribute('class', 'name');
 			name.innerHTML = game_info.Name();
 			node.appendChild(name);
-			
+
 			var container = document.createElement('div');
 			container.setAttribute('class', 'playersContainer');
 			for(var j=0;j<game_info.Length();j++)
@@ -88,7 +92,7 @@ window.onload = function()
 				container.appendChild(player);
 			}
 			node.appendChild(container);
-			
+
 			var btn = document.createElement('div');
 			btn.setAttribute('class', 'btnJoin');
 			btn.innerHTML = "Join";
@@ -97,15 +101,18 @@ window.onload = function()
 				game_info.Join();
 			};
 			node.appendChild(btn);
-			
+
 			output.appendChild(node);
 		}
 	};
 
-	if(window.parent){
-		window.parent.refresh_lobby();
-		window.parent.lobby_open = true;
+	if(PARENT){
+		PARENT.refresh_lobby();
+		PARENT.lobby_open = true;
 	}
+
+	PARENT.lobby_open = true;
+	PARENT.refresh_lobby();
 };
 
 function hide()

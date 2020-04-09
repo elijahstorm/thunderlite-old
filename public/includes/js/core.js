@@ -641,13 +641,7 @@ window.onload = function(){
 	Canvas.Reflow();
 	Canvas.Next_Tick();
 
-	changeContent("MULTIPLAYER");
-
-	if(MUSIC!=Music.Retrieve("intro"))
-	{
-		Music.Stop_All();
-		MUSIC = Music.Retrieve("intro").Play();
-	}
+	mainMenu();
 };
 
 var INTERFACE;
@@ -777,7 +771,7 @@ function init_map(map, players, game_id, skip_pregame, offline_game)
 	{
 		Game.Set_Player(0, socket.index, socket.username, true);
 		Menu.PreGame.Set(0, socket.username);
-		Menu.PreGame.AddStarter();
+		Menu.PreGame.AddStarter(map.Name);
 	}
 }
 function new_custom_game(game_data, game_setup, skippingLobby, save_data_index, story_progress, story_section)
@@ -839,6 +833,7 @@ function changeContent(choice, title) {
 	document.getElementById("GAMECONTENT").style.display = "none";
 	document.getElementById("MAPSELECTION").style.display = "none";
 	document.getElementById("CONTACT").style.display = "none";
+	document.getElementById("GAMELOBBY").style.display = "none";
 	document.getElementById("HOSTNEWGAME").style.display = "none";
 	document.getElementById("ENDGAME").style.display = "none";
 
@@ -856,6 +851,9 @@ function changeContent(choice, title) {
 		case "GAME PLAY":
 			document.getElementById("GAMECONTENT").style.display = "inline";
 			document.getElementById("CONTENT_TITLE").innerHTML = title;
+		case "GAME LOBBY":
+			document.getElementById("GAMELOBBY").style.display = "inline";
+			document.getElementById("CONTENT_TITLE").innerHTML = "Online Lobby";
 			break;
 		case "HOST GAME":
 			document.getElementById("HOSTNEWGAME").style.display = "inline";
@@ -899,8 +897,6 @@ function mainMenu(){
 	}
 
 	window.parent.openLobby();
-
-	changeContent("MULTIPLAYER");
 }
 
 var paused = false;

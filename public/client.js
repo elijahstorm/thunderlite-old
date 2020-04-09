@@ -119,12 +119,21 @@ window.onload = function(){
 		else if(data.type==3)
 		{	// receive already opened games data
 			if(!lobby_open)return;
-			for(var i in data.info)
+			let i = 0;
+			for(i in data.info)
 			{
 				lobby.contentWindow.add_game(data.info[i].name,data.info[i].map,data.info[i].game);
 				lobby.contentWindow._openGames.add();
 				// add player list
 			}
+
+			// initially land user on open games list, but...
+			// if there aren't a lot of open games to choose from -> land user on game host
+			if(i<2)	// if less then two open games waiting,
+			{	// then will defult to send player to land on game hosting page
+				game.changeContent("MULTIPLAYER");
+			}
+			else game.changeContent("GAME LOBBY");
 		}
 		else if(data.type==4)
 		{	// client disconnected
@@ -229,10 +238,9 @@ window.onload = function(){
 			socket.index = data.index;
 			CONNECTED = true;
 			CHECK_CONNECTION();
-			if(gameFrame.src!="includes/game.html")
+			if(gameFrame.src!="game.html")
 				gameFrame.src = "includes/game.html";
 			document.title = socket.username+" playing ThunderLite";
-			openLobby();
 		}
 		else if(data.type==21)
 		{	// setup game to play
@@ -511,14 +519,23 @@ function RECONNECTED(){
 }
 
 function openLobby(){
-	lobby.src = "includes/lobby.html";
-	document.getElementById("refreshLobby").href = "includes/lobby.html";
+	if(lobby==null)
+	{
+		lobby = game.document.getElementById("lobbyFrame");
+		if(lobby==null)return;
+	}
+	lobby.src = "lobby.html";
 	socket.emit('lobby on');
+	game.document.getElementById("refreshLobby").href = "lobby.html";
 }
 function openChat(){
+	if(lobby==null)
+	{
+		lobby = game.document.getElementById("lobbyFrame");
+	}
 	lobby_open = false;
-	document.getElementById("refreshLobby").href = "includes/chat.html";
-	lobby.src = "includes/chat.html";
+	document.getElementById("refreshLobby").href = "chat.html";
+	// lobby.src = "chat.html";
 }
 
 function refreshChatList(){
@@ -561,4 +578,4 @@ function timestamp(){
 	}
 	console.log(new Date().toLocaleTimeString(),"->",str);
 }
-var lobby = document.getElementById('lobbyFrame');
+let lobby = null;

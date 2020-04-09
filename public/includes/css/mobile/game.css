@@ -6,7 +6,7 @@ body{
     user-select:none;
 }
 
-#GAMECONTENT, #MAPSELECTION, #HOSTNEWGAME, #ENDGAME, #CONTACT{
+#GAMECONTENT, #GAMELOBBY, #MAPSELECTION, #HOSTNEWGAME, #ENDGAME, #CONTACT{
 	display: none;
 }
 
@@ -78,6 +78,10 @@ search-input::placeholder {
   color: #fff;
 }
 
+#lobbyFrame{
+	min-height:400px;
+}
+
 #logger-container{
 	position: fixed;
 	width: 40%;
@@ -132,6 +136,9 @@ img.MAPCHOICEIMG{
 	padding: 5px;
 }
 
+#refreshLobby{
+	width: 50%;
+}
 
 #canvasHolder{
 	position:absolute;

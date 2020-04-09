@@ -30,7 +30,8 @@
 <nav class="w3-sidebar w3-bar-block w3-white w3-animate-left w3-text-grey w3-collapse w3-top w3-center" style="z-index:3;width:300px;font-weight:bold" id="mySidebar"><br>
   <h3 class="w3-padding-64 w3-center"><b>THUNDER<br />LITE</b></h3>
   <a href="javascript:void(0)" onclick="w3_close()" class="w3-bar-item w3-button w3-padding w3-hide-large">CLOSE</a>
-  <a href="#" onclick="w3_close(this)" class="w3-bar-item w3-button">MULTIPLAYER</a>
+	<a href="#" onclick="w3_close(this)" class="w3-bar-item w3-button">GAME LOBBY</a>
+	<a href="#" onclick="w3_close(this)" class="w3-bar-item w3-button">MULTIPLAYER</a>
 	<a href="#" onclick="w3_close(this)" class="w3-bar-item w3-button">STORY</a>
   <a href="#" onclick="w3_close(this)" class="w3-bar-item w3-button">MAP EDITOR</a>
   <a href="#" onclick="w3_close(this)" class="w3-bar-item w3-button">CONTACT US</a>
@@ -116,6 +117,18 @@
 			</div>
 		</div>
 		<div id="imageHolder" style="position:fixed;top:-9999px;left:-9999px;width:2000px;height:2000px;"><canvas width="2000px" height="2000px" id="imageHolderDisplay"></canvas></div>
+	</div>
+
+	<!-- ONLINE GAME LOBBY CONTENT -->
+  <div id="GAMELOBBY" class="w3-container w3-light-grey w3-padding-32 w3-padding-large" >
+    <div class="w3-content" style="max-width:600px">
+    	<div id="lobbyContainer" class="w3-center" >
+				<center>
+					<a id="refreshLobby" href="includes/holder.html" target="lobbyFrame" class="w3-button w3-block w3-black w3-margin-bottom" >Refresh?</a>
+	    		<iframe src="holder.html" id="lobbyFrame" frameborder="0" name="lobbyFrame"></iframe>
+				</center>
+    	</div>
+	  </div>
 	</div>
 
 	<!-- HOST NEW GAME CONTENT -->

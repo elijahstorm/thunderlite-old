@@ -6,7 +6,7 @@ body{
     user-select:none;
 }
 
-#GAMECONTENT, #MAPSELECTION, #HOSTNEWGAME, #ENDGAME, #CONTACT{
+#GAMECONTENT, #GAMELOBBY, #MAPSELECTION, #HOSTNEWGAME, #ENDGAME, #CONTACT{
 	display: none;
 }
 
@@ -76,6 +76,20 @@ body{
 }
 search-input::placeholder {
   color: #fff;
+}
+
+#refreshLobby{
+	width: 50%;
+}
+#lobbyContainer{
+	position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0px);
+	width: 70%;
+}
+#lobbyFrame{
+	min-height:400px;
+	width: 100%;
 }
 
 #logger-container{
