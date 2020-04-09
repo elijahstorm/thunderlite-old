@@ -76,20 +76,20 @@ window.onload = function(){
 	gameFrame = document.getElementById('gameFrame');
 	game = gameFrame.contentWindow;
 	socket.on('public log', function(msg, color, time){
-		if(game.LOG)game.LOG.add(msg, color, time);
+		if(game.LOG)game.LOG.popup(msg, color, time);
 	});
 	socket.on('set client data', function(index, name){
 		socket.index = index;
 		socket.username = name;
 	});
 	socket.on('user joined', function(username){
-		if(game.LOG)game.LOG.add(username+" joined","#FF0");
+		if(game.LOG)game.LOG.popup(username+" joined","#FF0");
 		if(!lobby_open)return;
 		lobby.contentWindow._activeUsers.add();
 		lobby.contentWindow._lobbyAmt.add();
 	});
 	socket.on('user left', function(username){
-		if(game.LOG)game.LOG.add(username+" left","#FF0");
+		if(game.LOG)game.LOG.popup(username+" left","#FF0");
 		if(!lobby_open)return;
 		lobby.contentWindow._activeUsers.sub();
 	});
@@ -201,9 +201,9 @@ window.onload = function(){
 			{ // no gamestate to revert to
 				game.INTERFACE.Game.End_Game();
 				if(!game.LOG)return;
-				game.LOG.add("ERROR: Game data issue. Could not salvage game.", "#F00", 10000);
-				game.LOG.add("Game ended and no points were lost", "#F00", 10000);
-				game.LOG.add("Note for dev., add button to auto restart last game?", "#FFF", 20000);
+				game.LOG.popup("ERROR: Game data issue. Could not salvage game.", "#F00", 10000);
+				game.LOG.popup("Game ended and no points were lost", "#F00", 10000);
+				game.LOG.popup("Note for dev., add button to auto restart last game?", "#FFF", 20000);
 				return;
 			}
 			setTimeout(function(){ // reset game after 5 seconds
@@ -211,7 +211,7 @@ window.onload = function(){
 				game.INTERFACE.Game.Start();
 			}, 5000);
 			if(!game.LOG)return;
-			game.LOG.add("ERROR: Game data issue. Reverting game to last saved point...", "#F00", 10000);
+			game.LOG.popup("ERROR: Game data issue. Reverting game to last saved point...", "#F00", 10000);
 		}
 		else if(data.type==16)
 		{	// player reconnected
@@ -219,7 +219,7 @@ window.onload = function(){
 				if(!game.load_game)return;
 				game.load_game(data.game);
 				if(!game.LOG)return;
-				game.LOG.add("Resuming game from last saved gamestate", "#FFF", 5000);
+				game.LOG.popup("Resuming game from last saved gamestate", "#FFF", 5000);
 			}
 		}
 
@@ -240,7 +240,7 @@ window.onload = function(){
 		}
 		else if(data.type==22)
 		{	// starting game
-			if(game.LOG)game.LOG.add("game started","#F00");
+			if(game.LOG)game.LOG.popup("game started","#F00");
 			game.INTERFACE.Game.Start();
 			lobby.contentWindow._openGames.sub();
 		}
@@ -268,7 +268,7 @@ window.onload = function(){
 		}
 		else if(data.type==26)
 		{	// join game
-			if(game.LOG)game.LOG.add(data.name+" joined game","#F00");
+			if(game.LOG)game.LOG.popup(data.name+" joined game","#F00");
 			game.INTERFACE.Game.Set_Player(data.slot, data.player, data.name);
 			game.Menu.PreGame.Set(data.slot, data.name);
 		}
@@ -277,7 +277,7 @@ window.onload = function(){
 			if(!lobby_open)return;
 			lobby.contentWindow.add_game(data.name,data.map,data.game);
 			lobby.contentWindow._openGames.add();
-			// if(game.LOG)game.LOG.add(game.Levels.Names(data.map)+" opened with id "+data.game,"#F00");
+			// if(game.LOG)game.LOG.popup(game.Levels.Names(data.map)+" opened with id "+data.game,"#F00");
 		}
 		else if(data.type==28)
 		{	// player lost connection
@@ -286,9 +286,9 @@ window.onload = function(){
 			if(playerName)
 				playerName = playerName.Name;
 			else playerName = data.slot;
-			game.LOG.add("Warning, player "+playerName+" lost connection", "#FFF", 10000);
-			game.LOG.add("This player has 30 seconds to reconnect", "#FFF", 20000);
-			game.LOG.add("Otherwise they forfeit the game", "#FFF", 30000);
+			game.LOG.popup("Warning, player "+playerName+" lost connection", "#FFF", 10000);
+			game.LOG.popup("This player has 30 seconds to reconnect", "#FFF", 20000);
+			game.LOG.popup("Otherwise they forfeit the game", "#FFF", 30000);
 		}
 		else if(data.type==29)
 		{	// player regained connection
@@ -297,7 +297,7 @@ window.onload = function(){
 			if(playerName)
 				playerName = playerName.Name;
 			else playerName = data.slot;
-			game.LOG.add("Player "+playerName+" reconnected connection.", "#FFF");
+			game.LOG.popup("Player "+playerName+" reconnected connection.", "#FFF");
 		}
 
 			/** loading published games */
@@ -307,16 +307,11 @@ window.onload = function(){
 		}
 		else if(data.type==501)
 		{	// map index does not exist
-			alert("We could not find any of the maps that you were looking for. Try changing your search");
+			game.LOG.popup("We could not find any of the maps that you were looking for. Try changing your search");
 		}
 		else if(data.type==502)
-		{	// recieved game data
-			let name = "";
-			while(name!="")
-			{
-				name = prompt("What do you want to name the game?");
-			}
-			game.new_custom_game(game_data, name);
+		{	// UNUSED
+
 		}
 		else if(data.type==503)
 		{	// recieved a list of game data that matched the query
@@ -400,7 +395,7 @@ window.onload = function(){
 			/** in-game error messages */
 		else if(data.type==100)
 		{	// could not connect to game message
-			if(game.LOG)game.LOG.add("ERROR:Could not connect to game "+data.game, "#F00");
+			if(game.LOG)game.LOG.popup("ERROR:Could not connect to game "+data.game, "#F00");
 		}
 
 			/** logs */
@@ -412,7 +407,7 @@ window.onload = function(){
 		else if(data.type==111)
 		{	// game log message
 			console.warn("WARNING: IMPROPER USE OF MESSAGING");
-			if(game.LOG)game.LOG.add(data.msg, data.color);
+			if(game.LOG)game.LOG.popup(data.msg, data.color);
 		}
 	});
 	for(var i in onFinishedLoadingList){
@@ -501,13 +496,13 @@ function CHECK_CONNECTION(){
 function LOST_CONNECTION(){
 	var time = new Date().toLocaleTimeString();
 	console.error("Lost connection at "+time);
-	if(game.LOG)game.LOG.add("Lost connection at "+time,"#F00",10000);
+	if(game.LOG)game.LOG.popup("Lost connection at "+time,"#F00",10000);
 	document.title_alert = new title_box_alert("LOST CONNECTION");
 }
 function RECONNECTED(){
 	var time = new Date().toLocaleTimeString();
 	console.error("Regained connection at "+time);
-	if(game.LOG)game.LOG.add("Regained connection at "+time,"#0F0",5000);
+	if(game.LOG)game.LOG.popup("Regained connection at "+time,"#0F0",5000);
 	refresh_lobby();
 	if(document.title_alert)
 	{

@@ -704,7 +704,7 @@ var Interface_Class = function()
 			if(prevPinchDiff!=0)
 			{
 				let _zoom = Math.abs(curPinchDiff/prevPinchDiff);
-				// LOG.add(""+_zoom, "#FFF", 800);
+				// LOG.popup(""+_zoom, "#FFF", 800);
 				// TILESIZE*=_zoom;
 				// TILESIZE = Math.max(Math.min(TILESIZE, 90), 30);
 			}
@@ -1634,9 +1634,6 @@ var Interface_Class = function()
 					img.src = canvas.toDataURL("image/png");
 					img.className = "MAPCHOICEIMG";
 					Map_Data.All_Data[id_start].push(_read_game_data[index]);
-					// img.onclick = function() {
-					// 	onClick(img);
-					// };
 
 					let row_holder = document.getElementById(id_start+index);
 					row_holder.appendChild(img);
@@ -1650,7 +1647,7 @@ var Interface_Class = function()
 
 	let menuCloser;
 
-	let __map_choice = "";
+	let __map_choice = "", __map_img;
 	let __map_game_setup = false;
 	let last_q, query_type = 2;
 	let search_fnc = function(index, query)
@@ -1745,13 +1742,13 @@ var Interface_Class = function()
 			insertTag.appendChild(search);
 		}
 
-
 		insertTag.appendChild(text_tag);
 	}
 
-	self.Map_Choice = function(__choice)
+	self.Map_Choice = function(__choice, __img)
 	{
 		__map_choice = __choice;
+		__map_img = __img;
 	};
 	self.Open_Level_Select = function()
 	{
@@ -1833,8 +1830,7 @@ var Interface_Class = function()
 			let gameName = "";
 			while(gameName=="")gameName = prompt("Name the game ");
 			if(!gameName)return;
-			changeContent("GAME PLAY", gameName);
-			new_custom_game(DATA, gameName);
+			new_custom_game(DATA, [gameName, __map_img]);
 			return;
 		}
 
@@ -1845,8 +1841,7 @@ var Interface_Class = function()
 				break;
 			section++;
 		}
-		changeContent("GAME PLAY", DATA.Name);
-		new_custom_game(DATA, DATA.Name, true, null, Levels.Current()[section]==parseInt(__map_choice.charAt(__map_choice.length-1))+1 ? 2 : 3, section);
+		new_custom_game(DATA, [DATA.Name], true, null, Levels.Current()[section]==parseInt(__map_choice.charAt(__map_choice.length-1))+1 ? 2 : 3, section);
 	};
 
 
@@ -2123,6 +2118,7 @@ var Interface_Class = function()
 	};
 	self.Start = function()
 	{
+		HUD_Avoid_Mouse.interact();
 		Animations.kill = false;
 		for(var x=1;x<Terrain_Data.TERRE.length;x++)
 		{

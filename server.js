@@ -917,6 +917,9 @@ io.on('connection', function(socket){
 	});
 	socket.on('gamedata get', function(sort_by, start_index, end_amt, userSearch){
 		sort_by.PUBLISHED = true;
+
+console.log(sort_by);
+
 		for(let i in sort_by)
 		{	/// let users search for things that just contain and aren't exact matches
 			if(sort_by[i].charAt==null)continue;
@@ -925,6 +928,9 @@ io.on('connection', function(socket){
 				sort_by[i] = RegExp(".*" + sort_by[i].substring(1, sort_by[i].length) + ".*")
 			}
 		}
+
+console.log(sort_by);
+
 		db.gamedata.find(sort_by, function(err, data){
 			if(err){
 				socket.send({type:500});

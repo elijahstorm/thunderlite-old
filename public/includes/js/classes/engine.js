@@ -70,7 +70,7 @@ var Engine_Class = function(input, is_sample, is_local)
 			if(last_move_time==this_move_time)
 			{ // warn that user has 15 seconds to make a move
 				UI.Warn_Hurry();
-				warningMsg = LOG.add((client==_self.Active_Player() ? "You" : "They")+" have 15 seconds to make another move", "#F00", 10000);
+				warningMsg = LOG.popup((client==_self.Active_Player() ? "You" : "They")+" have 15 seconds to make another move", "#F00", 10000);
 				last_timeout = setTimeout(function(){
 					if(last_move_time==this_move_time)
 					{	// force player to end their turn

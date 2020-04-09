@@ -2333,7 +2333,7 @@ LOGGER(currentUnit.Name);
 			STATUS_CHOICE(aiState, __game, aiPlayer);
 		} catch (e) {
 			LOGGER("ERROR, something broke the AI calculations here");
-			LOG.add("ERROR AI01: AI error. Let the Dev know you saw this", "red");
+			LOG.popup("ERROR AI01: AI error. Let the Dev know you saw this", "red");
 			aiPlayer.End_Turn();
 		}
 	};

@@ -272,7 +272,7 @@ var Mod_List = {
 						}
 						if(direction==-1)
 						{	// cannot build in that area
-							LOG.add("That unit cannot be built here", "#f00", 2500);
+							LOG.popup("That unit cannot be built here", "#f00", 2500);
 							return;
 						}
 

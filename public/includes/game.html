@@ -118,6 +118,85 @@
 		<div id="imageHolder" style="position:fixed;top:-9999px;left:-9999px;width:2000px;height:2000px;"><canvas width="2000px" height="2000px" id="imageHolderDisplay"></canvas></div>
 	</div>
 
+	<!-- HOST NEW GAME CONTENT -->
+  <div id="HOSTNEWGAME" class="w3-container w3-light-grey w3-padding-32 w3-padding-large" >
+    <div class="w3-content" style="max-width:600px">
+      <h4 style="display:inline-block" id="HOSTGAMEMAPNAME" ></h4>
+			<div style="display:inline-block"><b>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspID:&nbsp</b></div>
+			<div style="display:inline-block;" id="HOSTGAMEMAPID" class="copy" onclick="copyToClipboard(this.innerHTML)" ></div>
+
+			<div class="w3-row">
+				<div class="w3-third">
+					<h3 class="w3-center">Players</h3>
+					<div id="HOSTGAMEPLAYERS">
+
+					</div>
+				</div>
+
+				<div class="w3-third">
+					<div id="HOSTGAMEIMG-container" class="w3-third" style="width:100%" >
+						<img id="HOSTGAMEIMG" class="PREGAMEIMG" ></img>
+					</div>
+				</div>
+
+				<div class="w3-third">
+					<div id="HOSTGAMERULES" class="w3-third" style="width:100%" >
+						<h3 class="w3-center">Game Rules</h3>
+						<b>
+							<ul style="list-style-type:none" >
+								<li class="INFO-LIST">
+									Weather
+								</li>
+								<li id="_weather" class="INFO-LIST-SUB" onclick="toggle_pregame_info(this)" >
+									ON
+								</li>
+								<li class="INFO-LIST">
+									Turn limit
+								</li>
+								<li id="_turnlimit" class="INFO-LIST-SUB inactive" onclick="toggle_pregame_info(this)" >
+									None
+								</li>
+								<li class="INFO-LIST">
+									Ranked Game
+								</li>
+								<li id="_ranked" class="INFO-LIST-SUB" onclick="toggle_pregame_info(this)" >
+									YES
+								</li>
+							</ul>
+						</b>
+					</div>
+				</div>
+			</div>
+
+			<div id="HOSTGAMEBUTTONS">
+      	<button id="HOSTGAMELEAVE" onclick="Menu.PreGame.Leave()" class="w3-button w3-block w3-black w3-margin-bottom">Leave</button>
+			</div>
+    </div>
+  </div>
+
+	<!-- END GAME SCREEN CONTENT -->
+  <div id="ENDGAME" class="w3-container w3-light-grey w3-padding-32 w3-padding-large" >
+    <div class="w3-content" style="max-width:600px">
+      <h4 class="w3-center"><b>Game over!</b></h4>
+      <p>Do you want me to photograph you? Fill out the form and fill me in with the details :) I love meeting new people!</p>
+      <form action="/action_page.php" target="_blank">
+        <div class="w3-section">
+          <label>Name</label>
+          <input class="w3-input w3-border" type="text" name="Name" required>
+        </div>
+        <div class="w3-section">
+          <label>Email</label>
+          <input class="w3-input w3-border" type="text" name="Email" required>
+        </div>
+        <div class="w3-section">
+          <label>Message</label>
+          <input class="w3-input w3-border" type="text" name="Message" required>
+        </div>
+        <button type="submit" class="w3-button w3-block w3-black w3-margin-bottom">Send Message</button>
+      </form>
+    </div>
+  </div>
+
   <!-- CONTACT US CONTENT -->
   <div id="CONTACT" class="w3-container w3-light-grey w3-padding-32 w3-padding-large" >
     <div class="w3-content" style="max-width:600px">
@@ -140,7 +219,9 @@
       </form>
     </div>
   </div>
+	<div id="logger-container" class="w3-container w3-center" ></div>
 
+	<!-- HTML credits to W3 schools! Thank you W3. Use them for all your templates!  -Elijah -->
   <div style="display:none" class="w3-black w3-center w3-padding-24">Powered by <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-opacity">w3.css</a></div>
 
 <!-- End page content -->
@@ -168,7 +249,7 @@ function onClick(element) {
   var captionText = document.getElementById("caption");
   captionText.innerHTML = element.alt;
 
-	INTERFACE.Map_Choice(element.parentElement.id);
+	INTERFACE.Map_Choice(element.parentElement.id, element.src);
 }
 </script>
 

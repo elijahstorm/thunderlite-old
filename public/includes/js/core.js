@@ -74,7 +74,25 @@ var LOG = {
 			}
 		}
 		this.display();
-	}
+	},
+	container:document.getElementById("logger-container"),
+	popup:function(text){
+		const POPUP = document.createElement('h5');
+		POPUP.className = "logger-popup w3-brown";
+		POPUP.innerHTML = text;
+		LOG.container.appendChild(POPUP);
+		POPUP.addEventListener('click', function() {
+			POPUP.style.opacity = '0';
+			POPUP.style.transform =  "translate(0, -200px)";
+		});
+		POPUP.addEventListener('transitionend', () => POPUP.remove());
+		if(LOG.first_popup)
+		{
+			LOG.first_popup = false;
+			LOG.popup("Click to remove logs");
+		}
+	},
+	first_popup:true
 };
 
 var Core = {
@@ -510,6 +528,7 @@ var socket;
 window.onload = function(){
 	if(window.parent)socket = window.parent.socket;
 	if(socket)online = true;
+	LOG.container = document.getElementById("logger-container");
 
 	// game setup
 	FRAMERATEDISPLAY = document.getElementById("frames");
@@ -652,7 +671,41 @@ function decrypt_game_data(data)
 		encrypted+=String.fromCharCode(data.charCodeAt(i)-50);
 	return encrypted;
 }
+const copyToClipboard = str => {
+	try {
+	  const el = document.createElement('textarea');
+	  el.value = str;
+	  document.body.appendChild(el);
+	  el.select();
+	  document.execCommand('copy');
+	  document.body.removeChild(el);
+		LOG.popup("Copied!");
+	} catch (e) {
+		LOG.popup("Could not copy");
+	}
+};
 
+function toggle_pregame_info(element)
+{
+	if(element.className.indexOf("inactive")!=-1)
+		return;
+	if(element.id)
+	switch (element.id) {
+		case "_weather":
+			if(element.innerHTML=="OFF")
+				element.innerHTML = "ON";
+			else element.innerHTML = "OFF";
+			break;
+		case "_turnlimit":
+
+			break;
+		case "_ranked":
+			if(element.innerHTML=="NO")
+				element.innerHTML = "YES";
+			else element.innerHTML = "NO";
+			break;
+	}
+}
 function init_map(map, players, game_id, skip_pregame, offline_game)
 {
 	var Game = new Engine_Class(map);
@@ -710,12 +763,10 @@ function init_map(map, players, game_id, skip_pregame, offline_game)
 		return;
 	}
 
-	Game.FORCE_MERGE_DISPLAY = true;
-	Menu.PreGame.Map(map, INTERFACE.Get_Sample(Game));
-	Game.FORCE_MERGE_DISPLAY = false;
+	Menu.PreGame.Setup_Map(map);
 	if(players!=null)
 	{
-		for(var i in players.c)
+		for(let i in players.c)
 		{
 			if(players.c[i]==null)continue;
 			Game.Set_Player(i, players.c[i], players.n[i], players.n[i]==socket.username);
@@ -728,11 +779,10 @@ function init_map(map, players, game_id, skip_pregame, offline_game)
 		Menu.PreGame.Set(0, socket.username);
 		Menu.PreGame.AddStarter();
 	}
-	INTERFACE.Display_Menu(Menu.PreGame);
 }
-function new_custom_game(game_data, name, skippingLobby, save_data_index, story_progress, story_section)
+function new_custom_game(game_data, game_setup, skippingLobby, save_data_index, story_progress, story_section)
 {
-	if(!name)return;
+	if(game_data==null || game_setup==null)return;
 
 	let data;
 	if(game_data.Valid)
@@ -740,12 +790,16 @@ function new_custom_game(game_data, name, skippingLobby, save_data_index, story_
 	else data = Map_Reader.Read(game_data);
 	if(!data.Valid)return;
 
+	if(skippingLobby)
+	{
+		changeContent("GAME PLAY", game_setup[0]);
+	} else changeContent("HOST GAME", game_setup);
+
 	init_map(data, null, null, skippingLobby, [skippingLobby, save_data_index, story_progress, story_section]);
-	if(skippingLobby)return;
 
 	if(online){
-		socket.emit("open", data.id, name, data.Player_Amount());
-		window.parent.lobby.contentWindow.add_game(name,data.Map,data.id,true);
+		socket.emit("open", data.id, game_setup[0], data.Player_Amount());
+		window.parent.lobby.contentWindow.add_game(game_setup[0],data.Map,data.id,true);
 		window.parent.lobby.contentWindow._openGames.add();
 	}
 }
@@ -775,7 +829,7 @@ function openMapEditor(game_data, data_index, testing_won){
 }
 
 function changeContent(choice, title) {
-	if(INTERFACE.Game!=null)
+	if(INTERFACE.Game!=null && choice!="GAME PLAY")
 	{
 		let ans = confirm("This will exit the game. Are you sure?");
 		if(!ans)return;
@@ -785,6 +839,8 @@ function changeContent(choice, title) {
 	document.getElementById("GAMECONTENT").style.display = "none";
 	document.getElementById("MAPSELECTION").style.display = "none";
 	document.getElementById("CONTACT").style.display = "none";
+	document.getElementById("HOSTNEWGAME").style.display = "none";
+	document.getElementById("ENDGAME").style.display = "none";
 
 	switch (choice) {
 		case "MULTIPLAYER":
@@ -799,6 +855,15 @@ function changeContent(choice, title) {
 			break;
 		case "GAME PLAY":
 			document.getElementById("GAMECONTENT").style.display = "inline";
+			document.getElementById("CONTENT_TITLE").innerHTML = title;
+			break;
+		case "HOST GAME":
+			document.getElementById("HOSTNEWGAME").style.display = "inline";
+			document.getElementById("CONTENT_TITLE").innerHTML = title[0];
+			document.getElementById("HOSTGAMEIMG").src = title[1];
+			break;
+		case "END GAME":
+			document.getElementById("ENDGAME").style.display = "inline";
 			document.getElementById("CONTENT_TITLE").innerHTML = title;
 			break;
 		case "MAP EDITOR":

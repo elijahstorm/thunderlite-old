@@ -1096,7 +1096,7 @@ Menu.MapEditor.Open = function()
 				}
 				else if(ACTIVE_TYPE==TYPES.WEATHER)
 				{
-					LOG.add("weather not implemented");
+					LOG.popup("weather not implemented");
 					// map_list[tile] = ACTIVE_INDEX;
 				}
 				Menu.MapEditor.Mouse_Move(0, 0);
@@ -1129,7 +1129,7 @@ Menu.MapEditor.Open = function()
 			{
 				if(!each_player[i])
 				{
-					LOG.add("Each player must have at least one unit to Test.", "#f00",3000);
+					LOG.popup("Each player must have at least one unit to Test.", "#f00",3000);
 					return;
 				}
 			}
@@ -1141,7 +1141,7 @@ Menu.MapEditor.Open = function()
 				return;
 			}
 
-			new_custom_game(Map_Data_To_Str(), name, true, local_saved_map, 1);
+			new_custom_game(Map_Data_To_Str(), [name], true, local_saved_map, 1);
 		}, {
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
@@ -1781,89 +1781,66 @@ Menu.MapEditor.Open = function()
 Menu.Game_Prompt = new Menu.Menu_Class();
 
 
-/*** Before Game Lobby Menu ***/
-Menu.PreGame = new Menu.Menu_Class("#77a8bc");
+/*** Game Internal Lobby Menu ***/
+Menu.PreGame = {};
 Menu.PreGame.Slots = [];
-Menu.PreGame.Icon = {
-	Image:null,
-	Draw:function(canvas, x, y, w, h){
-		if(this.Image==null)return;
-		Canvas.ScaleImageData(canvas, this.Image, x*Menu.PreGame.xScale, y*Menu.PreGame.yScale, w/this.Image.width*Menu.PreGame.xScale, h/this.Image.height*Menu.PreGame.yScale);
-	}
+Menu.PreGame.AddStarter = function(){
+	let START = document.createElement('button');
+	START.id = "HOSTGAMESTART";
+	START.innerHTML = INTERFACE.Game.Full() ? "Start Game" : "Start with AI";
+	START.onclick = function(){
+		changeContent("GAME PLAY");
+		INTERFACE.Game.Host_Game(socket.game_id);
+	};
+	START.className = "w3-button w3-block w3-black w3-margin-bottom";
+	document.getElementById("HOSTGAMEBUTTONS").appendChild(START);
 };
 Menu.PreGame.Set = function(index,value){
 	if(index>=this.Slots.length)return;
-	this.Slots[index].State.Set(value);
+
+	document.getElementById("HOSTGAMEPLAYERLIST"+index).innerHTML = value;
+	this.Slots[index] = value;
+
+	if(document.getElementById("HOSTGAMESTART")==null)return;
+	document.getElementById("HOSTGAMESTART").innerHTML = INTERFACE.Game.Full() ? "Start Game" : "Start with AI";
+};
+Menu.PreGame.Leave = function(){
+	INTERFACE.Game.Send_Move('leave');
+	mainMenu();
 };
 Menu.PreGame.visibleMapID = function(txt){
 	if(txt==null)return "";
 	if(txt.length!=9)return "";
 	return txt.substring(0, 3) + " - " + txt.substring(3, 6) + " - " + txt.substring(6, 9);
 };
-Menu.PreGame.Map = function(map, gameImage){
-	if(map==null || gameImage==null)return;
-
-	let playersAmount, __name, __id;
-
+Menu.PreGame.Setup_Map = function(map){
+	if(map==null)return;
 	if(!map.Valid)return;
-	playersAmount = map.Player_Amount();
-	__name = map.Name;
-	__id = map.id;
 
-	this.Erase();
-	this.Add(new Canvas.Drawable(new Text_Class("45pt Impact", "#000"), null, 50, 70, 600, 45, __name));
-	this.Add(new Canvas.Drawable(new Text_Class("20pt Impact", "#000"), null, 140, 14, 300, 30, "Map ID: "+Menu.PreGame.visibleMapID(__id)));
-	this.Add(new Canvas.Drawable({ // back btn
-		Draw:function(c, x, y, w, h, s){
-			Shape.Rectangle.Draw(c,x,y,85,35,Menu.Button[0]);
-			new Text_Class("15pt Verdana", Menu.Button[2]).Draw(c,x+15,y+10,60,25,"BACK");
-			new Text_Class("15pt Verdana", Menu.Button[3]).Draw(c,x+13,y+8,60,25,"BACK");
-		}
-	}, null, 20, 10, 85, 35), function(){
-		INTERFACE.Game.Send_Move('leave');
-		mainMenu();
-	}, {
-		Draw:function(c, x, y, w, h, s){
-			Shape.Rectangle.Draw(c,x,y,85,35,Menu.Button[1]);
-			new Text_Class("15pt Verdana", Menu.Button[2]).Draw(c,x+15,y+10,60,25,"BACK");
-			new Text_Class("15pt Verdana", Menu.Button[3]).Draw(c,x+13,y+8,60,25,"BACK");
-		}
-	});
+	let playersAmount = map.Player_Amount(),
+		__name = map.Name,
+		__id = map.id;
+	let doc_list = document.getElementById("HOSTGAMEPLAYERS");
 
-	var NameTxt = new Text_Class("40pt Calibri", "#000");
-	this.Slots = [];
-	this.Add(new Canvas.Drawable(Shape.Rectangle, null, 20, 150, 400, (playersAmount*52)-2, "#F2F3FF"));
-	for(var i=0;i<playersAmount;i++){
-		this.Slots[i] = new Canvas.Drawable(NameTxt, null, 40, 150+52*i, 400, 48, "");
-		this.Slots[i].Index = Menu.PreGame;
-		this.Add(this.Slots[i]);
-		if(i!=0)this.Add(new Canvas.Drawable(Shape.Rectangle, null, 35, 148+52*i, 370, 2, "#000"));
+	while(doc_list.childNodes.length>0)
+	{
+		doc_list.removeChild(doc_list.childNodes[0]);
 	}
-	this.Icon.Image = gameImage;
-	this.Add(new Canvas.Drawable(this.Icon, null, 450, 150, 300, 300, map));
-};
-Menu.PreGame.AddStarter = function(){
-	this.Add(new Canvas.Drawable({ // default display
-		Draw:function(c, x, y, w, h, s){
-			Shape.Rectangle.Draw(c,x,y,w,h,"#A77CC3");
-			new Text_Class("45pt Impact", "#7ECC9E").Draw(c,x+25,y+30,w,h,function(){
-				if(INTERFACE.Game.Full())
-					return " Start Game";
-				return "Start with AI";
-			});
-		}
-	}, null, 400, 40, 350, 100), function(){ // click function
-		INTERFACE.Game.Host_Game(socket.game_id);
-	}, { // hovered display
-		Draw:function(c, x, y, w, h, s){
-			Shape.Rectangle.Draw(c,x,y,w,h,"#63FF97");
-			new Text_Class("45pt Impact", "#848DC6").Draw(c,x+25,y+30,w,h,function(){
-				if(INTERFACE.Game.Full())
-					return " Start Game";
-				return "Start with AI";
-			});
-		}
-	});
+
+	document.getElementById("HOSTGAMEMAPNAME").innerHTML = "<b>"+__name+"</b>";
+	document.getElementById("HOSTGAMEMAPID").innerHTML = Menu.PreGame.visibleMapID(__id);
+
+	this.Slots = new Array(playersAmount);
+	let curEl;
+
+	for(var i=0;i<playersAmount;i++)
+	{
+		curEl = document.createElement('div');
+		curEl.id = "HOSTGAMEPLAYERLIST"+i;
+		curEl.innerHTML = "&nbsp;";
+		curEl.className = "INFO-LIST";
+		doc_list.appendChild(curEl);
+	}
 };
 
 

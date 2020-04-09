@@ -4,13 +4,15 @@ body{
 	-webkit-touch-callout:none;
 	-webkit-user-select:none;
 	-moz-user-select:none;
-    user-select:none;
-}.selectable{
+  user-select:none;
+}
+.selectable{
 	-webkit-touch-callout:initial;
 	-webkit-user-select:initial;
 	-moz-user-select:initial;
-    user-select:initial;
-}#footer{
+  user-select:initial;
+}
+#footer{
 	position:absolute;
 	top:91%;
 	left:20%;
