@@ -377,18 +377,13 @@ var Interface_Class = function()
 		Show_Info:function(__tile) {
 			if(__tile==null)
 			{
-				document.getElementById('status-icon').style.visibility = "hidden";
-				document.getElementById('status-info').style.visibility = "hidden";
+				document.getElementById('statsCanvas').style.visibility = "hidden";
 				return;
 			}
-			document.getElementById('status-icon').style.visibility = "visible";
-			document.getElementById('status-info').style.visibility = "visible";
-
+			document.getElementById('statsCanvas').style.visibility = "visible";
 
 			document.getElementById('status-icon').src = __tile.Sprite().Source();
-
 			document.getElementById('status-info').innerHTML = __tile.Description();
-			// document.getElementById('status-info').src = __tile.src;
 		},
 		Info_Type:0
 	};
@@ -436,13 +431,15 @@ var Interface_Class = function()
 						this.border.Draw(c,x+5,y+5,w-10,h-10,data_to_hex(Team_Colors.Color[player.Color][2]));
 						c.lineWidth = 1;
 						this.icon.Draw(c,x+20,y+20,100,100);
-						this.name.Draw(c,x+180,y+40,w,h,player.Name);
+						if(self.IS_MOBILE_GAME)
+							this.name.Draw(c,x+30,y+150,w,h,player.Name);
+						else this.name.Draw(c,x+180,y+40,w,h,player.Name);
 					} catch (e) {
 						console.error("ERROR DRAWING CHANGING PLAYER");
 					}
 				}
-			}, null, 600, 100, 300, 175, null, null, .7);
-			Core.Slide_Drawable_X(collectiveDrawable, -450, 10, function(collectiveDrawable){
+			}, null, 600, 100, self.IS_MOBILE_GAME ? 200 : 400, 250, null, null, .7);
+			Core.Slide_Drawable_X(collectiveDrawable, -550, 10, function(collectiveDrawable){
 				setTimeout(function(){
 					Core.Fade_Drawable(collectiveDrawable, 0, 10, function(collectiveDrawable){
 						Dialog_Display.Delete_Drawable(collectiveDrawable);
