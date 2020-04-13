@@ -25,6 +25,10 @@ var Characters = {
 		{
 			return CharData.Description;
 		};
+		self.Sprite = function()
+		{
+			return CharData.Sprite[0];
+		};
 		self.Index = null;
 
 		self.Terrain = function()

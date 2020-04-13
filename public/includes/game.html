@@ -20,7 +20,6 @@
 		.w3-third img{margin-bottom: -6px; opacity: 0.8; cursor: pointer}
 		.w3-third img:hover{opacity: 1}
 	</style>
-	<link href="css/game.css" rel="stylesheet">
 </head>
 
 
@@ -103,17 +102,27 @@
 			<div class="canvas" id="overlayCanvas" style="width:600px;height:600px;"></div>
 			<div class="canvas" id="dialogCanvas" style="width:600px;height:600px;"></div>
 			<div class="canvas" id="devCanvas" style="width:600px;height:600px;"></div>
-			<div class="canvas" id="avatarCanvas"></div>
-			<div class="canvas" id="statsCanvas"></div>
+			<div class="canvas" id="avatarCanvas">
+				<div id="active-players">
+					<img id="avatar-icon" class="avatar-icon-inline"></img>
+					<img id="weather-icon" class="avatar-icon-inline"></img>
+					<ul id="active-player-list" style="list-style-type:none" ></ul>
+				</div>
+			</div>
+			<div class="canvas" id="statsCanvas">
+				<div id="tile-info">
+					<img id="status-icon"></img>
+					<div id="status-info">
+					</div>
+				</div>
+			</div>
 			<div class="canvas" id="menuCanvas" style="width:810px;height:665px;"></div>
 			<div class="canvas" id="logCanvas" style="width:810px;height:665px;"></div>
 			<div class="canvas" id="inputHandler" style="width:810px;height:665px;"></div>
 			<div id="gameHelpers">
-				<div id="frames" style="color:rgb(18, 121, 11);">30/30 FPS</div>
-				<div class="btn" id="menuButton" onclick="(true);">Leave</div>
-				<div class="btn" id="pause" onmousedown="pause();"><pause></pause></div>
 				<div id="data"></div>
 				<div id="endTurn">End Turn</div>
+				<div id="frames" style="color:rgb(18, 121, 11);">30/30 FPS</div>
 			</div>
 		</div>
 		<div id="imageHolder" style="position:fixed;top:-9999px;left:-9999px;width:2000px;height:2000px;"><canvas width="2000px" height="2000px" id="imageHolderDisplay"></canvas></div>

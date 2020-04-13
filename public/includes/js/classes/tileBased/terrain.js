@@ -133,6 +133,10 @@ var Terrain = {
 		{
 			return TerreData.Description;
 		};
+		this.Sprite = function()
+		{
+			return TerreData.Sprite[0];
+		};
 		this.Index = function()
 		{
 			return index;

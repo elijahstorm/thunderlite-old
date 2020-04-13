@@ -1,6 +1,5 @@
 body{
 	overflow:hidden;
-	visibility:hidden;
 }
 #overlay{
 	background:#000;
@@ -12,6 +11,56 @@ body{
 	height:100%;
 	display:none;
 }
+
+#main-holder{
+	position: absolute;
+	left: 0px;
+	bottom: 0px;
+	height: 0px;
+	width: 100%;
+	overflow: hidden;
+	background: #eee;
+
+	transition: height .7s ease-out, left .5s ease;
+}
+#open-button{
+	position: absolute;
+	right: 5px;
+	bottom: 5px;
+	background: #ccc;
+	padding:0px;
+	-moz-border-radius:30px;
+	-webkit-border-radius:30px;
+	-border-radius:30px;
+	height:50px;
+	width:50px;
+	overflow: hidden;
+
+	opacity: .45;
+	transition: opacity 1.5s ease-out, bottom .3s;
+}
+#open-button:hover{
+	opacity: 1;
+}
+#chat-icon{
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 70%;
+	height: 70%;
+}
+#notify{
+	position: absolute;
+	left: -80%;
+	top: -100%;
+	width: 75%;
+	height: 150%;
+	transform: rotate(45deg);
+	background: #f009;
+	transition: left .5s linear, top .5s linear, width .5s linear;
+}
+
 #chat{
 	background:#EEE;
 	position:absolute;

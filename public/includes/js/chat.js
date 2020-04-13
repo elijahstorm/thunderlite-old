@@ -1,14 +1,70 @@
+const ICON = document.getElementById('chat-icon');
+const HOLDER = document.getElementById('main-holder');
+
+let chat_open = false;
+let first_open = true;
+let notification = false;
+
+function openChat(){
+	if(first_open)
+	{
+		first_open = false;
+		parent = document.getElementById('open-button');
+		parent.style.opacity = .9;
+		function jump(i){
+			if(i<0)
+			{
+				parent.style.opacity = .45;
+				// window.parent.shrinkChat();
+				return;
+			}
+			parent.style.bottom = "50px";
+			setTimeout(function() {
+				parent.style.bottom = "5px";
+				setTimeout(function() {
+					jump(i-1);
+				}, 300);
+			}, 300);
+		}
+		setTimeout(function() {
+			jump(3);
+		}, 300);
+		return;
+	}
+
+	ICON.src = "img/Icons/close icon.png";
+	chat_open = true;
+	removeNotification();
+
+	HOLDER.style.height = "100%";
+	HOLDER.style.left = "0px";
+	// window.parent.growChat();
+}
+function closeChat(){
+	ICON.src = "img/Icons/chat icon.png";
+	chat_open = false;
+
+	HOLDER.style.height = "0px";
+	HOLDER.style.left = "100%";
+	// window.parent.shrinkChat();
+}
+
+
+function toggleChat(){
+	if(chat_open){
+		closeChat();
+	}
+	else {
+		openChat();
+	}
+}
+
 document.getElementById('inputMessage').onkeypress = function(event){
 	if(event.keyCode==13&&this.value!='')
 	{
-		window.parent.game.INTERFACE.Game.Send_Chat(this.value);
+		// window.parent.game.INTERFACE.Game.Send_Chat(this.value);
 		this.value = "";
 	}
-};
-
-window.onload = function(){
-	document.getElementById('inputMessage').focus()
-	window.parent.refreshChatList();
 };
 
 var chatters = [];
@@ -36,8 +92,45 @@ function delPlayer(socket)
 	}
 }
 
+function removeNotification()
+{
+	if(!notification)return;
+	notification = false;
+	let NOTIFY = document.getElementById('notify');
+	NOTIFY.style.display = "none";
+	NOTIFY.style.left = "-80%";
+	NOTIFY.style.top = "-100%";
+	NOTIFY.style.width = "75%";
+}
+function notify()
+{
+	if(notification || chat_open)return;
+	notification = true;
+	let NOTIFY = document.getElementById('notify');
+
+	document.getElementById('open-button').style.opacity = 1;
+	NOTIFY.style.display = "block";
+	NOTIFY.style.left = "100%";
+	NOTIFY.style.top = "100%";
+
+	setTimeout(function() {
+		if(!notification)return;
+		NOTIFY.style.left = "-80%";
+		NOTIFY.style.top = "-100%";
+	}, 500);
+	setTimeout(function() {
+		if(!notification)return;
+		NOTIFY.style.top = "-20px";
+		NOTIFY.style.width = "200%";
+	}, 1000);
+	setTimeout(function() {
+		document.getElementById('open-button').style.opacity = .45;
+	}, 2000);
+}
 function add_msg(sender, text)
 {
+	notify();
+
 	var name = null;
 	for(var i in chatters)
 	{

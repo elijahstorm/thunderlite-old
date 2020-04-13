@@ -97,7 +97,9 @@ var LOG = {
 		if(LOG.first_popup)
 		{
 			LOG.first_popup = false;
-			LOG.popup("Click to remove logs. Moving your mouse over a log will remove it after two seconds.");
+			if(INTERFACE.IS_MOBILE_GAME)
+				LOG.popup("Tap to remove logs.");
+			else LOG.popup("Click to remove logs. Moving your mouse over a log will remove it after two seconds.");
 		}
 	},
 	first_popup:true
@@ -591,37 +593,6 @@ window.onload = function(){
 			/// LOAD FREE MAPS DATA
 	socket.emit('userdata get', "progress");
 
-	if(window.parent.mobilecheck())
-	{
-		document.getElementById("avatarCanvas").style.height = 200+"px";
-		document.getElementById("avatarCanvas").style.width = 60+"px";
-		avatarCanvas = initiateCanvas("avatarCanvas");
-		avatarCanvas.width = 60;
-		avatarCanvas.height = 200;
-		document.getElementById("statsCanvas").style.width = 600+"px";
-		statsCanvas = initiateCanvas("statsCanvas");
-		statsCanvas.width = 600;
-		statsCanvas.height = 60;
-	}
-	else
-	{
-		document.getElementById("avatarCanvas").style.height = 600+"px";
-		document.getElementById("avatarCanvas").style.width = 210+"px";
-		avatarCanvas = initiateCanvas("avatarCanvas");
-		avatarCanvas.width = 210;
-		avatarCanvas.height = 600;
-		document.getElementById("statsCanvas").style.width = 600+"px";
-		statsCanvas = initiateCanvas("statsCanvas");
-		statsCanvas.width = 600;
-		statsCanvas.height = 70;
-	}
-	Avatar_Display = Canvas.Create_Canvas(avatarCanvas, "avatar");
-	Avatar_Display.Background.State.Set("#55D6C2");
-	Avatar_Display.Background.Alpha.Set(1);
-	Stats_Display = Canvas.Create_Canvas(statsCanvas, "stat");
-	Stats_Display.Background.State.Set("#F49097");
-	Stats_Display.Background.Alpha.Set(1);
-
 	INTERFACE = new Interface_Class;
 	dialogCanvas = initiateCanvas("dialogCanvas");
 	Dialog_Display = Canvas.Create_Canvas(dialogCanvas, "dialog");
@@ -631,12 +602,6 @@ window.onload = function(){
 		onInterfaceLoadedList[i](INTERFACE);
 	}
 	onInterfaceLoadedList = null;
-	document.getElementById("menuButton").onclick = function(){
-		if(!confirm("Are you sure?\nYou will lose all current progress"))
-			return;
-		INTERFACE.Game.Send_Move('leave');
-		INTERFACE.Game.End_Game();
-	};
 	document.getElementById("endTurn").onclick = function(){
 		if(!INTERFACE.Game)return;
 		if(INTERFACE.Game.Client_Player().Active)
@@ -878,6 +843,7 @@ function changeContent(choice, title) {
 	document.getElementById("mySidebar").style.left = "0px";
 	window.parent.document.getElementById("container").style.maxWidth = "";
 	window.parent.document.getElementById("container").style.maxHeight = "";
+	window.parent.closeChat();
 
 	switch (choice) {
 		case "MULTIPLAYER":
@@ -893,10 +859,13 @@ function changeContent(choice, title) {
 		case "GAME PLAY":
 			document.getElementById("GAMECONTENT").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = title;
-			document.getElementById("game-margin-content").style.marginLeft = "0px";
-			document.getElementById("mySidebar").style.left = "-300px";
 			window.parent.document.getElementById("container").style.maxWidth = "810px";
 			window.parent.document.getElementById("container").style.maxHeight = "665px";
+			if(!INTERFACE.IS_MOBILE_GAME)
+			{
+				document.getElementById("game-margin-content").style.marginLeft = "0px";
+				document.getElementById("mySidebar").style.left = "-300px";
+			}
 			break;
 		case "GAME LOBBY":
 			document.getElementById("GAMELOBBY").style.display = "block";

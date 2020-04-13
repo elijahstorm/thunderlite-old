@@ -166,42 +166,78 @@ img.MAPCHOICEIMG{
 	display:block;
 	z-index:99999;
 }
+#game-options-list{
+	padding: 0px 40px;
+}
 
 #avatarCanvas{
-	position:absolute;
+	position: absolute;
+	top: 54px;
 	right: 0px;
-	width:210px;
-	min-width:210px;
-	max-width:210px;
-	height:600px;
-	min-height:600px;
-	max-height:600px;
+	width: 150px;
+	min-width: 150px;
+	max-width: 150px;
+	height: 400px;
+	min-height: 400px;
+	max-height: 400px;
+
+	background: #fffd;
+	overflow: hidden;
 }
+#active-players{
+	position: absolute;
+	top: 10px;
+	width: 90%;
+	padding: 5px;
+}
+.avatar-icon-inline{
+	position: relative;
+	display: inline;
+	margin: 5px;
+	top: 10px;
+	width: 40%;
+}
+#active-player-list{
+	padding: 0px;
+}
+.active-game-players{
+	position: relative;
+	padding: 0px;
+	border-bottom: 1px solid #0008;
+	transition: left .2s ease-out;
+}
+
 #statsCanvas{
-	position:absolute;
-	bottom:0px;
-	height:65px;
-	min-height:65px;
-	max-height:65px;
-	width:600px;
-	min-width:600px;
-	max-width:600px;
+	position: absolute;
+	padding: 5px;
+	bottom: 50px;
+	left: -1px;
+	height: 155px;
+	min-height: 155px;
+	max-height: 155px;
+	width: 120px;
+	min-width: 120px;
+	max-width: 120px;
+
+	background: #fffd;
+	overflow: hidden;
 }
 
 #gameHelpers{
 	display:none;
   position: absolute;
-  right: 0px;
+  left: 0px;
 	bottom: 0px;
   width: 210px;
 	box-sizing: unset;
 }
 #frames{
 	position:absolute;
-	bottom:65px;
-	right:0px;
+	bottom:5px;
+	left:20px;
 	opacity:.7;
 	width:80px;
+	pointer-events: none;
 }
 #menuButton{
 	position:absolute;
@@ -210,13 +246,17 @@ img.MAPCHOICEIMG{
 	width: 40px;
 	font-size:80%;
 	padding:.5vh 1vw;
+
+	display: none;
 }
 #endTurn{
-	position:absolute;
-	bottom:0px;
-	right:0px;
-	width:160px;
-	height:50px;
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	width: 70px;
+	max-width: 120px;
+	height: 40px;
+	max-height: 50px;
 	-moz-box-shadow:inset 0px 1px 0px 0px #fce2c1;
 	-webkit-box-shadow:inset 0px 1px 0px 0px #fce2c1;
 	box-shadow:inset 0px 1px 0px 0px #fce2c1;
@@ -242,43 +282,6 @@ img.MAPCHOICEIMG{
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fb9e25', endColorstr='#ffc477');
 	background-color:#fb9e25;
 	cursor:pointer;
-}
-#pause{
-	display:none;
-	position:absolute;
-	bottom:65px;
-	right:100px;
-	padding:0px;
-	-moz-border-radius:30px;
-	-webkit-border-radius:30px;
-	-border-radius:30px;
-	height:18px;
-	width:18px;
-	overflow:hidden;
-}
-pause{
-	position:absolute;
-	left:25%;
-	top:20%;
-	min-width:0px;
-	width:20%;
-	height:60%;
-	border-color:#000000;
-	border-style:hidden solid;
-	border-width:.45vw;
-	float:right;
-}
-play{
-	position:absolute;
-	left:40%;
-	top:20%;
-	width:0px;
-	height:0px;
-	border-color:transparent #000000;
-	border-style:solid;
-	border-width:1vh;
-	border-right-style:hidden;
-	float:right;
 }
 
 #mainMenu{

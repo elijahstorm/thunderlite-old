@@ -14,6 +14,10 @@ var Buildings = {
 		{
 			return BuildData.Description;
 		};
+		this.Sprite = function()
+		{
+			return BuildData.Sprite;
+		};
 		this.Index = null;
 
 		this.Name = BuildData.Name;

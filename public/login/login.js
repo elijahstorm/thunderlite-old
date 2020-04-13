@@ -40,11 +40,11 @@ window.parent.onFinishedLoading(function(){
 		{
 			valueCheck = 220;
 		}
-		if(container.clientHeight-logoStyle.clientHeight<valueCheck)
-		{
-			btn.style.visibility = "hidden";
-		}
-		else btn.style.visibility = "visible";
+		// if(container.clientHeight-logoStyle.clientHeight<valueCheck)
+		// {
+		// 	btn.style.visibility = "hidden";
+		// }
+		// else btn.style.visibility = "visible";
 	};
 	window.addEventListener("resize", reflow, false);
 	reflow();

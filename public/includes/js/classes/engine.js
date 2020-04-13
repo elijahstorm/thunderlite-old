@@ -1049,7 +1049,6 @@ var Engine_Class = function(input, is_sample, is_local)
 			self.Game_Over = true;
 			if(UI!=Fast_Fake_Interface)
 				setTimeout(function(){
-					alert(input.Name+" wins!");
 					self.End_Game(client == input);
 				},700);
 			return;
@@ -1089,6 +1088,17 @@ var Engine_Class = function(input, is_sample, is_local)
 		}
 		return Connected_Players[_player.Team]==null;
 	};
+	this.Online_Game = function()
+	{
+		for(let i in Connected_Players)
+		{
+			if(Connected_Players[i]==null || Connected_Players[i]==socket.index)
+			{
+				return true;
+			}
+		}
+		return false;
+	};
 	function runWeather(self){
 		self.Active_Weather.Stop(UI);
 		self.Active_Weather = Weather_Data.Normal;
@@ -1100,6 +1110,7 @@ var Engine_Class = function(input, is_sample, is_local)
 			break;
 		}
 		self.Active_Weather.Start(UI);
+		UI.Avatar.Weather(self.Active_Weather);
 	}
 	this.Next_Player = function(ignore_controls)
 	{

@@ -529,20 +529,26 @@ function openLobby(){
 	game.document.getElementById("refreshLobby").href = "lobby.html";
 }
 function openChat(){
-	if(lobby==null)
-	{
-		lobby = game.document.getElementById("lobbyFrame");
-	}
-	lobby_open = false;
-	// document.getElementById("refreshLobby").href = "chat.html";
-	// lobby.src = "chat.html";
+	document.getElementById('chat-container').style.display = "block";
+	document.getElementById('chatFrame').contentWindow.openChat();
+	refreshChatList();
+}
+function closeChat(){
+	document.getElementById('chat-container').style.display = "none";
+}
+function growChat(){
+	document.getElementById('chat-container').styleName = "growchat";
+}
+function shrinkChat(){
+	document.getElementById('chat-container').styleName = "";
 }
 
 function refreshChatList(){
-	if(lobby_open)return;
+	if(game.INTERFACE.Game==null)return;
 	var list = game.INTERFACE.Request_Connections();
+	let _chat = document.getElementById('chatFrame');
 	for(var i in list){
-		lobby.contentWindow.addPlayer(list[i][0], list[i][1]);
+		_chat.contentWindow.addPlayer(list[i][0], list[i][1]);
 	}
 }
 function refresh_lobby(){

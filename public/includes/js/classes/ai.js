@@ -2051,16 +2051,22 @@ LOGGER(currentUnit.Name);
 	var Act = function(__game, aiPlayer, currentUnit, destination, moverClass)
 	{
 		__game.Move(currentUnit, destination[0], destination[1], moverClass.Path(), function(__unit){
-			if(__unit.Alpha.Get()!=0)
-			if(!__game.Terrain_Map.At(currentUnit.X, currentUnit.Y).Hidden)
-				INTERFACE.Scroll_To_Tile(currentUnit.X, currentUnit.Y);
-			__unit.End_Turn();
-			INTERFACE.Draw();
-			setTimeout(function(){
+			try {
+				if(__unit.Alpha.Get()!=0)
+				if(!__game.Terrain_Map.At(currentUnit.X, currentUnit.Y).Hidden)
+					INTERFACE.Scroll_To_Tile(currentUnit.X, currentUnit.Y);
+				__unit.End_Turn();
 				INTERFACE.Draw();
-				STATUS_CHOICE(Check_Standings(aiPlayer), __game, aiPlayer);
-			}, TIMEOUT);
-			INTERFACE.Draw();
+				setTimeout(function(){
+					INTERFACE.Draw();
+					STATUS_CHOICE(Check_Standings(aiPlayer), __game, aiPlayer);
+				}, TIMEOUT);
+			} catch (e) {
+				console.error(" - - - > Caught AI Error :", e);
+				aiPlayer.End_Turn();
+			} finally {
+				INTERFACE.Draw();
+			}
 		});
 	};
 	var Prep_Movement = function(__game, aiPlayer, currentUnit, destination, moverClass)

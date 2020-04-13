@@ -299,284 +299,100 @@ var Interface_Class = function()
 		Animations.Tick();
 	};
 
-	var Avatar,Status;
-	if(self.IS_MOBILE_GAME) {	// mobile display
-		Status = {
-			Display:0,
-			Icon:Stats_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 0, 0, 1, true, null, Canvas.Background),
-			Name:Stats_Display.Add_Drawable(new Text_Class("15pt Arial", "#000"), "Name", 110, 8, 200, 20, "", Canvas.Background),
-			Desc:Stats_Display.Add_Drawable(new Text_Class("10pt Arial", "#000"), "Desc", 110, 35, 200, 35, "", Canvas.Background),
-			Set:function(data)
+			// view_danger();
+	let Avatar,Status;
+	Avatar = {
+		List_Sliders:[],
+		Player_List:function(__player) {
+			HUD_Avoid_Mouse.interact();
+			if(__player==null)
 			{
-				Stats_Display.Background.Redraw();
-				if(data==null)
-				{
-					this.Display = 0;
-					this.Icon.Alpha.Set(0);
-					this.Name.Alpha.Set(0);
-					this.Desc.Alpha.Set(0);
-					return;
+				for (var i = 0; i < Avatar.List_Sliders.length; i++) {
+					Avatar.List_Sliders[i].style.left = "200px";
 				}
-				this.Display = data.SELECTABLE;
-				this.Icon.Source.Set(data);
-				this.Icon.X.Set(5+data.X_Offset());
-				this.Icon.Y.Set(3+data.Y_Offset());
-				this.Icon.State.Set(true);
-				this.Icon.Alpha.Set(1);
-				this.Name.State.Set(data.Name);
-				this.Name.Alpha.Set(1);
-				this.Desc.State.Set(data.Description());
-				this.Desc.Alpha.Set(1);
+				return;
 			}
-		};
-		Avatar = {
-			DayNumber:Avatar_Display.Add_Drawable(new Text_Class("12pt Arial", "#000"), "Day Number", 2, 8, 30, 27, "Day", Canvas.Background),
-			Turn_Number:Avatar_Display.Add_Drawable(new Text_Class("20pt Arial", "#000"), "Turn Number", 36, 5, 30, 30, null, Canvas.Background),
-			Current_Player:Avatar_Display.Add_Drawable(new Text_Class("15pt Arial", "#000"), "Player Name", 5, -130, 80, 35, null, Canvas.Background),
-			Standings:Avatar_Display.Add_Drawable(new Text_Class("10pt Arial", "#000"), "Standings", 2, 27, 200, 200, null, Canvas.Background),
-			Info:Avatar_Display.Add_Drawable(new Text_Class("13pt Arial", "#000"), "Info", 2, 40, 200, 20, null, Canvas.Background),
-			Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 15, 55, 30, 30, null, Canvas.Background),
-
-			All_Threaths:Avatar_Display.Add_Drawable({Draw:function(){}}, "Threats", 605, 242, 80, 30, "#EE6352", Canvas.Background),
-			_ThreathsBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "ThreatsBG", 5, 242, 80, 30, "#EE6352", Canvas.Background),
-			_ThreathsTEXT:Avatar_Display.Add_Drawable(new Text_Class("13pt Arial", "#57241E"), "ThreatsText", 9, 250, 80, 20, "DANGER", Canvas.Background),
-			_ThreathsBox:Avatar_Display.Add_Drawable(Shape.Box, "ThreatsBox", 5, 242, 80, 30, "#7F9172", Canvas.Background),
-
-			PLHighlights:Avatar_Display.Add_Drawable({
-				Font:new Text_Class("9pt Arial", "#ddd"),
-				Draw:function(canvas, x, y, w, h, __game){
-					if(__game==null ||!~__game)return;
-
-					Shape.Rectangle.Draw(canvas, x, y, w+5, h+5, "#E5D1D0");
-					Shape.Box.Draw(canvas, x, y, w+5, h+5, "#7F9172");
-
-					var active_player = __game.Active_Player();
-					var total_players = __game.Total_Players();
-
-					var str = new Array(total_players);
-					var box = new Array(total_players);
-
-					for(var i=0;i<total_players;i++)
-					{
-						str = (active_player==__game.Client_Player()) ? "You" : (__game.AI_Players(active_player.Team) ? "AI" : active_player.Name.substring(0, 3)+".");
-						var j_max = Math.floor(Math.log10(active_player.Cash_Money()))+1;
-						if(active_player.Cash_Money()==0)
-							j_max = 1;
-						if(active_player.Dead)
-							j_max = 3;
-						for(var j=6-str.length;j>j_max;j--)
-						{
-							str+=" ";
-						}
-						if(active_player.Dead)
-							str+="XXX";
-						else str+="$"+active_player.Cash_Money();
-
-						var color = Team_Colors.Color[active_player.Color][2]; //turn this to hex
-						box = data_to_hex(color);
-
-						Shape.Rectangle.Draw(canvas, x+5, y+(i*23)+5, w-5, 20, box);
-						Shape.Box.Draw(canvas, x+5, y+(i*23)+5, w-5, 20, "#000");
-						this.Font.Draw(canvas, x+10, y+(i*23)+7, w+10, 20, str);
-
-						active_player = __game.Player((active_player.Team+1)%total_players);
-					}
+			document.getElementById('avatar-icon').src = __player.Icon.Source();
+			Avatar.List_Sliders[0].remove();
+			document.getElementById("active-player-list").appendChild(Avatar.List_Sliders[0]);
+			Avatar.List_Sliders.push(Avatar.List_Sliders.shift());
+			for (var i = 0; i < Avatar.List_Sliders.length; i++) {
+				Avatar.List_Sliders[i].style.left = "0px";
+				if(game.Player(i).Cash_Money()!=0)
+					document.getElementById("active-player-money"+i).innerHTML = "$"+game.Player(i).Cash_Money();
+				else document.getElementById("active-player-money"+i).innerHTML = "";
+				let _standingStr = "⭐",
+					_standing = game.Check_Player_Standing(i);
+				for (var jj = 0; jj < _standing; jj++) {
+					_standingStr+="⭐";
 				}
-			}, "Player List Highlights", 2, 90, 50, 40, null, Canvas.Merge),
-
-			Update_Player_List:function(){
-				var total_players = game.Total_Players();
-				this.PLHighlights.Height.Set(total_players*24+1);
-				this.PLHighlights.State.Set(game);
-			},
-			Display:function(player){
-				if(player==null||game.Game_Over)
-				{
-					this.DayNumber.State.Set("");
-					this.Icon.Alpha.Set(0);
-					this.Standings.State.Set("");
-					this.Info.State.Set("");
-					this.Current_Player.State.Set("");
-					this._ThreathsBG.Alpha.Set(0);
-					this._ThreathsBox.Alpha.Set(0);
-					this._ThreathsTEXT.Alpha.Set(0);
-					return;
-				}
-				this.DayNumber.State.Set("Day");
-				this.Turn_Number.State.Set(""+(game.Turn()+1));
-
-				var standing = game.Check_Player_Standing(player.Team),
-					str = "";
-				for(var i=0;i<=standing;i++)
-					str+="★";
-				for(var i=standing+1;i<5;i++)
-					str+="☆";
-				this.Standings.State.Set(str);
-
-				this._ThreathsBG.Alpha.Set(255);
-				this._ThreathsBox.Alpha.Set(255);
-				this._ThreathsTEXT.Alpha.Set(255);
-
-				this.Info.State.Set("$"+player.Cash_Money());
-				this.Current_Player.State.Set(player.Name);
-				this.Icon.Source.Set(player.Icon);
-				this.Icon.Alpha.Set(1);
-				this.Update_Player_List();
+				document.getElementById("active-player-status"+i).innerHTML = _standingStr;
 			}
-		};
-	}
-	else {	// browser display
-		Status = {
-			Display:0,
-			Icon:Stats_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 0, 0, 1, true, null, Canvas.Background),
-			IconBorder:Stats_Display.Add_Drawable(Shape.Box, "IconBorder", 3, 3, 63, 63, "#3C6BBE", Canvas.Merge),
-			Name:Stats_Display.Add_Drawable(new Text_Class("15pt Arial", "#000"), "Name", 70, 3, 200, 20, "", Canvas.Background),
-			Desc:Stats_Display.Add_Drawable(new Text_Class("10pt Arial", "#000"), "Desc", 70, 25, 200, 35, "", Canvas.Background),
-			Info:Stats_Display.Add_Drawable(new Text_Class("10pt Arial", "#000"), "Info", 290, 5, 130, 50, "", Canvas.Background),
-			Divisor1:Stats_Display.Add_Drawable(Shape.Rectangle, "Div1", 280, 3, 2, 60, "#000", Canvas.Background, 0),
-			Set:function(data)
+		},
+		Weather:function(_weather) {
+			document.getElementById('weather-icon').src = _weather.Icon.Source();
+		},
+		Set_Up:function(__players) {
+			let el,txt,money,status;
+			function makeList(i)
 			{
-				Stats_Display.Background.Redraw();
-				if(data==null)
-				{
-					this.Display = 0;
-					this.Icon.Alpha.Set(0);
-					this.Name.Alpha.Set(0);
-					this.Desc.Alpha.Set(0);
-					this.Info.Alpha.Set(0);
-					this.Divisor1.Alpha.Set(0);
-					return;
+				el = document.createElement("li");
+				el.className = "active-game-players";
+				txt = document.createElement("h3");
+				txt.style.textAlign = "left";
+				txt.style.padding = "0px 5px";
+				txt.style.margin = "0px";
+				txt.innerHTML = game.Player(i).Name;
+				money = document.createElement("h6");
+				if(game.Player(i).Cash_Money()!=0)
+					money.innerHTML = game.Player(i).Cash_Money();
+				money.id = "active-player-money"+i;
+				money.style.margin = "0px";
+				status = document.createElement('h6');
+				status.id = "active-player-status"+i;
+				status.style.margin = "0px";
+				let _standingStr = "⭐",
+					_standing = game.Check_Player_Standing(i);
+				for (var jj = 0; jj < _standing; jj++) {
+					_standingStr+="⭐";
 				}
-				this.Display = data.SELECTABLE;
-				this.Icon.Source.Set(data);
-				this.Icon.X.Set(5+data.X_Offset());
-				this.Icon.Y.Set(3+data.Y_Offset());
-				this.Icon.State.Set(true);
-				this.Icon.Alpha.Set(1);
-				this.Name.State.Set(data.Name);
-				this.Name.Alpha.Set(1);
-				this.Desc.State.Set(data.Description());
-				this.Desc.Alpha.Set(1);
-				this.Info.Alpha.Set(1);
-				this.Divisor1.Alpha.Set(1);
-				if(data.SELECTABLE==1)
-				{	/// unit
-					this.Info.State.Set(data.Health+" / "+data.Max_Health+" HP\n"+(data.Health/data.Max_Health*data.Power).toFixed(0)+" Strength\n"+Char_Data.TypeToStr[data.Unit_Type]+"\n"+data.Movement+" "+Char_Data.MoveToStr[data.Move_Type]);
-				}
-				else if(data.SELECTABLE==2)
-				{	/// city
-					this.Icon.State.Set(false);
-					this.Info.State.Set((data.Protection*100)+"% Protection\n\n"+Terrain_Data.TypeToStr[data.Type]+"\n"+data.Damage+" Damage");
-				}
-				else if(data.SELECTABLE==3)
-				{	/// terrain
-					this.Info.State.Set(data.Stature.Get()+" / "+Building_Data.PLACE[data.Source].Stature+" HP\n"+(data.Protection*100)+"% Protection\n\n"+Building_Data.TypeToStr[data.Type]+"\n"+data.Defense+" Defense\n\n");
-				}
+				status.innerHTML = _standingStr;
+				el.appendChild(txt);
+				el.appendChild(money);
+				el.appendChild(status);
+				el.id = "player "+i;
+				el.style.background = data_to_hex(Team_Colors.Color[game.Player(i).Color][0])+"77";
+				document.getElementById("active-player-list").appendChild(el);
+				Avatar.List_Sliders.push(el);
 			}
-		};
-		Avatar = {
-			TurnBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "TurnBG", 20, 15, 150, 55, "#D6E094", Canvas.Background),
-			TurnBox:Avatar_Display.Add_Drawable(Shape.Box, "TurnBox", 20, 15, 150, 55, "#DFB2F4", Canvas.Merge),
-			Turn:Avatar_Display.Add_Drawable(new Text_Class("20pt Arial", "#000"), "Turn", 30, 30, 50, 40, null, Canvas.Merge),
-			Weather:Avatar_Display.Add_Drawable(Shape.Rectangle, "Weather Icon", 10, 185, 50, 50, null, Canvas.Background),
-			Turn_Number:Avatar_Display.Add_Drawable(new Text_Class("40pt Arial", "#000"), "Turn Number", 100, 20, 50, 45, null, Canvas.Merge),
-			Standings:Avatar_Display.Add_Drawable(new Text_Class("15pt Arial", "#000"), "Standings", 20, 85, 200, 20, null, Canvas.Background),
-			Standings_Border1:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border1", 20, 80, 150, 2, "#000", Canvas.Background),
-			Standings_Border2:Avatar_Display.Add_Drawable(Shape.Rectangle, "Standings Border2", 20, 105, 150, 2, "#000", Canvas.Background),
-			Current_Player:Avatar_Display.Add_Drawable(new Text_Class("25pt Arial", "#000"), "Player Name", 10, 130, 200, 35, null, Canvas.Background),
-			Info:Avatar_Display.Add_Drawable(new Text_Class("15pt Arial", "#000"), "Info", 15, 165, 200, 20, null, Canvas.Background),
-			Icon:Avatar_Display.Add_Drawable(Images.Retrieve("empty"), "Icon", 110, 160, 80, 80, null, Canvas.Background),
-
-			All_Threaths:Avatar_Display.Add_Drawable({Draw:function(){}}, "Threats", 605, 242, 80, 30, "#EE6352", Canvas.Background),
-			_ThreathsBG:Avatar_Display.Add_Drawable(Shape.Rectangle, "ThreatsBG", 5, 242, 80, 30, "#EE6352", Canvas.Background),
-			_ThreathsBox:Avatar_Display.Add_Drawable(Shape.Box, "ThreatsBox", 5, 242, 80, 30, "#7F9172", Canvas.Background),
-			_ThreathsTEXT:Avatar_Display.Add_Drawable(new Text_Class("13pt Arial", "#57241E"), "ThreatsText", 9, 250, 80, 20, "DANGER", Canvas.Merge),
-
-			PLHighlights:Avatar_Display.Add_Drawable({
-				Font:new Text_Class("15pt Arial", "#ddd"),
-				Draw:function(canvas, x, y, w, h, __game){
-					if(__game==null ||!~__game)return;
-
-					Shape.Rectangle.Draw(canvas, x-5, y-5, w+10, h+10, "#E5D1D0");
-					Shape.Box.Draw(canvas, x-5, y-5, w+10, h+10, "#7F9172");
-
-					var active_player = __game.Active_Player();
-					var total_players = __game.Total_Players();
-
-					var str = new Array(total_players);
-					var box = new Array(total_players);
-
-					for(var i=0;i<total_players;i++)
-					{
-						str = active_player.Name;
-						var j_max = Math.floor(Math.log10(active_player.Cash_Money()))+1;
-						if(active_player.Cash_Money()==0)
-							j_max = 1;
-						if(active_player.Dead)
-							j_max = 3;
-						for(var j=25-str.length;j>j_max;j--)
-						{
-							str+=" ";
-						}
-						if(active_player.Dead)
-							str+="XXX";
-						else str+="$"+active_player.Cash_Money();
-
-						var color = Team_Colors.Color[active_player.Color][2]; //turn this to hex
-						box = data_to_hex(color);
-
-						Shape.Rectangle.Draw(canvas, x, y+(i*36), w, 30, box);
-						Shape.Box.Draw(canvas, x, y+(i*36), w, 30, "#000");
-						this.Font.Draw(canvas, x+5, y+(i*36)+5, w, 30, str);
-
-						active_player = __game.Player((active_player.Team+1)%total_players);
-					}
-				}
-			}, "Player List Highlights", 10, 360, 180, 85, null, Canvas.Merge),
-
-			Update_Player_List:function(){
-				var total_players = game.Total_Players();
-				this.PLHighlights.Height.Set(total_players*34+1);
-				this.PLHighlights.State.Set(game);
-			},
-			Display:function(player){
-				if(player==null||game.Game_Over)
-				{
-					this.Icon.Alpha.Set(0);
-					this.Standings.State.Set("");
-					this.Info.State.Set("");
-					this.Current_Player.State.Set("");
-					this._ThreathsBG.Alpha.Set(0);
-					this._ThreathsBox.Alpha.Set(0);
-					this._ThreathsTEXT.Alpha.Set(0);
-					return;
-				}
-				this.TurnBG.Alpha.Set(255);
-				this.TurnBox.Alpha.Set(255);
-				this.Turn.State.Set("Day");
-				this.Weather.Source.Set(game.Active_Weather.Icon);
-				this.Turn_Number.State.Set(""+(game.Turn()+1));
-
-				var standing = game.Check_Player_Standing(player.Team),
-					str = "";
-				for(var i=0;i<=standing;i++)
-					str+="★   ";
-				for(var i=standing+1;i<5;i++)
-					str+="☆   ";
-				this.Standings.State.Set(str);
-
-				this._ThreathsBG.Alpha.Set(255);
-				this._ThreathsBox.Alpha.Set(255);
-				this._ThreathsTEXT.Alpha.Set(255);
-
-				this.Info.State.Set("$"+player.Cash_Money());
-				this.Current_Player.State.Set(player.Name);
-				this.Icon.Source.Set(player.Icon);
-				this.Icon.Alpha.Set(1);
-				this.Update_Player_List();
+			makeList(__players-1);
+			for(let i=0;i<__players-1;i++)
+			{
+				makeList(i);
 			}
-		};
-	}
+		}
+	};
+	this.Avatar = Avatar;
+	Status = {
+		Show_Info:function(__tile) {
+			if(__tile==null)
+			{
+				document.getElementById('status-icon').style.visibility = "hidden";
+				document.getElementById('status-info').style.visibility = "hidden";
+				return;
+			}
+			document.getElementById('status-icon').style.visibility = "visible";
+			document.getElementById('status-info').style.visibility = "visible";
+
+
+			document.getElementById('status-icon').src = __tile.Sprite().Source();
+
+			document.getElementById('status-info').innerHTML = __tile.Description();
+			// document.getElementById('status-info').src = __tile.src;
+		},
+		Info_Type:0
+	};
+	this.Status = Status;
 
 	var Screen = {
 		// Border:Dialog_Display.Add_Drawable(Shape.Box, "Border", 0, 0, 600, 600, "#0ff", Canvas.Background),
@@ -949,9 +765,6 @@ var Interface_Class = function()
 		}
 	};
 	var clickable = self.Clickable;
-	self.Clickable.Add_Button(Avatar.All_Threaths, function(drawable){
-		view_danger();
-	});
 
 	var click_fnc = function(x, y){
 		if(!allow_input)return;
@@ -1006,7 +819,7 @@ var Interface_Class = function()
 	 	HUD_Avoid_Mouse = {
 			avatar_down:true,
 			avatar_right:true,
-			time_without_interaction:200,
+			time_without_interaction:135,
 			idle_time:0,
 			avoid:20,
 			speed:10,
@@ -1129,7 +942,7 @@ var Interface_Class = function()
 	 	HUD_Avoid_Mouse = {
 			avatar_right:true,
 			idle_time:0,
-			time_without_interaction:100,
+			time_without_interaction:135,
 			avoid:20,
 			speed:10,
 			adjust:-1,
@@ -1204,16 +1017,16 @@ var Interface_Class = function()
 				if(HUD_Avoid_Mouse.idle_time>HUD_Avoid_Mouse.time_without_interaction)
 				{
 					if(gameWidth>=600)return;
-					if(_avatar.style.opacity>0.3)
+					if(_avatar.style.opacity>0.1)
 					{
-						_avatar.style.opacity-=.035;
-						_status.style.opacity-=.035;
+						_avatar.style.opacity-=.045;
+						_status.style.opacity-=.045;
 						_helpers.style.opacity-=.025;
 					}
 					else
 					{
-						_avatar.style.opacity = .3;
-						_status.style.opacity = .3;
+						_avatar.style.opacity = .1;
+						_status.style.opacity = .1;
 						_helpers.style.opacity = .5;
 					}
 					return;
@@ -1320,15 +1133,11 @@ var Interface_Class = function()
 		self.gameYScale = gameHeight/600;
 		Dialog_Display.Scale(self.gameXScale, self.gameYScale);
 		HUD_Display.Scale(self.gameXScale, self.gameYScale);
-		Avatar_Display.Scale(1, self.gameYScale);
-		Stats_Display.Scale(self.gameXScale, 1);
 		if(open_menu && menu_scale){
 			open_menu.Scale(clientWidth/Canvas.MaxWidth, clientHeight/Canvas.MaxHeight);
 			return;
 		}
 		if(game==null)return;
-		Avatar_Display.Redraw();
-		Stats_Display.Redraw();
 
 		scroller.setDimensions(gameWidth, gameHeight, game.Terrain_Map.Width*TILESIZE, game.Terrain_Map.Height*TILESIZE);
 	};
@@ -1356,11 +1165,11 @@ var Interface_Class = function()
 	{
 		if(sampledGame==null)return;
 		if(!sampledGame.valid)return;
-		var fullWidth = sampledGame.Terrain_Map.Width*TILESIZE;
-		var fullHeight = sampledGame.Terrain_Map.Height*TILESIZE;
+		let fullWidth = sampledGame.Terrain_Map.Width*TILESIZE;
+		let fullHeight = sampledGame.Terrain_Map.Height*TILESIZE;
 		imageHolderCanvas.clearRect(0, 0, fullWidth, fullHeight);
-		for(var i=0;i<sampledGame.Terrain_Map.Width;i++)
-		for(var j=0;j<sampledGame.Terrain_Map.Height;j++){
+		for(let i=0;i<sampledGame.Terrain_Map.Width;i++)
+		for(let j=0;j<sampledGame.Terrain_Map.Height;j++){
 			var at = sampledGame.Terrain_Map.At(i,j);
 			if(at!=null){
 				at.UI_Draw(imageHolderCanvas, i*TILESIZE, j*TILESIZE, 1);
@@ -1369,6 +1178,10 @@ var Interface_Class = function()
 			}
 			at = sampledGame.Units_Map.At(i,j);
 			if(at!=null&&at!=moving_unit)at.UI_Draw(imageHolderCanvas, i*TILESIZE, j*TILESIZE, 1);
+		}
+		if(TILESIZE!=60)
+		{
+			return scale(imageHolderCanvas.getImageData(0, 0, fullWidth, fullHeight), 60/TILESIZE, 60/TILESIZE);
 		}
 		return imageHolderCanvas.getImageData(0, 0, fullWidth, fullHeight);
 	};
@@ -1392,7 +1205,7 @@ var Interface_Class = function()
 	};
 	self.Update_Player_Info = function()
 	{
-		Avatar.Display(game.Active_Player());
+		Avatar.Player_List(game.Active_Player());
 	};
 	self.Income_Draw = function(tile_x, tile_y, amount)
 	{
@@ -1863,10 +1676,7 @@ var Interface_Class = function()
 
 		if(__map_game_setup)
 		{
-			let gameName = "";
-			while(gameName=="")gameName = prompt("Name the game ");
-			if(!gameName)return;
-			new_custom_game(DATA, [gameName, __map_img]);
+			new_custom_game(DATA, [DATA.Name, __map_img]);
 			return;
 		}
 
@@ -2155,6 +1965,11 @@ var Interface_Class = function()
 	self.Start = function()
 	{
 		changeContent("GAME PLAY", game.Name);
+		if(game.Online_Game())
+		{
+			window.parent.openChat();
+		}
+		Avatar.Set_Up(game.Total_Players());
 
 		HUD_Avoid_Mouse.interact();
 		Animations.kill = false;
@@ -2166,7 +1981,6 @@ var Interface_Class = function()
 		}
 		Repair_Animation.Stop = false;
 		document.getElementById("gameHelpers").style.display = "block";
-		window.parent.openChat();
 		Mod_List.Units.Self_Action.Irreparable.Sprite = Mod_List.Units.Self_Action.Repairable.Sprite;
 		Mod_List.Units.Self_Action.Irreparable.Active = false;
 		SFXs.Stop_All();
@@ -2195,6 +2009,7 @@ var Interface_Class = function()
 		Enviornment.Stop_All();
 		if(players!=null)
 			MUSIC = Music.Retrieve("game "+ (game_won ? "won" : "lost")).Play();
+		LOG.popup(game_won ? "You won!!" : "Good try!");
 		for(var x=1;x<Terrain_Data.TERRE.length;x++)
 		{
 			var _t = Terrain_Data.TERRE[x];
@@ -2288,11 +2103,11 @@ var Interface_Class = function()
 	}
 
 	this.HIGHLIGHT = function(){
-		Avatar._ThreathsBG.State.Set("#dd5040");
+		// Avatar._ThreathsBG.State.Set("#dd5040");
 		return highlight_enemies(game);
 	};
 	this.UNHIGHLIGHT = function(_danger){
-		Avatar._ThreathsBG.State.Set("#EE6352");
+		// Avatar._ThreathsBG.State.Set("#EE6352");
 		hl_map(_danger, 0);
 	};
 
@@ -2323,7 +2138,7 @@ var Interface_Class = function()
 	self.Set_Next_Player = function(player, callback)
 	{
 		self.Allow_Controls(false);
-		Avatar.Display();
+		Avatar.Player_List();
 		if(player==game.Client_Player())
 		{
 			MUSIC = MUSIC.Switch(Music.Retrieve("player turn"));
@@ -2333,7 +2148,7 @@ var Interface_Class = function()
 			MUSIC = MUSIC.Switch(Music.Retrieve("enemy turn"));
 		}
 		Screen.Next_Player(player, function(){ // when done drawing player intro
-			Avatar.Display(player);
+			Avatar.Player_List(player);
 			self.Allow_Controls(true);
 			if(callback!=null)
 				callback();
@@ -2375,7 +2190,7 @@ var Interface_Class = function()
 				selected_unit.Close_Selection();
 				selected_unit = null;
 			}
-			Status.Set();
+			Status.Show_Info();
 			selected_tile = null;
 			if(_____danger.length>0)
 			{
@@ -2393,25 +2208,25 @@ var Interface_Class = function()
 			// Unit -> Building -> Terrain -> Unit
 			// skipping when there is no data
 			if(game.Terrain_Map.At(x,y).Hidden)return;
-			if(Status.Display==1)
+			if(Status.Info_Type==1)
 			{
 				var display = game.Terrain_Map.At(x,y);
 				if(display.Building!=null)
-					Status.Set(display.Building);
-				else Status.Set(display);
+					Status.Show_Info(display.Building);
+				else Status.Show_Info(display);
 			}
-			else if(Status.Display==2)
+			else if(Status.Info_Type==2)
 			{
 				var display = game.Terrain_Map.At(x,y);
 				if(display.Unit!=null)
-					Status.Set(display.Unit);
+					Status.Show_Info(display.Unit);
 				else if(display.Building!=null)
-					Status.Set(display.Building);
-				else Status.Set(display);
+					Status.Show_Info(display.Building);
+				else Status.Show_Info(display);
 			}
-			else if(Status.Display==3)
+			else if(Status.Info_Type==3)
 			{
-				Status.Set(game.Terrain_Map.At(x,y));
+				Status.Show_Info(game.Terrain_Map.At(x,y));
 			}
 			if(selected_unit!=null)
 			{
@@ -2453,7 +2268,7 @@ var Interface_Class = function()
 					if(selected.Building!=null)
 					{
 						selected = selected.Building;
-						Status.Set(selected);
+						Status.Show_Info(selected);
 						if(!selected.Active)return;
 						if(selected.Owner!=game.Active_Player()||selected.Owner!=game.Client_Player())
 						{
@@ -2466,7 +2281,7 @@ var Interface_Class = function()
 						}
 						selected.Act();
 					}
-					else Status.Set(selected);
+					else Status.Show_Info(selected);
 					return;
 				}
 
@@ -2508,7 +2323,7 @@ var Interface_Class = function()
 			if(selected.Building!=null)
 			{
 				selected = selected.Building;
-				Status.Set(selected);
+				Status.Show_Info(selected);
 				if(!selected.Active)return;
 				if(selected.Owner!=game.Active_Player()||selected.Owner!=game.Client_Player())
 				{
@@ -2521,7 +2336,7 @@ var Interface_Class = function()
 				}
 				selected.Act();
 			}
-			else Status.Set(selected);
+			else Status.Show_Info(selected);
 			return;
 		}
 
@@ -2535,7 +2350,7 @@ var Interface_Class = function()
 		highlight_path(hl_path);
 		if(selected_unit.Slow_Attack)
 			highlight_both(hl_path);
-		Status.Set(selected_unit);
+		Status.Show_Info(selected_unit);
 		if(selected_unit.Idle||!selected_unit.Active)
 		{
 			selected_unit.Close_Selection();
