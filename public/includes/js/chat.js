@@ -4,6 +4,28 @@ const HOLDER = document.getElementById('main-holder');
 let chat_open = false;
 let first_open = true;
 let notification = false;
+let PARENT;
+
+window.onload = function() {
+	PARENT = 	window.parent.shrinkChat==null ? window.top.parent :	window.parent;
+};
+
+function jump(i){
+	if(i<0)
+	{
+		parent.style.opacity = .45;
+		if(!chat_open)
+			PARENT.shrinkChat();
+		return;
+	}
+	parent.style.bottom = "50px";
+	setTimeout(function() {
+		parent.style.bottom = "5px";
+		setTimeout(function() {
+			jump(i-1);
+		}, 300);
+	}, 300);
+}
 
 function openChat(){
 	if(first_open)
@@ -11,21 +33,6 @@ function openChat(){
 		first_open = false;
 		parent = document.getElementById('open-button');
 		parent.style.opacity = .9;
-		function jump(i){
-			if(i<0)
-			{
-				parent.style.opacity = .45;
-				// window.parent.shrinkChat();
-				return;
-			}
-			parent.style.bottom = "50px";
-			setTimeout(function() {
-				parent.style.bottom = "5px";
-				setTimeout(function() {
-					jump(i-1);
-				}, 300);
-			}, 300);
-		}
 		setTimeout(function() {
 			jump(3);
 		}, 300);
@@ -38,7 +45,7 @@ function openChat(){
 
 	HOLDER.style.height = "100%";
 	HOLDER.style.left = "0px";
-	// window.parent.growChat();
+	PARENT.growChat();
 }
 function closeChat(){
 	ICON.src = "img/Icons/chat icon.png";
@@ -46,9 +53,11 @@ function closeChat(){
 
 	HOLDER.style.height = "0px";
 	HOLDER.style.left = "100%";
-	// window.parent.shrinkChat();
+	setTimeout(function() {
+		if(chat_open)return;
+		PARENT.shrinkChat();
+	}, 1000);
 }
-
 
 function toggleChat(){
 	if(chat_open){
@@ -62,7 +71,7 @@ function toggleChat(){
 document.getElementById('inputMessage').onkeypress = function(event){
 	if(event.keyCode==13&&this.value!='')
 	{
-		// window.parent.game.INTERFACE.Game.Send_Chat(this.value);
+		PARENT.game.INTERFACE.Game.Send_Chat(this.value);
 		this.value = "";
 	}
 };

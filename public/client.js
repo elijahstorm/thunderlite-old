@@ -537,10 +537,10 @@ function closeChat(){
 	document.getElementById('chat-container').style.display = "none";
 }
 function growChat(){
-	document.getElementById('chat-container').styleName = "growchat";
+	document.getElementById('chat-container').className = "growchat";
 }
 function shrinkChat(){
-	document.getElementById('chat-container').styleName = "";
+	document.getElementById('chat-container').className = "";
 }
 
 function refreshChatList(){

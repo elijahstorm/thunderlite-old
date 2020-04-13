@@ -57,9 +57,14 @@ body{
 	position: absolute;
 	right: 5px;
 	bottom: 5px;
-	height: 60%;
+  height: 105px;
+  width: 60px;
 	transition: right .6s ease, bottom .6s ease;
 	display: none;
+}
+.growchat{
+  height: 60%!important;
+  width: 50%!important;
 }
 #chatFrame{
 	width: 100%;
