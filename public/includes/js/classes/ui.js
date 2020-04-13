@@ -441,15 +441,15 @@ var Interface_Class = function()
 						console.error("ERROR DRAWING CHANGING PLAYER");
 					}
 				}
-			}, null, 600, 200, 400, 200, null, null, .7);
-			Core.Slide_Drawable_X(collectiveDrawable, -500, 10, function(collectiveDrawable){
+			}, null, 600, 100, 300, 175, null, null, .7);
+			Core.Slide_Drawable_X(collectiveDrawable, -450, 10, function(collectiveDrawable){
 				setTimeout(function(){
-					Core.Fade_Drawable(collectiveDrawable, 0, 5, function(collectiveDrawable){
+					Core.Fade_Drawable(collectiveDrawable, 0, 10, function(collectiveDrawable){
 						Dialog_Display.Delete_Drawable(collectiveDrawable);
 						// allow_render = true;
 						callback();
 					});
-				}, 700);
+				}, 1000);
 			});
 		}
 	};
