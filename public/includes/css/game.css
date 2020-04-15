@@ -12,6 +12,18 @@ body{
 #GAMECONTENT{
 	padding: 0px;
 }
+#LOADINGOVERLAY{
+	width: 100%;
+	height: 500px;
+}
+#loading-background{
+	height: 500px;
+	overflow: hidden;
+}
+.fade_in{
+	opacity: 0;
+	transition: opacity .5s;
+}
 
 #HOSTGAMEMAPNAME{
 	padding: 0px 25px;
@@ -166,7 +178,6 @@ img.MAPCHOICEIMG{
 
 #canvasHolder{
 	position:absolute;
-	padding: 84px 0px 0px 0px;
 	margin:0px;
 	width: 100%;
 	height: 100%;
@@ -193,7 +204,6 @@ img.MAPCHOICEIMG{
 
 #avatarCanvas{
 	position: absolute;
-	top: 56px;
 	right: 0px;
 	width: 150px;
 	min-width: 150px;
@@ -245,13 +255,16 @@ img.MAPCHOICEIMG{
 }
 
 #gameHelpers{
-	display:none;
   position: absolute;
   left: 0px;
 	bottom: 0px;
   width: 210px;
 	box-sizing: unset;
 }
+.fade_out{
+	transition: opacity 1.5s ease;
+}
+
 #frames{
 	position:absolute;
 	bottom:5px;
@@ -379,10 +392,92 @@ img.MAPCHOICEIMG{
 	cursor:pointer;
 }
 
-.btnBack{
-	position:absolute;
-	bottom:100px;
-	left:20px;
-	height:20px;
-	width:50px;
+
+.lds-ripple {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-ripple div {
+  position: absolute;
+  border: 4px solid #fff;
+  opacity: 1;
+  border-radius: 50%;
+  animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.lds-ripple div:nth-child(2) {
+  animation-delay: -0.5s;
+}
+@keyframes lds-ripple {
+  0% {
+    top: 36px;
+    left: 36px;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 0px;
+    left: 0px;
+    width: 72px;
+    height: 72px;
+    opacity: 0;
+  }
+}
+
+.lds-ellipsis {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-ellipsis div {
+  position: absolute;
+  top: 33px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+.lds-ellipsis div:nth-child(1) {
+  left: 8px;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(2) {
+  left: 8px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(3) {
+  left: 32px;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(4) {
+  left: 56px;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(24px, 0);
+  }
 }

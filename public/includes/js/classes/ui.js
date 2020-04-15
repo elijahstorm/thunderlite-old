@@ -312,6 +312,7 @@ var Interface_Class = function()
 				}
 				return;
 			}
+			document.getElementById('day_turn_info').innerHTML = "Day "+(game.Turn()+1);
 			document.getElementById('avatar-icon').src = __player.Icon.Source();
 			Avatar.List_Sliders[0].remove();
 			document.getElementById("active-player-list").appendChild(Avatar.List_Sliders[0]);
@@ -333,6 +334,7 @@ var Interface_Class = function()
 			document.getElementById('weather-icon').src = _weather.Icon.Source();
 		},
 		Set_Up:function(__players) {
+			Avatar.List_Sliders = [];
 			let el,txt,money,status;
 			function makeList(i)
 			{
@@ -378,12 +380,16 @@ var Interface_Class = function()
 			if(__tile==null)
 			{
 				document.getElementById('statsCanvas').style.visibility = "hidden";
+				Status.Info_Type = 0;
 				return;
 			}
+
 			document.getElementById('statsCanvas').style.visibility = "visible";
 
 			document.getElementById('status-icon').src = __tile.Sprite().Source();
 			document.getElementById('status-info').innerHTML = __tile.Description();
+
+			Status.Info_Type = __tile.SELECTABLE;
 		},
 		Info_Type:0
 	};
@@ -536,9 +542,6 @@ var Interface_Class = function()
 			if(prevPinchDiff!=0)
 			{
 				let _zoom = Math.abs(curPinchDiff/prevPinchDiff);
-				// LOG.popup(""+_zoom, "#FFF", 800);
-				// TILESIZE*=_zoom;
-				// TILESIZE = Math.max(Math.min(TILESIZE, 90), 30);
 			}
 
 			prevPinchDiff = curPinchDiff;
@@ -816,7 +819,7 @@ var Interface_Class = function()
 	 	HUD_Avoid_Mouse = {
 			avatar_down:true,
 			avatar_right:true,
-			time_without_interaction:135,
+			time_without_interaction:85,
 			idle_time:0,
 			avoid:20,
 			speed:10,
@@ -912,18 +915,9 @@ var Interface_Class = function()
 				HUD_Avoid_Mouse.Switch_X();
 				if(HUD_Avoid_Mouse.idle_time>HUD_Avoid_Mouse.time_without_interaction)
 				{
-					if(_avatar.style.opacity>0)
-					{
-						_avatar.style.opacity-=.05;
-						_status.style.opacity-=.05;
-						_helpers.style.opacity-=.025;
-					}
-					else
-					{
-						_avatar.style.opacity = 0;
-						_status.style.opacity = 0;
-						_helpers.style.opacity = .5;
-					}
+					_avatar.style.opacity = 0;
+					_status.style.opacity = 0;
+					_helpers.style.opacity = .5;
 					return;
 				}
 				HUD_Avoid_Mouse.idle_time++;
@@ -939,7 +933,7 @@ var Interface_Class = function()
 	 	HUD_Avoid_Mouse = {
 			avatar_right:true,
 			idle_time:0,
-			time_without_interaction:135,
+			time_without_interaction:85,
 			avoid:20,
 			speed:10,
 			adjust:-1,
@@ -1001,7 +995,12 @@ var Interface_Class = function()
 				HUD_Avoid_Mouse.adjust-=HUD_Avoid_Mouse.speed;
 			},
 			scared:function(x, y){
-
+				if(_status.style.opacity<1)return;
+				if(x<=_status.clientWidth+HUD_Avoid_Mouse.avoid)
+				if(clientHeight-y<=_status.clientHeight+HUD_Avoid_Mouse.avoid+50)  // +50 for the endTurn button
+				{
+					_status.style.opacity = .25;
+				}
 			},
 			interact:function(){
 				HUD_Avoid_Mouse.idle_time = 0;
@@ -1014,18 +1013,9 @@ var Interface_Class = function()
 				if(HUD_Avoid_Mouse.idle_time>HUD_Avoid_Mouse.time_without_interaction)
 				{
 					if(gameWidth>=600)return;
-					if(_avatar.style.opacity>0.1)
-					{
-						_avatar.style.opacity-=.045;
-						_status.style.opacity-=.045;
-						_helpers.style.opacity-=.025;
-					}
-					else
-					{
-						_avatar.style.opacity = .1;
-						_status.style.opacity = .1;
-						_helpers.style.opacity = .5;
-					}
+					_avatar.style.opacity = .1;
+					_status.style.opacity = .1;
+					_helpers.style.opacity = .5;
 					return;
 				}
 				HUD_Avoid_Mouse.idle_time++;
@@ -1119,9 +1109,10 @@ var Interface_Class = function()
 		zooming:true
 	});
 	self.reflow = function(w, h){
-		LOG.display();
-		gameWidth = w-(window.parent.mobilecheck()?0:210);
-		gameHeight = h-(window.parent.mobilecheck()?0:70);
+		w = w>810 ? 810 : w;
+		h = h>665 ? 665 : h;
+		gameWidth = w;
+		gameHeight = h;
 		self.gameWidth = gameWidth;
 		self.gameHeight = gameHeight;
 		clientWidth = w;
@@ -1428,7 +1419,7 @@ var Interface_Class = function()
 		{
 			names[index] = _data_text[index].name;
 			_data_text[index] = decrypt_game_data(_data_text[index].game);
-			_read_game_data[index] = Map_Reader.Read(_data_text[index]);
+			_read_game_data[index] = Map_Reader.String(_data_text[index]);
 
 			if(_read_game_data[index].Valid)
 			{
@@ -1977,7 +1968,6 @@ var Interface_Class = function()
 				Animations.Retrieve(_t.Name+" Ani").Stop = false;
 		}
 		Repair_Animation.Stop = false;
-		document.getElementById("gameHelpers").style.display = "block";
 		Mod_List.Units.Self_Action.Irreparable.Sprite = Mod_List.Units.Self_Action.Repairable.Sprite;
 		Mod_List.Units.Self_Action.Irreparable.Active = false;
 		SFXs.Stop_All();
@@ -2006,7 +1996,7 @@ var Interface_Class = function()
 		Enviornment.Stop_All();
 		if(players!=null)
 			MUSIC = Music.Retrieve("game "+ (game_won ? "won" : "lost")).Play();
-		LOG.popup(game_won ? "You won!!" : "Good try!");
+		document.getElementById("end-game-results").innerHTML = (game_won ? "You won!!" : "Good try!");
 		for(var x=1;x<Terrain_Data.TERRE.length;x++)
 		{
 			var _t = Terrain_Data.TERRE[x];
@@ -2014,7 +2004,6 @@ var Interface_Class = function()
 				Animations.Retrieve(_t.Name+" Ani").Stop = true;
 		}
 		Repair_Animation.Stop = true;
-		document.getElementById("gameHelpers").style.display = "none";
 		Canvas.Stop_All();
 		Canvas.Set_Game(null);
 		Dialog.Next();
@@ -2031,12 +2020,7 @@ var Interface_Class = function()
 				return index.data.money_spent;
 			});
 			self = this;
-			// Menu.PostGame.Set(game.Name, players, turns, function(){
-			// 	self.Close_Menu();
-			// 	game = null;
-			// 	mainMenu();
-			// });
-			self.Display_Menu(Menu.PostGame);
+			changeContent("END GAME", game);
 		}
 		this.setGame(null);
 		if(online)socket.emit();
@@ -2380,5 +2364,6 @@ var Fast_Fake_Interface = {
 	Simple_Draw:function(){},
 	Scroll_To_Tile:function(){},
 	Resource_Draw:function(){},
-	Set_Unit_Focus:function(){}
+	Set_Unit_Focus:function(){},
+	Warn_Hurry:function(){}
 };

@@ -24,57 +24,6 @@ var	fps = 30,
 var tpf = 1000/fps;
 
 var LOG = {
-	list:[],
-	indexer:0,
-	display:function(){
-		if(!logCanvas)return;
-		logCanvas.clearRect(0, 0, Canvas.Width, Canvas.Height);
-		var level = 10;
-		for(var i in this.list)
-		{
-			let size = Math.max((Canvas.Width/2)-(window.parent.mobilecheck() ? 100 : 400), TILESIZE*3)+30;
-			height = 15*Math.ceil(this.list[i].msg.length/(size/16))+10;
-			Shape.Rectangle.Draw(logCanvas, 10, level, size, height, this.list[i].boxColor);
-			Shape.Box.Draw(logCanvas, 10, level, size, height, "#FFF");
-			this.list[i].txt.Draw(logCanvas, 15, level+3, size, height, this.list[i].msg);
-			level+=height+10;
-		}
-	},
-	add:function(msg, color, time, callback){
-		if(time==null)time = 10000;
-		if(this.list.length==0)
-		{
-			this.indexer = 0;
-		}
-		if(color==null)color = "#fff";
-		this.list.push({
-			txt:new Text_Class("15pt Arial", color),
-			boxColor: parseInt(color.charAt(1), 16)<=7 ? "#5B2838" : "#768280",
-			msg:msg,
-			index:this.indexer
-		});
-		this.display();
-		var i = this.indexer;
-		setTimeout(function(){
-			LOG.remove(i);
-			if(callback!=null)callback();
-		},time);
-		return this.indexer++;
-	},
-	clear:function(){
-		this.list = [];
-		this.display();
-	},
-	remove:function(index){
-		for(var i in this.list)
-		{
-			if(this.list[i].index==index)
-			{
-				this.list.splice(i, 1);
-			}
-		}
-		this.display();
-	},
 	container:document.getElementById("logger-container"),
 	popup:function(text){
 		const POPUP = document.createElement('h5');
@@ -97,9 +46,13 @@ var LOG = {
 		if(LOG.first_popup)
 		{
 			LOG.first_popup = false;
-			if(INTERFACE.IS_MOBILE_GAME)
-				LOG.popup("Tap to remove logs.");
-			else LOG.popup("Click to remove logs. Moving your mouse over a log will remove it after two seconds.");
+			if(INTERFACE!=null)
+			if(!INTERFACE.IS_MOBILE_GAME)
+			{
+				LOG.popup("Click to remove logs. Moving your mouse over a log will remove it after two seconds.");
+				return;
+			}
+			LOG.popup("Tap to remove logs.");
 		}
 	},
 	first_popup:true
@@ -535,6 +488,7 @@ var Core = {
 
 var online = false;
 var socket;
+var LOADER;
 window.onload = function(){
 	if(window.parent)socket = window.parent.socket;
 	if(socket)online = true;
@@ -560,6 +514,36 @@ window.onload = function(){
 				FRAMERATEDISPLAY.style.color = "#909310";
 			else
 				FRAMERATEDISPLAY.style.color = "#12790b";
+		}
+	});
+
+		// this is the loading screen
+	let tick_counter = 0;
+	LOADER = Canvas.Add_Ticker(function(){
+		tick_counter++;
+		if(tick_counter<15)return;
+		tick_counter = 0;
+		if(Math.random()>.5)
+		{
+			let el = document.createElement('div');
+			el.style.position = "absolute";
+			el.style.top = (Math.random()*500)+"px";
+			el.style.left = (Math.random()*500)+"px";
+			el.className = "lds-ripple fade_in";
+			setTimeout(function() {
+				el.style.opacity = 1;
+			}, 10);
+
+			el.appendChild(document.createElement('div'));
+			el.appendChild(document.createElement('div'));
+			document.getElementById("loading-background").appendChild(el);
+
+			setTimeout(function() {
+				el.style.opacity = 0;
+				setTimeout(function() {
+					el.remove();
+				}, 500);
+			}, 1300);
 		}
 	});
 
@@ -754,13 +738,11 @@ function new_custom_game(game_data, game_setup, skippingLobby, save_data_index, 
 	let data;
 	if(game_data.Valid)
 		data = game_data;
-	else data = Map_Reader.Read(game_data);
+	else data = Map_Reader.String(game_data);
 	if(!data.Valid)return;
 
-	if(skippingLobby)
-	{
-		changeContent("GAME PLAY", game_setup[0]);
-	} else changeContent("HOST GAME", game_setup);
+	if(!skippingLobby)
+		changeContent("HOST GAME", game_setup);
 
 	init_map(data, null, null, skippingLobby, [skippingLobby, save_data_index, story_progress, story_section]);
 
@@ -768,22 +750,48 @@ function new_custom_game(game_data, game_setup, skippingLobby, save_data_index, 
 		socket.emit("open", data.id, game_setup[0], data.Player_Amount());
 	}
 }
-function load_game(gameData){
-	var Game = new Engine_Class(gameData);
-	if(!Game.valid)return;
-	INTERFACE.Close_Menu();
+function load_game(data)
+{
+	let _gamestate_data = JSON.parse(data.gamestate);
+	let GAMESTATE = Map_Reader.Gamestate(_gamestate_data);
+	var Game = new Engine_Class(GAMESTATE);
+
+	Game.id = socket.game_id;
+	Game.Map = GAMESTATE;
 	INTERFACE.setGame(Game);
 	INTERFACE.Set_Controls(document.getElementById("inputHandler"));
 	INTERFACE.Allow_Controls(true);
+	Canvas.Clear();
 	Canvas.Set_Game(Game);
 	Canvas.Redraw();
 	Canvas.Start_All();
 	gameInProgress = true;
-	Game.Start();
+	window.parent.setConnection(2);
+	Levels.Run_Script(Game, GAMESTATE.Data.Get().__script);
+
+	var set = false;
+	for(var i in data.players.c)
+	{
+		if(data.players.c[i]==null)
+		{
+			if(!set)
+			{
+				Game.Set_Player(i, socket.index, socket.username, true);
+				set = true;
+			}
+			continue;
+		}
+		Game.Set_Player(i, data.players.c[i], data.players.n[i], false);
+	}
+
+	Game.Set_Up(_gamestate_data.turn, _gamestate_data.connected, _gamestate_data.cur_player);
+	Game.Set_Passkey(data.passkey);
+	Game.Active_Player().Active = true;
+	Game.Active_Player().End_Turn();
 }
 function join_game(data)
 {
-	let GAME = Map_Reader.Read(decrypt_game_data(data.map));
+	let GAME = Map_Reader.String(decrypt_game_data(data.map));
 
 	let sampledGame = new Engine_Class(GAME, true);
 	sampledGame.Set_Interface(INTERFACE);
@@ -825,22 +833,29 @@ function openMapEditor(game_data, data_index, testing_won){
 	INTERFACE.Display_Menu(Menu.MapEditor);
 }
 
-function changeContent(choice, title) {
+function changeContent(choice, title, dontAsk)
+{
+	if(INTERFACE==null)return;
 	if(INTERFACE.Game!=null && choice!="GAME PLAY")
 	{
+		if(dontAsk)return;
 		let ans = confirm("This will exit the game. Are you sure?");
 		if(!ans)return;
-		INTERFACE.Game.End_Game();
+		INTERFACE.Game.Quit_Game();
+		INTERFACE.setGame(null);
+	}
+	if(choice!="GAME PLAY")
+	{
+		currently_playing = false;
 	}
 
+	document.getElementById("LOADINGOVERLAY").style.display = "none";
 	document.getElementById("GAMECONTENT").style.display = "none";
 	document.getElementById("MAPSELECTION").style.display = "none";
 	document.getElementById("CONTACT").style.display = "none";
 	document.getElementById("GAMELOBBY").style.display = "none";
 	document.getElementById("HOSTNEWGAME").style.display = "none";
 	document.getElementById("ENDGAME").style.display = "none";
-	document.getElementById("game-margin-content").style.marginLeft = "300px";
-	document.getElementById("mySidebar").style.left = "0px";
 	window.parent.document.getElementById("container").style.maxWidth = "";
 	window.parent.document.getElementById("container").style.maxHeight = "";
 	window.parent.closeChat();
@@ -861,11 +876,9 @@ function changeContent(choice, title) {
 			document.getElementById("CONTENT_TITLE").innerHTML = title;
 			window.parent.document.getElementById("container").style.maxWidth = "810px";
 			window.parent.document.getElementById("container").style.maxHeight = "665px";
-			if(!INTERFACE.IS_MOBILE_GAME)
-			{
-				document.getElementById("game-margin-content").style.marginLeft = "0px";
-				document.getElementById("mySidebar").style.left = "-300px";
-			}
+
+				// remove
+			document.getElementById("gameHelpers").style.display = "block";
 			break;
 		case "GAME LOBBY":
 			document.getElementById("GAMELOBBY").style.display = "block";
@@ -876,14 +889,24 @@ function changeContent(choice, title) {
 			document.getElementById("CONTENT_TITLE").innerHTML = title[0];
 			document.getElementById("HOSTGAMEIMG").src = title[1];
 			break;
-		case "END GAME":
+		case "END GAME":	// title = GAME
 			document.getElementById("ENDGAME").style.display = "block";
-			document.getElementById("CONTENT_TITLE").innerHTML = title;
+			document.getElementById("CONTENT_TITLE").innerHTML = title.Name;
+
+				// remove refresh_lobby() call when END GAME screen finished 
+			window.parent.refresh_lobby();
+
+
+			window.parent.refreshChat();
+			INTERFACE.setGame(null);
 			break;
 		case "MAP EDITOR":
 			document.getElementById("GAMECONTENT").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = "Map Editor";
 			openMapEditor();
+
+				// remove
+			document.getElementById("gameHelpers").style.display = "none";
 			break;
 		case "CONTACT US":
 			document.getElementById("CONTACT").style.display = "block";

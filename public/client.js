@@ -1,6 +1,12 @@
 function validateSignup(user, pass){
 	if(!user||!pass)return false;
 	if(user==""||pass=="")return false;
+	if(user.indexOf("/")!=-1 || pass.indexOf("/")!=-1)return false;
+	if(user.indexOf("\\")!=-1 || pass.indexOf("\\")!=-1)return false;
+	if(user.indexOf(" ")!=-1 || pass.indexOf(" ")!=-1)return false;
+	if(user.indexOf(".")!=-1 || pass.indexOf(".")!=-1)return false;
+	if(user.indexOf(":")!=-1 || pass.indexOf(":")!=-1)return false;
+	if(user.indexOf(";")!=-1 || pass.indexOf(";")!=-1)return false;
 	return true;
 }
 function reportLoggedIn(user, pass, report){
@@ -30,7 +36,7 @@ function logOut(){
 
 }
 
-var gameFrame;
+var gameFrame, chatFrame;
 var game;
 var title_box_alert = function(updated){
 	var old = document.title;
@@ -83,13 +89,13 @@ window.onload = function(){
 		socket.username = name;
 	});
 	socket.on('user joined', function(username){
-		if(game.LOG)game.LOG.popup(username+" joined","#FF0");
+		// if(game.LOG)game.LOG.popup(username+" joined","#FF0");
 		if(!lobby_open)return;
 		lobby.contentWindow._activeUsers.add();
 		lobby.contentWindow._lobbyAmt.add();
 	});
 	socket.on('user left', function(username){
-		if(game.LOG)game.LOG.popup(username+" left","#FF0");
+		// if(game.LOG)game.LOG.popup(username+" left","#FF0");
 		if(!lobby_open)return;
 		lobby.contentWindow._activeUsers.sub();
 	});
@@ -122,18 +128,26 @@ window.onload = function(){
 			let i = 0;
 			for(i in data.info)
 			{
-				lobby.contentWindow.add_game(data.info[i].name,data.info[i].map,data.info[i].game);
-				lobby.contentWindow._openGames.add();
-				// add player list
-			}
+				try {
+					lobby.contentWindow.add_game(data.info[i].name,data.info[i].map,data.info[i].game);
+					lobby.contentWindow._openGames.add();
+					// add player list
+				} catch (e) {
+					game.LOG.popup("Error loading some game");
+				} finally {
 
-			// initially land user on open games list, but...
-			// if there aren't a lot of open games to choose from -> land user on game host
-			if(i<2)	// if less then two open games waiting,
-			{	// then will defult to send player to land on game hosting page
-				game.changeContent("MULTIPLAYER");
+				}
 			}
-			else game.changeContent("GAME LOBBY");
+			game.Canvas.Kill_Ticker(game.LOADER);
+			if(game.currently_playing)return; // if already in game, don't change gamestate to the lobby
+
+										// initially land user on open games list, but...
+										// if there aren't a lot of open games to choose from -> land user on game host
+			if(i<2)				// if less then two open games waiting,
+			{							// then will defult to send player to land on game hosting page
+				game.changeContent("MULTIPLAYER", null, true);
+			}
+			else game.changeContent("GAME LOBBY", null, true);
 		}
 		else if(data.type==4)
 		{	// client disconnected
@@ -190,13 +204,25 @@ window.onload = function(){
 		}
 		else if(data.type==12)
 		{	// act building
-			var result = game.INTERFACE.Game.Build(data.building, data.input, null,  true);
+			let result;
+			if(data.dir==null)
+			{	// if built from building
+				result = game.INTERFACE.Game.Build(data.source, data.input, null,  true);
+			}
+			else
+			{	// if built from warmachine
+				result = game.INTERFACE.Game.Build_From_Unit(data.source, data.input, data.dir, true);
+			}
+			if(!result)
+			{
+				game.LOG.popup("Error with gamestate! It will automatically reload to the last saved gamestate :)");
+			}
 			game.INTERFACE.Draw();
 		}
 		else if(data.type==13)
 		{	// receive chat message
-			if(lobby_open)return;
-			lobby.contentWindow.add_msg(data.sender, data.txt);
+			if(!game.currently_playing)return;
+			chatFrame.add_msg(data.sender, data.txt);
 		}
 		else if(data.type==14)
 		{	// request game data
@@ -206,7 +232,7 @@ window.onload = function(){
 		else if(data.type==15)
 		{	// report invalid game data -> fix or break if unfixable
 			if(!game.INTERFACE.Game)return;
-			if(data.game==null)
+			if(data.gamestate==null)
 			{ // no gamestate to revert to
 				game.INTERFACE.Game.End_Game();
 				if(!game.LOG)return;
@@ -216,19 +242,26 @@ window.onload = function(){
 				return;
 			}
 			setTimeout(function(){ // reset game after 5 seconds
-				game.INTERFACE.setGame(new game.Engine_Class(data.game));
-				game.INTERFACE.Game.Start();
+				game.load_game(data);
 			}, 5000);
+			setTimeout(function() {
+				let G = game.INTERFACE.Game;
+				game.INTERFACE.setGame(null);
+				G.Set_Interface(game.Fast_Fake_Interface);
+				G.End_Game();
+			}, 2500);
 			if(!game.LOG)return;
-			game.LOG.popup("ERROR: Game data issue. Reverting game to last saved point...", "#F00", 10000);
+			game.LOG.popup("Sorry, it looks like the code's been changed...");
+			setTimeout(function() {
+				game.LOG.popup("We're setting your game back a turn to get you both back on the same page.");
+			}, 2500);
 		}
 		else if(data.type==16)
 		{	// player reconnected
 			gameFrame.onload = function(){
 				if(!game.load_game)return;
-				game.load_game(data.game);
-				if(!game.LOG)return;
-				game.LOG.popup("Resuming game from last saved gamestate", "#FFF", 5000);
+				game.load_game(data);
+				game.LOG.popup("You have been reconnected!");
 			}
 		}
 
@@ -289,23 +322,39 @@ window.onload = function(){
 		}
 		else if(data.type==28)
 		{	// player lost connection
+			game.INTERFACE.Allow_Controls(false);
+			game.INTERFACE.Display_Menu(game.Menu.No_Touch_Overlay);
+
 			if(!game.LOG)return;
 			var playerName = game.INTERFACE.Game.Player(data.slot);
 			if(playerName)
 				playerName = playerName.Name;
 			else playerName = data.slot;
-			game.LOG.popup("Warning, player "+playerName+" lost connection", "#FFF", 10000);
-			game.LOG.popup("This player has 30 seconds to reconnect", "#FFF", 20000);
-			game.LOG.popup("Otherwise they forfeit the game", "#FFF", 30000);
+			game.LOG.popup("Warning: "+playerName+" lost connection");
+			setTimeout(function() {
+				if(game.INTERFACE.Open_Menu()==null)return;
+				game.LOG.popup("This player has 30 seconds to reconnect");
+			}, 3000);
+			setTimeout(function() {
+				if(game.INTERFACE.Open_Menu()==null)return;
+				game.LOG.popup("Otherwise they forfeit the game");
+			}, 6000);
+			setTimeout(function() {
+				if(game.INTERFACE.Open_Menu()==null)return;
+				game.LOG.popup("10 more seconds...");
+			}, 20000);
 		}
 		else if(data.type==29)
 		{	// player regained connection
+			game.INTERFACE.Allow_Controls(true);
+			game.INTERFACE.Close_Menu();
+
 			if(!game.LOG)return;
 			var playerName = game.INTERFACE.Game.Player(data.slot);
 			if(playerName)
 				playerName = playerName.Name;
 			else playerName = data.slot;
-			game.LOG.popup("Player "+playerName+" reconnected connection.", "#FFF");
+			game.LOG.popup(playerName+" reconnected!", "#FFF");
 		}
 
 			/** loading published games */
@@ -530,8 +579,12 @@ function openLobby(){
 }
 function openChat(){
 	document.getElementById('chat-container').style.display = "block";
-	document.getElementById('chatFrame').contentWindow.openChat();
+	chatFrame = document.getElementById('chatFrame').contentWindow;
+	chatFrame.openChat();
 	refreshChatList();
+}
+function refreshChat(){
+	document.getElementById('chatFrame').src = "http://localhost:5000/includes/chat.html";
 }
 function closeChat(){
 	document.getElementById('chat-container').style.display = "none";
@@ -546,9 +599,8 @@ function shrinkChat(){
 function refreshChatList(){
 	if(game.INTERFACE.Game==null)return;
 	var list = game.INTERFACE.Request_Connections();
-	let _chat = document.getElementById('chatFrame');
 	for(var i in list){
-		_chat.contentWindow.addPlayer(list[i][0], list[i][1]);
+		chatFrame.addPlayer(list[i][0], list[i][1]);
 	}
 }
 function refresh_lobby(){
@@ -564,7 +616,7 @@ function refresh_game(){
 function send_chat(__input_passkey, text){
 	if(!game.currently_playing)return;
 	socket.emit('chat', __input_passkey, text);
-	lobby.contentWindow.add_msg(socket.index, text);
+	chatFrame.add_msg(socket.index, text);
 }
 function join_game(game_id){
 	if(game.currently_playing)

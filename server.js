@@ -25,34 +25,78 @@ function timestamp(){
 	}
 	console.log(new Date().toLocaleTimeString(),"->",str);
 }
-var data_list = function(){
+var data_list = function()
+{
+	function make_letter()
+	{ // 65 = A, 97 = a
+		let start = Math.random()>0.5 ? 65 : 97;
+		let index = Math.floor(Math.random()*26)+start;
+		if(start==65)	// upper case
+		{	// these if/else's prevent lookalike characters from existing, to make course input freindlier
+			while(index==14 || index==8)	// O, I
+			{
+				index = Math.floor(Math.random()*26)+start;
+			}
+		}
+		else
+		{	// lower case
+			while(index==11)	// l
+			{
+				index = Math.floor(Math.random()*26)+start;
+			}
+		}
+		return String.fromCharCode(index);
+	}
+	function make_number()
+	{	// 1 to 9
+		let index = Math.random()*9+1;
+		return Math.floor(index);
+	}
+	function make_unique_index()
+	{
+		let _str = "";
+		for(let bunch=0;bunch<9;bunch++)
+		{
+			_str += Math.random()>0.3 ? make_letter() : make_number();
+		}
+		return _str;
+	}
+
 	this.list = [];
 	this.Add = function(data)
 	{
-		var i = 0;
-		for(;i<this.list.length;i++)
+		let _index, found = true;
+		while(found)
 		{
-			if(this.list[i]==null)break;
+			_index = make_unique_index();
+			found = false;
+			for(let i in this.list)
+			{
+				if(i==_index)
+				{
+					found = true;
+					break;
+				}
+			}
 		}
-		this.list[i] = data;
-		return i;
+		this.list[_index] = data;
+		return _index;
 	};
 	this.Remove = function(index)
 	{
-		if(index>=this.list.length)return false;
-		var removed = this.list[index];
-		this.list[index] = null;
-		for(var i=index+1;i<this.list.length;i++)
+		for(let i in this.list)
 		{
-			if(this.list[i]!=null)return removed;
+			if(i==index)
+			{
+				let data = this.list[i];
+				this.list[i] = null;
+				this.list = this.list.filter(function(el) {
+					return el!=null;
+				});
+				return data;
+			}
 		}
-		var last_good = index;
-		for(;last_good>0;last_good--)
-		{
-			if(this.list[last_good-1]!=null)break;
-		}
-		this.list.splice(last_good, this.list.length-last_good);
-		return removed;
+		return null;
 	};
 	this.Active = function()
 	{
@@ -72,7 +116,6 @@ var con_handler = function(){
 	var amt = 0;
 	this.Socket = function(index)
 	{
-		if(index>=active.list.length)return null;
 		return active.list[index];
 	};
 	this.Add = function(socket)
@@ -83,15 +126,15 @@ var con_handler = function(){
 	this.Disconnect = function(index)
 	{
 		var user = active.Remove(index);
-		if(!user)return;
+		if(user==null)return;
 		amt--;
 		timestamp("user "+user.username+" disconnected");
 	};
 	this.Reconnect = function(index, socket)
 	{
-		if(index>=active.list.length)return;
 		var oldSocket = active.list[index];
-		socket.index = index;
+		if(oldSocket==null)return;
+		socket.index = oldSocket.index;
 		socket.username = oldSocket.username;
 		socket.vars = oldSocket.vars;
 		active.list[index] = socket;
@@ -125,9 +168,9 @@ var Game = function(map, name, slots){
 			return true; // no passkey needed yet--game hasn't started
 		if(__passkey==input_key)
 			return true;
-		if(__passkey==SUDO_ROUTE_PASS)
+		if(input_key==SUDO_ROUTE_PASS)
 			return true;
-		timestamp("Invalid passkey attempt in Game",self.index_in_server);
+		timestamp("Invalid passkey attempt in Game",self.index_in_server,"-> bad key:",input_key);
 		return false;
 	}
 	this.Passkey = function()
@@ -187,6 +230,43 @@ var Game = function(map, name, slots){
 			if(last_i!=null)
 			if(playerData[i][1]!=playerData[last_i][1]){
 					// games report differing data
+
+console.log(" ");
+console.log(" ");
+console.log(" ");
+console.log("++player",i);
+console.log(" ");
+console.log(" ");
+console.log(playerData[i][1]);
+console.log(" ");
+console.log(" ");
+console.log("+last+player",last_i);
+console.log(" ");
+console.log(" ");
+console.log(playerData[last_i][1]);
+
+console.log(" ");
+console.log(" ");
+console.log(" ");
+console.log(" ");
+console.log(" ");
+console.log(playerData[i][1].length, playerData[last_i][1].length);
+console.log(" ");
+console.log(" ");
+console.log(" ");
+
+let INDEX = 0;
+for(;INDEX<playerData[i][1].length;INDEX++)
+{
+	if(playerData[i][1].charAt(INDEX)!=playerData[last_i][1].charAt(INDEX))
+	{
+		console.log("found at",INDEX,":",playerData[i][1].charAt(INDEX),"->",playerData[last_i][1].charAt(INDEX),".");
+	}
+}
+console.log(" ");
+console.log(" ");
+console.log(" ");
+
 				badCallbackFnc();
 				return;
 			}
@@ -225,7 +305,29 @@ var Game = function(map, name, slots){
 	};
 	self.Revert = function(input_passkey){
 		if(!passkey_check(input_passkey))return;
-		self.Send(input_passkey, {type:15,game:lastValidGameState});
+
+		var game = self;
+		var connections = game.Data();
+		var names = [];
+		for(var i in connections)
+		{
+			if(connections[i]==null)
+			{
+				names.push("");
+			}
+			else names.push(Connections.Socket(connections[i]).username);
+		}
+		 // send reconnected player last gamestate
+		self.Send(input_passkey, {
+			type:15,
+			gamestate:lastValidGameState,
+			game:game.index_in_server,
+			passkey:__passkey,
+			players:{
+				c:connections,
+				n:names
+			}
+		});
 	};
 
 	self.Leave = function(input_passkey, socketIndex, rejoinTime, outOfTimeFnc){
@@ -275,24 +377,39 @@ var Game = function(map, name, slots){
 	};
 	self.Rejoin = function(input_passkey, playerIndex, socketIndex){
 		if(!passkey_check(input_passkey))return;
-	console.log("---- ++++ ---- rejoinging ---- ++++ ----");
-	console.log("DEBUG THIS AREA -> Player left and rejoined game");
-	return;
-	console.log(playerIndex, socketIndex);
-	console.log(playerData[playerIndex]);
-	console.log(playerData);
 		if(!playerData[playerIndex])return;
 		if(playerData[playerIndex][0]!=null)return;
-	console.log("good");
 		var returningPlayer = Connections.Socket(socketIndex);
 		if(returningPlayer==null)return;
 		playerData[playerIndex][0] = socketIndex;
 		self.Send(input_passkey, {type:29,slot:playerIndex}, socketIndex); // report player reconnected
 		var gamestate = lastValidGameState;
 		if(gamestate==null){ // this is the case if the game hasn't started
-			gamestate = self.Map; // so send new game data
+			gamestate = self.Map(); // so send new game data
 		}
-		returningPlayer.send({type:16,game:gamestate}); // send reconnected player last gamestate
+
+		var game = self;
+		var connections = game.Data();
+		var names = [];
+		for(var i in connections)
+		{
+			if(connections[i]==null)
+			{
+				names.push("");
+			}
+			else names.push(Connections.Socket(connections[i]).username);
+		}
+		 // send reconnected player last gamestate
+		returningPlayer.send({
+			type:16,
+			gamestate:gamestate,
+			game:game.index_in_server,
+			passkey:__passkey,
+			players:{
+				c:connections,
+				n:names
+			}
+		});
 	};
 	self.Send = function(input_passkey, msg){
 		if(!passkey_check(input_passkey))return;
@@ -343,22 +460,22 @@ var gl_handler = function(){
 	{
 		return games.Active();
 	};
-	this.Game = function(index, input_passkey)
+	this.Game = function(index)
 	{
 		if(index==null)return null;
-		if(index>=games.list.length)return null;
 		return games.list[index];
 	};
-	this.Close = function(index, input_passkey)
+	this.Close = function(index)
 	{
 		var cur = games.Remove(index);
-		if(!cur)return;
+		if(cur==null)return;
 		amt--;
+
 		timestamp("Game",cur.index_in_server,"->",cur.Name(),"closed");
 	};
 };
-var Game_List = new gl_handler();
-var Lobby = new data_list();
+let Game_List = new gl_handler();
+let Lobby = new data_list();
 
 function send_lobby_info(data, sender){
 	var active = Connections.Active();
@@ -397,7 +514,6 @@ io.on('connection', function(socket){
 				game:game.index_in_server,
 				map:game.Map(),
 				name:game.Name()
-				//, add player list
 			};
 		}
 		socket.send({
@@ -438,13 +554,14 @@ io.on('connection', function(socket){
 			path:path
 		}, socket.index);
 	});
-	socket.on('send build', function(__input_passkey, building, input){
+	socket.on('send build', function(__input_passkey, source, input, direction){
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
 		game.Send(__input_passkey, {
 			type:12,
-			building:building,
-			input:input
+			source:source,
+			input:input,
+			dir:direction
 		}, socket.index);
 	});
 	socket.on('next player', function(__input_passkey, gameData){
@@ -454,8 +571,8 @@ io.on('connection', function(socket){
 			// game data good, continue game.
 			game.Send(__input_passkey, {type:10}, socket.index);
 		}, function(){
-			game.Revert(__input_passkey);
 			timestamp("ERROR: game",game.index_in_server,game.Name(),"invalid, reverting to last saved point.");
+			game.Revert(__input_passkey);
 		}, socket.index, gameData);
 	});
 
@@ -632,7 +749,7 @@ io.on('connection', function(socket){
 			return index;
 		}
 		function make_number(){	// 1 to 9
-			let index = Math.random()*9+49;
+			let index = Math.random()*9+1;
 			return Math.floor(index);
 		}
 		db.gamedata.find({}, function(err, existing_maps){
@@ -1022,11 +1139,11 @@ io.on('connection', function(socket){
 				for(var i in activeCons){
 					if(activeCons[i].username!=username)continue;
 					if(!activeCons[i].vars.online){
-						Connections.Reconnect(i, socket);
+						Connections.Reconnect(activeCons[i].index, socket);
 						rejoined = true;
 						var game = Game_List.Game(socket.vars.in_game);
 						if(game){
-							game.Rejoin(socket.vars.slotIndex, socket.index);
+							game.Rejoin(SUDO_ROUTE_PASS, socket.vars.slotIndex, socket.index);
 						}
 						break;
 					}else{
@@ -1038,7 +1155,7 @@ io.on('connection', function(socket){
 				if(!rejoined){
 					socket.index = Connections.Add(socket);
 					socket.username = username;
-					timestamp("user",username,"connected");
+					timestamp("user",username,"connected:",socket.index);
 				}
 				socket.send({
 					type:20,
@@ -1140,7 +1257,7 @@ io.on('connection', function(socket){
 				});
 			}
 		});
-		console.log("Connections",Connections.Amount());
+		/* console.log("Connections",Connections.Amount());
 		for(var i=0;i<Connections.Length();i++)
 		{
 			if(Connections.Socket(i)!=null)
@@ -1157,7 +1274,7 @@ io.on('connection', function(socket){
 				console.log(i, Game_List.Game(i).Name(), Game_List.Game(i).index_in_server, Game_List.Game(i).Data());
 			}
 			else console.log(i, null);
-		}
+		} */
 		console.log("Lobby",Lobby.list.length);
 		for(var i=0;i<Lobby.list.length;i++)
 		{

@@ -371,7 +371,7 @@ Menu.MapEditor.Open = function()
 						let curMap = _list_data[_m];
 						var index = curMap.saveindex;
 						_data_text[index] = decrypt_game_data(curMap.map);
-						_read_game_data[index] = Map_Reader.Read(_data_text[index]);
+						_read_game_data[index] = Map_Reader.String(_data_text[index]);
 						_read_game_data[index].id = curMap.map_id;
 						_read_game_data[index].uploaded = curMap.uploaded;
 
@@ -1096,7 +1096,7 @@ Menu.MapEditor.Open = function()
 				}
 				else if(ACTIVE_TYPE==TYPES.WEATHER)
 				{
-					LOG.popup("weather not implemented");
+					LOG.popup("weather not implemented yet");
 					// map_list[tile] = ACTIVE_INDEX;
 				}
 				Menu.MapEditor.Mouse_Move(0, 0);
@@ -1161,7 +1161,7 @@ Menu.MapEditor.Open = function()
 
 			var color = "#fff";
 			send_map_data_to_server(SERVER.PUBLISH, id);
-			alert("Successfully uploaded.");
+			LOG.popup("Successfully uploaded.");
 		}, {
 			Draw:function(c, x, y, w, h, s){
 				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(beaten_game && data_saved) ? 1:4]);
@@ -1777,9 +1777,10 @@ Menu.MapEditor.Open = function()
 };
 
 
-/*** Level Select Screen ***/
-Menu.Game_Prompt = new Menu.Menu_Class();
-
+/*** Overlay to stop input ***/
+Menu.No_Touch_Overlay = new Menu.Menu_Class("#444C");
+Menu.No_Touch_Overlay.Add(new Canvas.Drawable(new Text_Class("20pt Impact", "#FFF"), null, 300, 100, 200, 200, "Input stopped until user reconnects"));
+Menu.No_Touch_Overlay.Add(new Canvas.Drawable(new Text_Class("15pt Impact", "#FFF"), null, 300, 300, 200, 200, "If 30 seconds pass, they will forfeit"));
 
 /*** Game Internal Lobby Menu ***/
 Menu.PreGame = {};
@@ -1790,6 +1791,7 @@ Menu.PreGame.AddStarter = function(mapName){
 	START.innerHTML = INTERFACE.Game.Full() ? "Start Game" : "Start with AI";
 	START.onclick = function(){
 		INTERFACE.Game.Host_Game(socket.game_id);
+		START.remove();
 	};
 	START.className = "w3-button w3-block w3-black w3-margin-bottom";
 	document.getElementById("HOSTGAMEBUTTONS").appendChild(START);

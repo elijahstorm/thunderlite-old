@@ -18,6 +18,7 @@ var Map_Reader_Class = function(){
 		}
 
 		var players = [],
+			p_data = [],
 			terrain_data = __t_data,
 			units = [],
 			cities = [],
@@ -47,27 +48,36 @@ var Map_Reader_Class = function(){
 			return players.length;
 		};
 
-		this.Add_Player = function(__player)
+		this.Add_Player = function(__player, __p_data)
 		{
 			if(players.length>=8)return;
 			players.push(__player);
+			p_data.push(__p_data)
 			if(players.length>1)
 				this.Valid = true;
 		};
 		this.Add_Unit = function(__unit)
 		{
-			if(__unit.length!=4)return;
-			if(__unit[3]>=players.length)return;
+			if(__unit.length!=4 && __unit.length!=5)return;
+			if(__unit[3]>=players.length && __unit[3]!=null)return;
 			units.push(__unit);
 		};
 		this.Add_City = function(__city)
 		{
-			if(__city.length!=4)return;
+			if(__city.length!=4 && __city.length!=6)return;
 			if(__city[3]>=players.length)return;
 			cities.push(__city);
 		};
 		this.Add_Weather = function(__weather)
 		{
+			if(Array.isArray(__weather))
+			{	// if it's a weather array, copy it directly
+				weather = new Array(__weather.length);
+				for (var i = 0; i < weather.length; i++) {
+					weather[i] = __weather[i];
+				}
+				return;
+			}	// otherwise parse the string for information
 			if(__weather.length==0)return;
 			weather[0] = (__weather.charAt(0)=='1') ? true : false;
 			for(let number,i=1;i<__weather.length;i++)
@@ -90,6 +100,14 @@ var Map_Reader_Class = function(){
 		{
 			script = str;
 		};
+		this.Refresh_PData = function(Game)
+		{
+			for(var i=0;i<players.length;i++)
+			{
+				if(p_data[i]!=null)
+					Game.Player(i).data = p_data[i];
+			}
+		};
 		this.Start = function(Game)
 		{
 			if(!this.Valid)return;
@@ -102,7 +120,7 @@ var Map_Reader_Class = function(){
 		};
 	};
 
-	this.Read = function(__input)
+	this.String = function(__input)
 	{
 		var ELEMENTS = 10;
 		var dividers = new Array(ELEMENTS);
@@ -232,7 +250,7 @@ var Map_Reader_Class = function(){
 			}
 		}
 
-		// ad id when synching to server
+		// add id when synching to server
 		var cur_map = new Map_Data(_map_data, __data[1], __data[0], __input);
 
 		for(var i=0;i<__data[5].length;i++)
@@ -250,6 +268,39 @@ var Map_Reader_Class = function(){
 		cur_map.Add_Weather(__data[8]);
 
 		cur_map.Script(__data[9]);
+
+		return cur_map;
+	};
+	this.Gamestate = function(_state)
+	{
+		// add id when synching to server
+		var cur_map = new Map_Data(JSON.parse(_state.Terrain), _state.name, 'GAMESTATE ID', _state);
+
+		let _player, _list, _index;
+		for(let i=0;i<_state.players.length;i++)
+		{
+			_player = _state.players[i];
+			cur_map.Add_Player(_player.name, _player.data);
+			_list = _player.units;
+			for(let j=0;j<_list.length;j++)
+			{
+				_index = _list[j];
+				cur_map.Add_Unit([_index.index, _index.x, _index.y, i, _index.health]);
+			}
+			_list = _player.cities;
+			for(let j=0;j<_list.length;j++)
+			{
+				_index = _list[j];
+				cur_map.Add_City([_index.index, _index.x, _index.y, i, _index.stature, _index.resources]);
+			}
+		}
+		for(let i=0;i<_state.unclaimed_cities.length;i++)
+		{
+			cur_map.Add_City([_state.unclaimed_cities[i].index, _state.unclaimed_cities[i].x, _state.unclaimed_cities[i].y, null, _state.unclaimed_cities[i].stature, _state.unclaimed_cities[i].resources]);
+		}
+
+		cur_map.Add_Weather(JSON.parse(_state.weather));
+		cur_map.Script(_state.script);
 
 		return cur_map;
 	};

@@ -68,6 +68,7 @@ var Weather = function(name, sightAffect, move_cost, damage, _aniW, _aniH)
 		sheetAni.Remove_All();
 		sheetAni.Stop = true;
 		particleAni.Stop = true;
+		if(interface!=Fast_Fake_Interface)
 		if(sightAffect!=null)
 		{
 			let u,amt = interface.Game.Unit_Amount();

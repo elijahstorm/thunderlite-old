@@ -51,6 +51,14 @@
   <!-- Push down content on small screens -->
   <div class="w3-hide-large" style="margin-top:83px"></div>
 
+	<!-- LOADING OVERLAY -->
+	<div id="LOADINGOVERLAY" class="w3-container w3-light-grey w3-padding-32 w3-padding-large" >
+		<div id="loading-background" class="w3-black w3-center">
+			<br /><br /><br />
+			<div class="lds-ellipsis"><div></div><div></div><div></div></div>
+		</div>
+	</div>
+
   <!-- MAP CHOICE CONTENT -->
 	<div id="MAPSELECTION">
 	  <div id="MAPSELECTIONROW" class="w3-row">
@@ -102,14 +110,15 @@
 			<div class="canvas" id="overlayCanvas" style="width:600px;height:600px;"></div>
 			<div class="canvas" id="dialogCanvas" style="width:600px;height:600px;"></div>
 			<div class="canvas" id="devCanvas" style="width:600px;height:600px;"></div>
-			<div class="canvas" id="avatarCanvas">
+			<div class="canvas fade_out" id="avatarCanvas">
 				<div id="active-players">
+					<h3 id="day_turn_info"></h3>
 					<img id="avatar-icon" class="avatar-icon-inline"></img>
 					<img id="weather-icon" class="avatar-icon-inline"></img>
 					<ul id="active-player-list" style="list-style-type:none" ></ul>
 				</div>
 			</div>
-			<div class="canvas" id="statsCanvas">
+			<div class="canvas fade_out" id="statsCanvas">
 				<div id="tile-info">
 					<img id="status-icon"></img>
 					<div id="status-info">
@@ -119,7 +128,7 @@
 			<div class="canvas" id="menuCanvas" style="width:810px;height:665px;"></div>
 			<div class="canvas" id="logCanvas" style="width:810px;height:665px;"></div>
 			<div class="canvas" id="inputHandler" style="width:810px;height:665px;"></div>
-			<div id="gameHelpers">
+			<div class="fade_out" id="gameHelpers">
 				<div id="data"></div>
 				<div id="endTurn">End Turn</div>
 				<div id="frames" style="color:rgb(18, 121, 11);">30/30 FPS</div>
@@ -200,22 +209,13 @@
   <div id="ENDGAME" class="w3-container w3-light-grey w3-padding-32 w3-padding-large" >
     <div class="w3-content" style="max-width:600px">
       <h4 class="w3-center"><b>Game over!</b></h4>
-      <p>Do you want me to photograph you? Fill out the form and fill me in with the details :) I love meeting new people!</p>
-      <form action="/action_page.php" target="_blank">
-        <div class="w3-section">
-          <label>Name</label>
-          <input class="w3-input w3-border" type="text" name="Name" required>
-        </div>
-        <div class="w3-section">
-          <label>Email</label>
-          <input class="w3-input w3-border" type="text" name="Email" required>
-        </div>
-        <div class="w3-section">
-          <label>Message</label>
-          <input class="w3-input w3-border" type="text" name="Message" required>
-        </div>
-        <button type="submit" class="w3-button w3-block w3-black w3-margin-bottom">Send Message</button>
-      </form>
+			<p class="w3-center" id="end-game-results"></p>
+			<p class="w3-center">This end screen will show detailed stats and info about the game in the next build. For now, please enjoy this cute bird :)</p>
+
+			<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+			<lottie-player class="w3-center" src="https://assets6.lottiefiles.com/packages/lf20_U3YTLB.json"  background="transparent"  speed="0.8"  style="width: 300px; height: 300px;"  loop autoplay></lottie-player>
+
+    	<button onclick="changeContent('MULTIPLAYER')" class="w3-button w3-block w3-black w3-margin-bottom">Back to User Maps</button>
     </div>
   </div>
 
@@ -223,7 +223,7 @@
   <div id="CONTACT" class="w3-container w3-light-grey w3-padding-32 w3-padding-large" >
     <div class="w3-content" style="max-width:600px">
       <h4 class="w3-center"><b>Contact Me</b></h4>
-      <p>Do you want me to photograph you? Fill out the form and fill me in with the details :) I love meeting new people!</p>
+      <p>Leave a message!</p>
       <form action="/action_page.php" target="_blank">
         <div class="w3-section">
           <label>Name</label>

@@ -397,7 +397,12 @@ var Canvas = {
 		Canvas.Temp_Ticks[Canvas.Temp_Ticks.length] = fnc;
 	},
 	Add_Ticker:function(fnc){
-		Canvas.Tick_Functions[Canvas.Tick_Functions.length] = fnc;
+		Canvas.Tick_Functions.push(fnc);
+		return Canvas.Tick_Functions.length-1;
+	},
+	Kill_Ticker:function(index){
+		if(index>=Canvas.Tick_Functions.length)return;
+		return Canvas.Tick_Functions.splice(index, 1);
 	},
 	Next_Tick:function(){
 		if(!Canvas.Kill)

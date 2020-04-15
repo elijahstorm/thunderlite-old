@@ -180,20 +180,45 @@ var Engine_Class = function(input, is_sample, is_local)
 				if(self.game_data[3]==1)
 					openMapEditor(self.game_data[1], self.game_data[2], client_won);
 				else if(self.game_data[3]==2 && client_won)
-			{
-				console.log(self.game_data);
-				console.log(self.game_data[4]);
+				{
 					socket.emit('userdata add', {
 						type:'progress',
 						section:self.game_data[4]
 					});
-
 				}
 			}
 			else if(UI!=Fast_Fake_Interface)
 				UI.End_Game(client_won, Players, turn);
 			self.game_data = [false,input,0];
 		}, 750);
+	};
+	this.Quit_Game = function()
+	{
+		this.Game_Over = true;
+		this.Active_Weather.Stop(UI);
+		if(UI!=Fast_Fake_Interface)
+		{
+			clearLastTimeoutCheck();
+			window.parent.setConnection(1);
+			Select_Animation.Remove_All();
+			Repair_Animation.Remove_All();
+			for(var x=1;x<Terrain_Data.TERRE.length;x++)
+			{
+				var _t = Terrain_Data.TERRE[x];
+
+				if(_t.Connnection==5 || _t.Connnection==3)
+				{
+					Animations.Retrieve(_t.Name+" Ani").Remove_All();
+				}
+			}
+		}
+		for(var x=0;x<terre.Width;x++)
+		for(var y=0;y<terre.Height;y++)
+		{
+			terre.At(x, y).Delete();
+		}
+		window.parent.refreshChat();
+		INTERFACE.setGame(null);
 	};
 	this.Hide_Animations = function()
 	{
@@ -702,6 +727,60 @@ var Engine_Class = function(input, is_sample, is_local)
 		}
 		return unit.Act(x, y, path, whenFinished, scrollTo);
 	};
+	this.Build_From_Unit = function(unit, type, direction, scrollTo)
+	{
+		if(unit==null)return false;
+		if(type==null)return false;
+		if(direction==null)return false;
+		if(unit.SELECTABLE==null)
+		{
+			var found = false;
+			for(var i in Units)
+			{
+				if(Units[i].Index==unit)
+				{
+					unit = Units[i];
+					found = true;
+					break;
+				}
+			}
+			if(!found)
+			{
+				return false;
+			}
+		}
+		SFXs.Retrieve("build").Play();
+		let player = unit.Player;
+		let new_unit = new Characters.Char_Class(unit.Game, type);
+		new_unit.Player = player;
+		unit.Cash-=player.Calculate_Cost(type);
+		new_unit.Alpha.data = 0;
+		new_unit.Idle = true;
+		new_unit.Set_Active(false);
+		let loc_x = unit.X,
+			loc_y = unit.Y;
+		if(direction==0)
+		{	// create to the left
+			loc_x--;
+		}
+		else if(direction==1)
+		{	// create up
+			loc_y--;
+		}
+		else if(direction==2)
+		{	// create to the right
+			loc_x++;
+		}
+		else if(direction==3)
+		{	// create down
+			loc_y++;
+		}
+		unit.Game.Add_Unit(new_unit, loc_x, loc_y, player.Team);
+		unit.End_Turn();
+		new_unit.Fade(255, 7);
+		if(scrollTo)UI.Scroll_To_Tile(new_unit.X, new_unit.Y);
+		return true;
+	};
 	this.Build = function(city, input, whenFinished, scrollTo)
 	{
 		if(city.SELECTABLE==null)
@@ -877,6 +956,7 @@ var Engine_Class = function(input, is_sample, is_local)
 	};
 	this.Host_Game = function(id)
 	{
+		if(currently_playing)return; // dont execute if game already started
 		this.id = id;
 		if(online)socket.emit('start');
 		this.Start();
@@ -885,8 +965,44 @@ var Engine_Class = function(input, is_sample, is_local)
 	{
 		Script = __script;
 	};
+	this.Set_Up = function(__turn_start, connections, __cur_player)
+	{	// when gamestate starting in the middle
+		if(currently_playing)return; // dont execute if game already started
+		currently_playing = true;
+		if(__turn_start!=null)
+			turn = __turn_start;
+		if(__cur_player!=null)
+			cur_player = __cur_player;
+		if(connections!=null)
+			Connected_Players = connections;
+
+		for(let i in Connected_Players)
+		{
+			if(Connected_Players[i]==socket.index)
+			{
+				client = Players[i];
+				break;
+			}
+		}
+
+		animationCanvas.clearRect(0, 0, 900, 900);
+		UI.Close_Menu();
+		Canvas.Reflow();
+		UI.Start();
+		UI.Draw();
+		if(Cities.length==0)
+		{
+			for(let p in Players)
+			{
+				Players[p].Add_Control(0, true);
+				Players[p].Add_Control(1, true);
+				Players[p].Add_Control(2, true);
+			}
+		}
+	}
 	this.Start = function()
 	{
+		if(currently_playing)return; // dont execute if game already started
 		currently_playing = true;
 
 		if(UI!=Fast_Fake_Interface)
@@ -905,7 +1021,6 @@ var Engine_Class = function(input, is_sample, is_local)
 				UI.Set_Next_Player(active_player, function(){
 					active_player.Start_Turn(socket.index==Connected_Players[cur_player], function(){
 						Script.Do("start");
-
 						Script.Do("turn", ""+(turn+1));
 						Script.Do("player", ""+cur_player+","+(turn+1));
 						sentGameMove();
@@ -919,7 +1034,6 @@ var Engine_Class = function(input, is_sample, is_local)
 				});
 			}
 			else UI.Set_Next_Player(Players[cur_player]);
-			if(!online)console.log("Offline game started.");
 		}
 		else
 		{
@@ -949,23 +1063,40 @@ var Engine_Class = function(input, is_sample, is_local)
 	{	/// create a clone of the data for the current game state
 		var self = this;
 		var player_data = [];
+		let unclaimed_cities = [];
 		for(var i in Players)
 		{
 			player_data.push(Players[i].Data());
 		}
-		let weather_clone = [];
+		for(let i in Cities)
+		{
+			if(Cities[i].Owner==null)
+			{
+				unclaimed_cities.push(Cities[i].Data());
+			}
+		}
+		let weather_clone = new Array(global_weather.length);
 		for(let i in global_weather)
 		{
 			weather_clone[i] = global_weather[i];
 		}
+		if(string)
+		{
+			weather_clone = JSON.stringify(weather_clone);
+		}
 		let terrain_data;
 		if(string)
 		{
-			terrain_data = "";
+			terrain_data = new Array(terre.Width);
 			for(let x=0;x<terre.Width;x++)
-			for(let y=0;y<terre.Height;y++)
-				terrain_data+=terre.At(x, y).Source+".";
+			{
+				terrain_data[x] = new Array(terre.Height);
+				for(let y=0;y<terre.Height;y++)
+					terrain_data[x][y] = terre.At(x, y).Source;
+			}
+			terrain_data = JSON.stringify(terrain_data);
 		}else terrain_data = terre.Clone();
+		let _script_str = Script.To_String==null ? "" : Script.To_String();
 		return {
 			Game_Engine:true,
 			valid:self.valid,
@@ -973,9 +1104,11 @@ var Engine_Class = function(input, is_sample, is_local)
 			turn:turn,
 			Terrain:terrain_data,
 			weather:weather_clone,
+			script:_script_str,
 			cur_player:cur_player,
 			connected:Connected_Players,
-			players:player_data
+			players:player_data,
+			unclaimed_cities:unclaimed_cities
 		};
 	};
 	this.Clone = function()
@@ -984,6 +1117,7 @@ var Engine_Class = function(input, is_sample, is_local)
 	};
 	this.Restart = function()
 	{
+		return; // should never call this function
 		if(UI!=Fast_Fake_Interface)
 		{
 			UI.Select_Tile();
@@ -1359,8 +1493,6 @@ var Engine_Class = function(input, is_sample, is_local)
 
 		if(input.Valid)
 		{		/// input is map data
-			if(!input.Valid)
-				return;
 
 		// takes some time, 50 - 100 ms
 			let data = input.Start(this);
@@ -1378,14 +1510,26 @@ var Engine_Class = function(input, is_sample, is_local)
 			draw_map_data(this, __terre);
 
 		// this doesn't take much time, usually .2 - 3.0 ms
+			let current;
 			for(var i in __units)
 			{
-				this.Add_Unit(Characters.New(this,Char_Data.Reverse_Get(__units[i][0]).Name), __units[i][1], __units[i][2], __units[i][3]);
+				current = this.Add_Unit(Characters.New(this,Char_Data.Reverse_Get(__units[i][0]).Name), __units[i][1], __units[i][2], __units[i][3]);
+				if(__units[i][4]!=null)
+				{
+					current.Health = __units[i][4];
+				}
 			}
 			for(var i in __cities)
 			{
-				this.Add_Building(Buildings.New(this,Building_Data.Reverse_Get(__cities[i][0]).Name), __cities[i][1], __cities[i][2], __cities[i][3]);
+				current = this.Add_Building(Buildings.New(this,Building_Data.Reverse_Get(__cities[i][0]).Name), __cities[i][1], __cities[i][2], __cities[i][3]);
+				if(__cities[i][4]!=null)
+				{
+					current.Stature.value = __cities[i][4];
+					current.Resources = __cities[i][5];
+				}
 			}
+
+			input.Refresh_PData(this);
 		}
 	}
 	else this.valid = false; // game does not have valid input to function

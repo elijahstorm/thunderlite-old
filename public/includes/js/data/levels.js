@@ -267,6 +267,10 @@ var Levels_Class = function()
 				}
 			}
 		};
+		this.To_String = function()
+		{
+			return _srpt_input;
+		};
 
 		let parseStartTag = _srpt_input.indexOf("<"),
 			parseEndTag = 0,

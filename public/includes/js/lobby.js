@@ -1,9 +1,10 @@
 let PARENT;
+var refresh;
 
 window.onload = function()
 {
 	PARENT = window.parent.window.parent;
-	
+
 	var data_handler = function(node){
 		this.value = 0;
 		this.add = function(){
@@ -67,7 +68,7 @@ window.onload = function()
 		games.splice(index, 1);
 		setTimeout(function(){refresh();}, 5);
 	};
-	window.refresh = function(){
+ 	refresh = function(){
 		var output = document.getElementById('lobby');
 		output.innerHTML = "";
 		for(var i=0;i<games.length;i++)
@@ -106,13 +107,10 @@ window.onload = function()
 		}
 	};
 
-	if(PARENT){
-		PARENT.refresh_lobby();
+	if(PARENT!=null){
 		PARENT.lobby_open = true;
+		PARENT.refresh_lobby();
 	}
-
-	PARENT.lobby_open = true;
-	PARENT.refresh_lobby();
 };
 
 function hide()

@@ -7,7 +7,7 @@ let notification = false;
 let PARENT;
 
 window.onload = function() {
-	PARENT = 	window.parent.shrinkChat==null ? window.top.parent :	window.parent;
+	PARENT = window.parent.shrinkChat==null ? window.top.parent :	window.parent;
 };
 
 function jump(i){

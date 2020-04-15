@@ -296,6 +296,7 @@ var Mod_List = {
 						}
 						else return;
 
+						unit.Game.Send_Move('send build', unit.Index, index, direction);
 						SFXs.Retrieve("build").Play();
 						unit.Cash-=player.Calculate_Cost(index);
 						new_unit.Alpha.data = 0;

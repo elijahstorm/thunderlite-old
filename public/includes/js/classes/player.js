@@ -81,7 +81,7 @@ var Player_Class = function(game, name, team, colors)
 			color:colors,
 			data:self.data,
 			units:units_data,
-			buildings:build_data
+			cities:build_data
 		};
 	};
 
@@ -332,7 +332,7 @@ var Player_Class = function(game, name, team, colors)
 	{
 		self.data.buildings_captured++;
 		Buildings.push(input);
-		input.Sprite = placeSprites[input.Source];
+		input.Owner_Image = placeSprites[input.Source];
 		input.Captured_By(self);
 		if(input.Owner!=null)
 		{

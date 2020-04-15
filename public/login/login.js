@@ -110,7 +110,7 @@ function sendMsgBtn(){
 		var date = new Date();
 		date.setTime(date.getTime()+604800000);
 		var expires = date.toGMTString();
-		document.cookie = "user="+user.value+";expires="+expires+";path=/";
+		document.cookie = "user="+user.value+";SameSite=Strict;expires="+expires+";path=/";
 		document.cookie = "pass="+pass.value+";expires="+expires+";path=/";
 	}
 	if(signupShown)
@@ -120,7 +120,7 @@ function sendMsgBtn(){
 
 function login(){
 	if(!window.parent.validateSignup(user.value, pass.value)){
-		report("invalid user info");
+		report("User name and password cannot contain \"/\\:;.\" or spaces.");
 	}
 	else window.parent.reportLoggedIn(user.value, pass.value, report);
 }

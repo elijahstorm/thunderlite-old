@@ -45,7 +45,7 @@ var Buildings = {
 		this.Height = BuildData.Height;
 		this.Drag = BuildData.Drag;
 		this.Source = place_index;
-		this.Sprite = null;
+		this.Owner_Image = null;
 		this.Resources = BuildData.Resources;
 		this.Income = BuildData.Income;
 		this.X;
@@ -65,7 +65,7 @@ var Buildings = {
 				index:place_index,
 				x:self.X,
 				y:self.Y,
-				stature:self.Stature,
+				stature:self.Stature.Get(),
 				resources:self.Resources
 			};
 			let extra_mods = [];
@@ -115,7 +115,7 @@ var Buildings = {
 
 		this.Draw = function(canvas, x, y)
 		{
-			if(this.Sprite==null || this.Terrain.Hidden)
+			if(this.Owner_Image==null || this.Terrain.Hidden)
 			{
 				var img = BuildData.Sprite.Image();
 				BuildData.Sprite.Draw(canvas,x,y,img.width*TILESIZE/60,img.height*TILESIZE/60);
@@ -123,10 +123,10 @@ var Buildings = {
 			}
 			if(game.FORCE_MERGE_DISPLAY)
 			{
-				canvas.putImageData(merge(canvas.getImageData(x, y, this.Sprite.width, this.Sprite.height), this.Sprite), x, y);
+				canvas.putImageData(merge(canvas.getImageData(x, y, this.Owner_Image.width, this.Owner_Image.height), this.Owner_Image), x, y);
 				return;
 			}
-			canvas.putImageData(this.Sprite, x, y);
+			canvas.putImageData(this.Owner_Image, x, y);
 		};
 		this.UI_Draw = function(canvas, x, y)
 		{
