@@ -38,6 +38,7 @@ function logOut(){
 
 var gameFrame, chatFrame;
 var game;
+let first_time_opening_lobby = true;
 var title_box_alert = function(updated){
 	var old = document.title;
 	this.time = 1000;
@@ -145,9 +146,14 @@ window.onload = function(){
 										// if there aren't a lot of open games to choose from -> land user on game host
 			if(i<2)				// if less then two open games waiting,
 			{							// then will defult to send player to land on game hosting page
-				game.changeContent("MULTIPLAYER", null, true);
+				game.chooseContent("MULTIPLAYER", null, true);
 			}
-			else game.changeContent("GAME LOBBY", null, true);
+			else game.chooseContent("GAME LOBBY", null, true);
+			if(first_time_opening_lobby)
+			{
+				game.changeContent(game.CONTENT_REDIRECT);
+				first_time_opening_lobby = false;
+			}
 		}
 		else if(data.type==4)
 		{	// client disconnected

@@ -146,7 +146,7 @@ var Characters = {
 				pic = merge(canvas.getImageData(x, y, pic.width, pic.height), pic);
 			}
 
-			canvas.putImageData(_scale==null ? pic : scale(pic, _scale, _scale), x, y);
+			canvas.putImageData(_scale==null ? pic : zoom(pic, _scale), x, y);
 		};
 		self.UI_Draw = function(canvas, x, y)
 		{
@@ -200,7 +200,7 @@ var Characters = {
 				Shape.Rectangle.Draw(canvas, 3, 34, 30, 30, "#000");
 				canvas.globalAlpha = 1;
 				Shape.Rectangle.Draw(canvas, 0, 30, 30, 30, "#fff");
-				self.Rescued_Unit.Draw(hudCanvas, x+(10*TILESIZE/60), y+(36**TILESIZE/60), .5);
+				self.Rescued_Unit.Draw(hudCanvas, x+(10*TILESIZE/60), y+(36*TILESIZE/60), .5);
 			}
 			if(showAttackWeakness!=0)
 			{

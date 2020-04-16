@@ -918,6 +918,10 @@ function changeContent(choice, title, dontAsk)
 	}
 }
 
+var CONTENT_REDIRECT = "MULTIPLAYER";
+function chooseContent(args){
+	CONTENT_REDIRECT = args;
+}
 function mainMenu(){
 	currently_playing = false;
 	Canvas.Stop_All();

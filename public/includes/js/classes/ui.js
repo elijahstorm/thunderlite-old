@@ -2008,7 +2008,8 @@ var Interface_Class = function()
 				return index.data.money_spent;
 			});
 			self = this;
-			changeContent("END GAME", game);
+			changeContent("END GAME", game, true);
+			window.parent.openLobby();
 		}
 		this.setGame(null);
 		if(online)socket.emit();

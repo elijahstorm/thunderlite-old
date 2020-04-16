@@ -7,20 +7,20 @@ Music.Declare("editor/plains", "editor plains", true, .5);
 Music.Declare("editor/water", "editor water", true, .4);
 
 Music.Declare("game/intro", "game intro", true, .3);
-Music.Declare("game/player", "player turn", true, .5);
-Music.Declare("game/thinking", "thought music", true, .7);
+Music.Declare("game/player", "player turn", true, .34);
+Music.Declare("game/thinking", "thought music", true, .6);
 Music.Declare("game/inactive", "hurry warning", true, .6);
-Music.Declare("game/enemy", "enemy turn", true, .55);
-Music.Declare("game/ally", "ally turn", true, .5);
-Music.Declare("game/win", "game won", false, .65);
-Music.Declare("game/lose", "game lost", false, .65);
+Music.Declare("game/enemy", "enemy turn", true, .45);
+Music.Declare("game/ally", "ally turn", true, .4);
+Music.Declare("game/win", "game won", false, .35);
+Music.Declare("game/lose", "game lost", false, .35);
 
   /** Enviornmental spacial effects */
 
-Enviornment.Declare("weather/rain", "Rain", true, .6);
-Enviornment.Declare("weather/snow", "Snow", true, .5);
-Enviornment.Declare("weather/desert", "Heat Wave", true, .65);
-Enviornment.Declare("weather/sunny", "Sunny", true, .6);
+Enviornment.Declare("weather/rain", "Rain", true, .8);
+Enviornment.Declare("weather/snow", "Snow", true, .7);
+Enviornment.Declare("weather/desert", "Heat Wave", true, .85);
+Enviornment.Declare("weather/sunny", "Sunny", true, .8);
 
   /** Sound effects */
 
