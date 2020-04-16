@@ -9,6 +9,12 @@ body{
 #GAMECONTENT, #GAMELOBBY, #MAPSELECTION, #HOSTNEWGAME, #ENDGAME, #CONTACT{
 	display: none;
 }
+#loading-background{
+	height: 400px;
+}
+.fade_out{
+	transition: opacity 1s ease;
+}
 
 .INFO-LIST{
 	border-bottom: solid 2px #cccc;
@@ -141,11 +147,11 @@ img.MAPCHOICEIMG{
 }
 
 #canvasHolder{
-	position:absolute;
-	padding:0px;
-	margin:0px;
+	position: absolute;
+	padding: 84px 0px 0px 0px;
+	margin: 0px;
 	width: 100%;
-	height: 95%;
+	height: 100%;
 	max-width:810px;
 	max-height:665px;
 	overflow:hidden;
@@ -177,8 +183,8 @@ img.MAPCHOICEIMG{
 	min-width: 150px;
 	max-width: 150px;
 	/* height: 400px; */
-	min-height: 220px;
-	max-height: 400px;
+	min-height: 300px;
+	max-height: 500px;
 
 	background: #fffd;
 	overflow: hidden;

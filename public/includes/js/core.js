@@ -640,6 +640,9 @@ function toggle_pregame_info(element)
 {
 	if(element.className.indexOf("inactive")!=-1)
 		return;
+
+	LOG.popup("Sorry. Feature disabling won't take affect until next update.");
+
 	if(element.id)
 	switch (element.id) {
 		case "_weather":
@@ -893,7 +896,7 @@ function changeContent(choice, title, dontAsk)
 			document.getElementById("ENDGAME").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = title.Name;
 
-				// remove refresh_lobby() call when END GAME screen finished 
+				// remove refresh_lobby() call when END GAME screen finished
 			window.parent.refresh_lobby();
 
 

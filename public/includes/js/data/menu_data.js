@@ -1776,6 +1776,8 @@ Menu.MapEditor.Open = function()
 	}
 };
 
+/*** In game unit popup, unit double click ***/
+Menu.Game_Prompt = new Menu.Menu_Class();
 
 /*** Overlay to stop input ***/
 Menu.No_Touch_Overlay = new Menu.Menu_Class("#444C");

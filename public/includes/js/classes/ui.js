@@ -511,6 +511,9 @@ var Interface_Class = function()
 
 		var x = Math.round(e.touches[0].clientX);
 		var y = Math.round(e.touches[0].clientY);
+
+		y-=84; // this is a temp fix for a mobile bug
+
 		self.Click(x,y);
 		touch_start_loc[0] = x;
 		touch_start_loc[1] = y;
@@ -532,6 +535,9 @@ var Interface_Class = function()
 		e.preventDefault();
 		var x = Math.round(e.touches[0].clientX);
 		var y = Math.round(e.touches[0].clientY);
+
+		y-=84; // this is a temp fix for a mobile bug
+
 		if(e.touches.length==2)
 		{
 			scroller.doTouchEnd(e.timeStamp);
@@ -574,6 +580,8 @@ var Interface_Class = function()
 
 		var x = Math.round(e.touches[0].clientX);
 		var y = Math.round(e.touches[0].clientY);
+
+		y-=84; // this is a temp fix for a mobile bug
 
 		if(!in_hl_path)
 		{
@@ -882,28 +890,8 @@ var Interface_Class = function()
 				HUD_Avoid_Mouse.adjust-=HUD_Avoid_Mouse.speed;
 			},
 			scared:function(x, y){
-				if(_avatar.style.opacity==0)return;
-				if(HUD_Avoid_Mouse.adjust>=0)return;
-				if(HUD_Avoid_Mouse.avatar_down)
-				if(HUD_Avoid_Mouse.avatar_right)
-				{
-					if(clientWidth-x<=_avatar.clientWidth+HUD_Avoid_Mouse.avoid)
-					if(clientHeight-y<=_avatar.clientHeight+HUD_Avoid_Mouse.avoid)
-					{
-						HUD_Avoid_Mouse.adjust = _avatar.clientWidth;
-						return;
-					}
-				}
-				if(HUD_Avoid_Mouse.avatar_down)
-				if(!HUD_Avoid_Mouse.avatar_right)
-				{
-					if(x<=_avatar.clientWidth+HUD_Avoid_Mouse.avoid)
-					if(y>=_avatar.clientHeight+HUD_Avoid_Mouse.avoid)
-					{
-						HUD_Avoid_Mouse.adjust = _avatar.clientWidth;
-						return;
-					}
-				}
+				_avatar.style.opacity = 0;
+				_status.style.opacity = 0;
 			},
 			interact:function(){
 				HUD_Avoid_Mouse.idle_time = 0;
