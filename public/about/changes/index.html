@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Future Updates - ThunderLite</title>
+	<title>New Things - ThunderLite</title>
 	<script>
 		let fileref = document.createElement("link");
 
@@ -19,35 +19,30 @@
 		body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 		.w3-third img{margin-bottom: -6px; opacity: 0.8; cursor: pointer}
 		.w3-third img:hover{opacity: 1}
-		.code{
-			font-family: "Times New Roman", sans-serif
-		}
 	</style>
 </head>
 
 
 <body class="w3-light-grey w3-content" style="max-width:1600px">
 
-	<!-- Sidebar/menu -->
-	<nav class="w3-sidebar w3-bar-block w3-white w3-animate-left w3-text-grey w3-collapse w3-top w3-center" style="z-index:3;width:300px;font-weight:bold" id="mySidebar"><br>
-	  <h3 class="w3-padding-64 w3-center"><b>THUNDER<br>LITE</b></h3>
-	  <a href="javascript:void(0)" onclick="w3_close()" class="w3-bar-item w3-button w3-padding w3-hide-large">CLOSE</a>
-	  <a href="http://thunderlite.herokuapp.com/" onclick="w3_close()" class="w3-bar-item w3-button">PLAY GAME</a>
-	  <a href="#top" onclick="w3_close()" class="w3-bar-item w3-button">INTRO</a>
-	  <a href="#faq" onclick="w3_close()" class="w3-bar-item w3-button">FAQ</a>
-	  <a href="#condition" onclick="w3_close()" class="w3-bar-item w3-button">CONDITIONALS</a>
-	  <a href="#actions" onclick="w3_close()" class="w3-bar-item w3-button">ACTIONS</a>
-	  <a href="#list" onclick="w3_close()" class="w3-bar-item w3-button">FULL REFERENCE</a>
-	</nav>
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-bar-block w3-white w3-animate-left w3-text-grey w3-collapse w3-top w3-center" style="z-index:3;width:300px;font-weight:bold" id="mySidebar"><br>
+  <h3 class="w3-padding-64 w3-center"><b>THUNDER<br />LITE</b></h3>
+  <a href="javascript:void(0)" onclick="w3_close()" class="w3-bar-item w3-button w3-padding w3-hide-large">CLOSE</a>
+  <a href="http://thunderlite.herokuapp.com/" onclick="w3_close()" class="w3-bar-item w3-button">PLAY GAME</a>
+  <a href="#updates" onclick="w3_close()" class="w3-bar-item w3-button">NEW THINGS!</a>
+  <a href="#contact" onclick="w3_close()" class="w3-bar-item w3-button">CONTACT</a>
+</nav>
 
-	<!-- Top menu on small screens -->
-	<header class="w3-container w3-top w3-hide-large w3-white w3-xlarge w3-padding-16">
-	  <span class="w3-left w3-padding">Scripting</span>
-	  <a href="javascript:void(0)" class="w3-right w3-button w3-white" onclick="w3_open()">☰</a>
-	</header>
+<!-- Top menu on small screens -->
+<header class="w3-container w3-top w3-hide-large w3-white w3-xlarge w3-padding-16">
+  <a href="http://thunderlite.herokuapp.com/"><span id="CONTENT_TITLE" class="w3-left w3-padding">ThunderLite</span></a>
+  <a href="javascript:void(0)" class="w3-right w3-button w3-white" onclick="w3_open()">☰</a>
+</header>
 
-	<!-- Overlay effect when opening sidebar on small screens -->
-	<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+
 
 <!-- !PAGE CONTENT! -->
 <div class="w3-main" style="margin-left:300px">
@@ -55,166 +50,57 @@
   <!-- Push down content on small screens -->
   <div class="w3-hide-large" style="margin-top:83px"></div>
 
-  <!-- Intro section -->
-  <div id="top" class="w3-container w3-light-grey w3-center w3-text-dark-grey w3-padding-32">
-    <h1><b>Information about scripting</b></h1>
+  <!-- Updates section -->
+  <div class="w3-container w3-light-grey w3-center w3-text-dark-grey w3-padding-32" id="updates">
+    <h4><b>New Things</b></h4>
     <div class="w3-content w3-justify" style="max-width:600px">
-      Scripting is a fun tool, used to alter the game rules as the game plays out. With the use of conditional functions modular design, you can use all the techniques a game developer can to make really fun levels!
-      <br /><br />
-      But don't worry, you don't need to be a programmer or know game logic to get started. It's as easy as English!
-      <br />
-      (... Well hopfully easier than English!)
-      <br /><br /><br /><br /><br /><br /><br /><br />
+			Want to play live <b>MULTIPLAYER</b>? Want to <b>create</b> and host original maps?<br /><br />
+			Both those features are already included in the game! Feel free to test it out by inviting your friends to play in a Multiplayer Custom Map game! More info below.
+			<br/><br />
+			Try it! <a href="http://thunderlite.herokuapp.com/">http://thunderlite.herokuapp.com/</a>
+			<br/><br />
+			Want to create a map?
+			Just click Map Editor on the dropdown menu to the left to begin creating! Once you're finished, test it. If you complete the map (proving it's possible), you can UPLOAD it so everyone else can play!
+			<br/><br />
+			Want to play a game?
+			Go to MULTIPLAYER and host an existing game, or search for one of your own!
+			<br/><br />
+			Want to play with a friend?
+			Invite them to join with the link above. New features include fixing all those server errors that use to pop up. Now there's no more CONNECTION issues. If a user loses connection Mid-Game, the server will allow them to rejoin within 30seconds to get right back into the game!
+			<br/><br />
+			Think it's too good to be true? Test it out! Invite a friend to play with you, then after a turn or two, have them close the tab. Then reopen it and log back in, your game will automatically resume! Just don't wait more than 30seconds, or the sever will assume they aren't intending to reconnect and end the game.
+			<br/><br />
+			<br/><br />
+			Play around and relive some old memories! Invite your friends and maybe we can regain the old community :)
+			<br/><br />
+			Thank you
+			-- Elijah Storm
+			<br/><br />
+			<br/><br />
+			Next update list: </a href="http://thunderlite.herokuapp.com/about/updates">http://thunderlite.herokuapp.com/about/updates</a>
     </div>
   </div>
 
-	<!-- FAQ section -->
-	<div id="faq" class="w3-container w3-dark-grey w3-center w3-text-light-grey w3-padding-32">
-		<h3><b>FAQ</b></h3>
-		<div class="w3-content w3-justify" style="max-width:600px">
-			Frequenly Asked Questions
-
-			<br /><br /><br />
-			<h4 class="w3-center">Example</h4>
-				...
-			<div class="code">
-
-			</div>
-			<br /><br /><br /><br /><br /><br /><br /><br />
-		</div>
-	</div>
-
-  <!-- Conditions section -->
-  <div id="condition" class="w3-container w3-light-grey w3-center w3-text-dark-grey w3-padding-32">
-    <h3><b>Conditions</b></h3>
-    <div class="w3-content w3-justify" style="max-width:600px">
-      In order to start reading code, you have to start it in a Conditional.
-			<br /><br />
-			Conditionals start with &lt; <i>condition "value"</i> &gt;
-			<br /><br />
-			When the condition is met, the script within the condtion tag will be ran.
-			<br /><br />
-			To end a conditional, just run the &lt; / <i>condition</i> &gt; end tag. End tag with the "/" at the start.
-
-			<br /><br /><br />
-			<h4 class="w3-center">Example</h4>
-				...
-			<div class="code">
-				&lt;<i>start</i>&gt;<br />
-				<br />
-				talk Jeff: "I'm going to highlight some tiles for you."<br />
-				<br />
-				move: 16,15<br />
-				hl: 9, 11<br />
-				hl: 9, 14<br />
-				hl: 11, 14<br />
-				hl: 12, 13<br />
-				<br />
-				wait: 2<br />
-				talk Jeff: "Alright, there you go. I'll take the highlights away now."<br />
-				<br />
-				unhl: 9, 11<br />
-				unhl: 9, 14<br />
-				unhl: 11, 14<br />
-				unhl: 12, 13<br />
-				<br />
-				&lt;/<i>start</i>&gt;<br />
-				<br />
-				<br />
-				&lt;<i>turn 2</i>&gt;<br />
-				<br />
-				talk Jeff: "Here's some units for you to use in this game"<br />
-				<br />
-				move: 5, 0<br />
-				add unit: 2, "Strike Commando", 4, 6<br />
-				add unit: 2, "Strike Commando", 13, 1<br />
-				wait: 1<br />
-				<br />
-				move: 18, 14<br />
-				add unit: 2, "Strike Commando", 16, 16<br />
-				add unit: 2, "Strike Commando", 17, 14<br />
-				add unit: 2, "Strike Commando", 18, 6<br />
-				wait: 1<br />
-				<br />
-				move: 8, 0<br />
-				add unit: 2, "Spider Tank", 9, 2<br />
-				add unit: 2, "Spider Tank", 11, 2<br />
-				wait: 1<br />
-				<br />
-				<br />
-				talk Jeff: "There you go."<br />
-				<br />
-				wait: .5<br />
-				talk Jeff: "Goodbye!"<br />
-				<br />
-				&lt;/<i>turn</I>&gt;<br />
-			</div>
-
-			<br /><br /><br /><br /><br /><br /><br /><br />
-    </div>
-  </div>
-
-  <!-- Actions section -->
-  <div id="actions" class="w3-container w3-dark-grey w3-center w3-text-light-grey w3-padding-32">
-    <h3><b>Actions</b></h3>
-    <div class="w3-content w3-justify" style="max-width:600px">
-			sup bitch
-
-			<br /><br /><br />
-			<h4 class="w3-center">Example</h4>
-				...
-			<div class="code">
-
-			</div>
-			<br /><br /><br /><br /><br /><br /><br /><br />
-    </div>
-  </div>
-
-  <!-- List Reference section -->
-  <div id="list" class="w3-container w3-light-grey w3-center w3-text-dark-grey w3-padding-32">
-    <h3><b>List Reference</b></h3>
-    <div class="w3-content w3-justify" style="max-width:600px">
-			<h4 class="w3-center">All Conditions</h4>
-				start<br />
-				<br />
-				turn Number<br />
-				<br />
-				player Number<br />
-				<br />
-				win<br />
-				<br />
-				lose<br />
-			<h4 class="w3-center">All Actions</h4>
-			<div class="code">
-				talk <i>Name</i> : "Text1","Text2",...,"TextN"
-				<br />&emsp;(each text must be in quotes)<br />
-				wait : <i>Time</i> (in seconds)<br />
-				move : <i>Tile x, y</i>
-				<br />&emsp;(0, 0 starts in the top, left. and moves down and to the right. x in horizonal. y is vertial. comma to seperate)<br />
-				<br />
-
-				set player <i>Number</i> : <i>Name</i><br />
-				<br />
-
-				hl : <i>Tile x, y</i><br />
-				unhl : <i>Tile x, y</i>
-				<br />&emsp;(if you don't unhighlight, it will stay highlighted until the end of the game or if it's changed via terrain action)<br />
-				<br />
-
-				terrain : <i>"Terrain Type Name", Tile x, y</i><br />
-				<br />&emsp;(Terrain name needs to be in quotes. If a type happens, code will ignore it. Check your spelling if it doesn't work.)<br />
-				<br />
-
-				hurt unit : <i>Tile x, y</i> Change unit health<br />
-				add unit : <i>Tile x, y</i> Adds new unit to game<br />
-				kill unit : <i>Tile x, y</i> Removes unit from game<br />
-				<br />
-
-				hurt city : <i>Tile x, y</i> Change city capture rate<br />
-				add city : <i>Tile x, y</i> Adds new city to game<br />
-				kill city : <i>Tile x, y</i> Removes city from game<br />
-			</div>
-			<br /><br />
+  <!-- Contact section -->
+  <div class="w3-container w3-light-grey w3-padding-32 w3-padding-large" id="contact">
+    <div class="w3-content" style="max-width:600px">
+      <h4 class="w3-center"><b>Contact ThunderLite</b></h4>
+      <p>Have feedback, comments, or concerns? Send them our way!</p>
+      <form action="http://thunderlite.herokuapp.com/about/action_page" target="_blank">
+        <div class="w3-section">
+          <label>Name</label>
+          <input class="w3-input w3-border" type="text" name="Name" required>
+        </div>
+        <div class="w3-section">
+          <label>Email</label>
+          <input class="w3-input w3-border" type="text" name="Email" required>
+        </div>
+        <div class="w3-section">
+          <label>Message</label>
+          <input class="w3-input w3-border" type="text" name="Message" required>
+        </div>
+        <button type="submit" class="w3-button w3-block w3-black w3-margin-bottom">Send Message</button>
+      </form>
     </div>
   </div>
 
