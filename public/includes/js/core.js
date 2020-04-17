@@ -882,6 +882,7 @@ function changeContent(choice, title, dontAsk)
 
 				// remove
 			document.getElementById("gameHelpers").style.display = "block";
+			document.getElementById("canvasHolder").style.top = "84px";
 			break;
 		case "GAME LOBBY":
 			document.getElementById("GAMELOBBY").style.display = "block";
@@ -910,6 +911,7 @@ function changeContent(choice, title, dontAsk)
 
 				// remove
 			document.getElementById("gameHelpers").style.display = "none";
+			document.getElementById("canvasHolder").style.top = "0px";
 			break;
 		case "CONTACT US":
 			document.getElementById("CONTACT").style.display = "block";
