@@ -23,6 +23,13 @@ function eraseCookie(){
 	document.cookie = "pass;expires=-1";
 }
 
+window.onload = function(){
+	if(window.innerWidth<400)
+	{
+		btn.style.marginTop = "45px";
+	}
+};
+
 window.parent.onFinishedLoading(function(){
 	let LOGIN = function(e){
 		if(e.keyCode==13)
@@ -71,9 +78,9 @@ window.parent.onFinishedLoading(function(){
 			pass.value = cookPass;
 			// login();
 		}
-		// pass.focus();
+		pass.focus();
 	}
-	// else user.focus();
+	else user.focus();
 });
 
 function openSignup(){

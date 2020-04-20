@@ -304,7 +304,7 @@ var Interface_Class = function()
 	Avatar = {
 		List_Sliders:[],
 		Player_List:function(__player) {
-			HUD_Avoid_Mouse.interact();
+			HUD_Avoid_Mouse.show();
 			if(__player==null)
 			{
 				for (var i = 0; i < Avatar.List_Sliders.length; i++) {
@@ -827,7 +827,7 @@ var Interface_Class = function()
 	 	HUD_Avoid_Mouse = {
 			avatar_down:true,
 			avatar_right:true,
-			time_without_interaction:85,
+			time_without_interaction:200,
 			idle_time:0,
 			avoid:20,
 			speed:10,
@@ -893,19 +893,24 @@ var Interface_Class = function()
 				_avatar.style.opacity = 0;
 				_status.style.opacity = 0;
 			},
-			interact:function(){
-				HUD_Avoid_Mouse.idle_time = 0;
+			show:function(){
 				_avatar.style.opacity = 1;
 				_status.style.opacity = 1;
 				_helpers.style.opacity = 1;
+			},
+			interact:function(){
+				HUD_Avoid_Mouse.idle_time = 0;
+				_avatar.style.opacity = 0;
+				_status.style.opacity = 1;
+				_helpers.style.opacity = .5;
 			},
 			tick:function(){
 				HUD_Avoid_Mouse.Switch_X();
 				if(HUD_Avoid_Mouse.idle_time>HUD_Avoid_Mouse.time_without_interaction)
 				{
-					_avatar.style.opacity = 0;
-					_status.style.opacity = 0;
-					_helpers.style.opacity = .5;
+					_avatar.style.opacity = 1;
+					_status.style.opacity = 1;
+					_helpers.style.opacity = 1;
 					return;
 				}
 				HUD_Avoid_Mouse.idle_time++;
@@ -921,7 +926,7 @@ var Interface_Class = function()
 	 	HUD_Avoid_Mouse = {
 			avatar_right:true,
 			idle_time:0,
-			time_without_interaction:85,
+			time_without_interaction:200,
 			avoid:20,
 			speed:10,
 			adjust:-1,
@@ -990,20 +995,25 @@ var Interface_Class = function()
 					_status.style.opacity = .25;
 				}
 			},
-			interact:function(){
-				HUD_Avoid_Mouse.idle_time = 0;
+			show:function(){
 				_avatar.style.opacity = 1;
 				_status.style.opacity = 1;
 				_helpers.style.opacity = 1;
+			},
+			interact:function(){
+				HUD_Avoid_Mouse.idle_time = 0;
+				if(gameWidth>=600)return;
+				_avatar.style.opacity = 0;
+				_status.style.opacity = 1;
+				_helpers.style.opacity = .5;
 			},
 			tick:function(){
 				HUD_Avoid_Mouse.Switch_X();
 				if(HUD_Avoid_Mouse.idle_time>HUD_Avoid_Mouse.time_without_interaction)
 				{
-					if(gameWidth>=600)return;
-					_avatar.style.opacity = .1;
-					_status.style.opacity = .1;
-					_helpers.style.opacity = .5;
+					_avatar.style.opacity = 1;
+					_status.style.opacity = 1;
+					_helpers.style.opacity = 1;
 					return;
 				}
 				HUD_Avoid_Mouse.idle_time++;
@@ -1947,7 +1957,7 @@ var Interface_Class = function()
 		}
 		Avatar.Set_Up(game.Total_Players());
 
-		HUD_Avoid_Mouse.interact();
+		HUD_Avoid_Mouse.show();
 		Animations.kill = false;
 		for(var x=1;x<Terrain_Data.TERRE.length;x++)
 		{
