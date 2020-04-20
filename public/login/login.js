@@ -7,7 +7,7 @@ var user = document.getElementById('username');
 var pass = document.getElementById('pass');
 var btn = document.getElementById('signupBtn');
 var error = document.getElementById('error');
-var stayCheck = document.getElementById('staySignedOn');
+let stayCheck = false;
 let container = window.parent.document.getElementById("container");
 let logoStyle = document.getElementById('loginLogo');
 
@@ -40,11 +40,6 @@ window.parent.onFinishedLoading(function(){
 		{
 			valueCheck = 220;
 		}
-		// if(container.clientHeight-logoStyle.clientHeight<valueCheck)
-		// {
-		// 	btn.style.visibility = "hidden";
-		// }
-		// else btn.style.visibility = "visible";
 	};
 	window.addEventListener("resize", reflow, false);
 	reflow();
@@ -76,22 +71,22 @@ window.parent.onFinishedLoading(function(){
 			pass.value = cookPass;
 			// login();
 		}
-		pass.focus();
+		// pass.focus();
 	}
-	else user.focus();
+	// else user.focus();
 });
 
 function openSignup(){
 	if(signupShown){
 		// title.innerHTML = 'Logging in...';
-		sendBtn.value = 'Log in';
+		sendBtn.innerHTML = 'LOGIN';
 		signupShown = false;
-		btn.value = "Don't have an account?";
+		btn.innerHTML = "CREATE ACCOUNT";
 	}else{
 		// title.innerHTML = 'Signning up...';
-		sendBtn.value = 'Sign up';
+		sendBtn.innerHTML = 'CREATE ACCOUNT';
 		signupShown = true;
-		btn.value = 'Log in instead...';
+		btn.innerHTML = 'LOGIN';
 	}
 }
 
@@ -105,13 +100,25 @@ function seePassword() {
 	}
 }
 
+const stayBox = document.getElementById("staySignedOn");
+function toggleMemory() {
+	if (stayCheck) {
+		stayCheck = false;
+		stayBox.className = "checkmarkbox";
+	}
+	else {
+		stayCheck = true;
+		stayBox.className += " checked";
+	}
+}
+
 function sendMsgBtn(){
-	if(stayCheck.checked){
+	if(stayCheck){
 		var date = new Date();
 		date.setTime(date.getTime()+604800000);
 		var expires = date.toGMTString();
 		document.cookie = "user="+user.value+";SameSite=Strict;expires="+expires+";path=/";
-		document.cookie = "pass="+pass.value+";expires="+expires+";path=/";
+		document.cookie = "pass="+pass.value+";SameSite=Strict;expires="+expires+";path=/";
 	}
 	if(signupShown)
 		signup();
@@ -120,7 +127,7 @@ function sendMsgBtn(){
 
 function login(){
 	if(!window.parent.validateSignup(user.value, pass.value)){
-		report("User name and password cannot contain \"/\\:;.\" or spaces.");
+		report("invalid user info");
 	}
 	else window.parent.reportLoggedIn(user.value, pass.value, report);
 }

@@ -1,11 +1,20 @@
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('../includes/fonts/BebasNeue-Regular.eot'); /* IE9 Compat Modes */
+  src: url('../includes/fonts/BebasNeue-Regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../includes/fonts/BebasNeue-Regular.woff2') format('woff2'), /* Super Modern Browsers */
+       url('../includes/fonts/BebasNeue-Regular.woff') format('woff'), /* Pretty Modern Browsers */
+       url('../includes/fonts/BebasNeue-Regular.ttf')  format('truetype'); /* Safari, Android, iOS */
+}
+
 body{
-	background: #77a8bc;
-	overflow-y: auto;
-	overflow-x: hidden;
+	background:#77a8bc;
+	color: #D8D4D5;
+	overflow:hidden;
 	margin: auto;
 	padding: 0px;
 	width: 60%;
-  font-family: "Arial Black";
+  font-family: "Bebas Neue";
 	font-size: 13px;
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
@@ -22,90 +31,65 @@ body{
 	right: 0px;
 	width: 100%;
 	height: 100%;
-	opacity: .18;
+	opacity: .3;
 	z-index: -1;
 }
 
 #data_contents{
 	overflow: hidden;
 	height:60%;
-	width: 80%;
 	z-index: 10;
 }
 
 .textInput{
-	background-color: #78B1CC;
+	background-color: #D8D4D5;
+  font-family: "Bebas Neue";
+	font-size: 20px;
 	border: none;
 	-moz-border-radius:15px;
 	-webkit-border-radius:15px;
+	color: #27A9BC;
 	border-radius:15px;
 	height: 30px;
 	width: 90%;
 	margin-bottom: 5px;
 	margin-right: 10px;
 	padding-left: 10%;
-}
-.textInput:hover{
-	border-top-style: solid;
-	border-top-color: #84C3E0;
-	border-bottom-style: solid;
-	border-bottom-color: #496C7C;
-	border-top-width: 1px;
-	border-bottom-width: 3px;
-	height: 26px;
+	padding-top: 3px;
 }
 
 #sendBtn{
-	width: 100%;
+	font-size: 25px;
 }
 
 .button{
 	background: transparent;
+	color: #D8D4D5;
+	border-style: solid;
 	border-width: medium;
-	border-color: #6494AA;
+	text-align: center;
+	font-size: 17px;
+	border-color: #D8D4D5;
+	font-family: "Bebas Neue";
 	-moz-border-radius:15px;
 	-webkit-border-radius:15px;
 	border-radius:15px;
-	height: 30px;
 	margin-bottom: 10px;
 	padding-left: 10px;
 	padding-right: 10px;
+	padding-top: 3px;
 }
 
 #stayOnDiv{
 	display: inline;
-		margin: auto;
-}
-#staySignedOn{
 	margin: auto;
 }
 
-#staySignedOn, #signupBtn, #signupBtn{
+#seePasswordBtn{
 	display: inline;
 	margin-left: 0px;
 	margin-right: 0px;
-}
-#signupBtn{
 	float: right;
-}
-#pass{
-	width: 60%;
-}
-#seePasswordBtn{
-	position: relative;
-	right: 0px;
-}
-
-@media (max-width: 912px) { /* max with is when it's too small */
-	#pass {
-		width: 90%!important;
-	}
-	#seePassword {
-		width: 45%!important;
-	}
-	#sendBtn {
-		width: 45%!important;
-	}
 }
 
 #loginLogo{
@@ -114,14 +98,42 @@ body{
 	max-height: 250px;
 }
 
+#signupBtn{
+	z-index: 5;
+}
+
 #error{
 	display:inline;
 	visibility:hidden;
-	color:red;
+	color:#3EDDD0;
 }
 
 #connect{
 	top:40%;
 	left:40%;
 	width:70%;
+}
+
+.checkmarkbox{
+	display: inline-block;
+	background-color: #D8D4D5;
+	cursor: pointer;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	border-radius:5px;
+	width: 20px;
+	height: 20px;
+	margin-left: 5px
+}
+.checked{
+	background-image: url("check.png");
+	background-size: contain;
+}
+
+.checkLabel{
+	position: relative;
+	top: 4px;
+	cursor: pointer;
+	font-size:20px;
+	padding:5px;
 }

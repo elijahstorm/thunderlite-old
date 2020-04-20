@@ -5,22 +5,26 @@
 	<link href="login.css" rel="stylesheet">
 </head>
 <body>
-	<img id="bgImage" src="background.png"></img>
+	<center>
+		<img id="bgImage" src="background.png"></img>
+	</center>
 	<div id="data_contents">
 		<img id="loginLogo"></img>
 		<br />
 		<div id="error">Error <div id="errno"></div></div>
-		<input class="textInput" type="text" id="username" placeholder="Name"></input>
+		<input class="textInput" type="text" id="username" placeholder="EMAIL"></input>
 		<br />
-		<input class="textInput" type="password" id="pass" placeholder="Password"></input>
-		<input class="button" id="seePasswordBtn" type="button" onclick="seePassword()" value="View Password"></input>
-		<input class="button" id="sendBtn" type="button" onclick="sendMsgBtn()" value="Log in"></input>
+		<input class="textInput" type="password" id="pass" placeholder="PASSWORD"></input>
 		<br />
-		<div id="stayOnDiv">
-			<input type="checkbox" id="staySignedOn">&nbsp;Keep me signed in
+		<div class="button" id="sendBtn" onclick="sendMsgBtn()">LOGIN</div>
+		<div id="stayOnDiv" onclick="toggleMemory();">
+			<div id="staySignedOn" class="checkmarkbox">&nbsp;</div>
+			<label class="checkLabel">REMEMBER ME</label>
+			<div class="button" id="seePasswordBtn" onclick="seePassword()">VIEW PASSWORD</div>
 		</div>
-		<input class="button" id="signupBtn" type="button" onclick="openSignup()" value="Don't have an account?"></input>
 		<br />
+		<br />
+		<div class="button" id="signupBtn" onclick="openSignup()">CREATE ACCOUNT</div>
 	</div>
 	<script src="login.js"></script>
 </body>
