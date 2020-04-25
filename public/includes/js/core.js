@@ -483,6 +483,15 @@ var Core = {
 				return temp;
 			}
 		}
+	},
+	Object:{
+		Clone:function(obj) {
+			let clone = {};
+			for (let i in obj) {
+				clone[i] = obj[i];
+			}
+			return clone;
+		}
 	}
 };
 
@@ -839,9 +848,9 @@ function openMapEditor(game_data, data_index, testing_won){
 function changeContent(choice, title, dontAsk)
 {
 	if(INTERFACE==null)return;
+	if(!dontAsk)
 	if(INTERFACE.Game!=null && choice!="GAME PLAY")
 	{
-		if(dontAsk)return;
 		let ans = confirm("This will exit the game. Are you sure?");
 		if(!ans)return;
 		INTERFACE.Game.Quit_Game();
@@ -862,6 +871,7 @@ function changeContent(choice, title, dontAsk)
 	window.parent.document.getElementById("container").style.maxWidth = "";
 	window.parent.document.getElementById("container").style.maxHeight = "";
 	window.parent.closeChat();
+	window.scrollTo(0, 0);
 
 	switch (choice) {
 		case "MULTIPLAYER":
@@ -893,14 +903,11 @@ function changeContent(choice, title, dontAsk)
 			document.getElementById("CONTENT_TITLE").innerHTML = title[0];
 			document.getElementById("HOSTGAMEIMG").src = title[1];
 			break;
-		case "END GAME":	// title = GAME
+		case "END GAME":
 			document.getElementById("ENDGAME").style.display = "block";
-			document.getElementById("CONTENT_TITLE").innerHTML = title.Name;
+			document.getElementById("CONTENT_TITLE").innerHTML = title;
 
-				// remove refresh_lobby() call when END GAME screen finished
 			window.parent.refresh_lobby();
-
-
 			window.parent.refreshChat();
 			INTERFACE.setGame(null);
 			break;

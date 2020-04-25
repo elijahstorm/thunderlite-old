@@ -1070,10 +1070,9 @@ io.on('connection', function(socket){
 
 					for(let i=0;i<end_amt && i<data.length;i++)
 					{
-						data[i]
 						arr.push({
-							game:data[i].mapdata,
-							name:data[i].mapowner
+							game:data[data.length-i-1].mapdata,
+							name:data[data.length-i-1].mapowner
 						});
 					}
 
@@ -1085,10 +1084,9 @@ io.on('connection', function(socket){
 
 			for(let i=0;i<end_amt && i<data.length;i++)
 			{
-				data[i]
 				arr.push({
-					game:data[i].mapdata,
-					name:data[i].mapowner
+					game:data[data.length-i-1].mapdata,
+					name:data[data.length-i-1].mapowner
 				});
 			}
 

@@ -304,21 +304,32 @@ var Interface_Class = function()
 	Avatar = {
 		List_Sliders:[],
 		Player_List:function(__player) {
+			if(game==null)return;
 			HUD_Avoid_Mouse.show();
 			if(__player==null)
 			{
 				for (var i = 0; i < Avatar.List_Sliders.length; i++) {
-					Avatar.List_Sliders[i].style.left = "200px";
+					Avatar.List_Sliders[i].style.left = (100*i+200)+"px";
 				}
 				return;
 			}
 			document.getElementById('day_turn_info').innerHTML = "Day "+(game.Turn()+1);
 			document.getElementById('avatar-icon').src = __player.Icon.Source();
-			Avatar.List_Sliders[0].remove();
-			document.getElementById("active-player-list").appendChild(Avatar.List_Sliders[0]);
-			Avatar.List_Sliders.push(Avatar.List_Sliders.shift());
+
+			while (game.Player(parseInt(Avatar.List_Sliders[0].id.charAt(Avatar.List_Sliders[0].id.length-1)))!=__player) {
+				Avatar.List_Sliders[0].remove();
+				document.getElementById("active-player-list").appendChild(Avatar.List_Sliders[0]);
+				Avatar.List_Sliders.push(Avatar.List_Sliders.shift());
+			}
+
 			for (var i = 0; i < Avatar.List_Sliders.length; i++) {
 				Avatar.List_Sliders[i].style.left = "0px";
+				if(game.Player(i).Dead)
+				{
+					document.getElementById("active-player-money"+i).innerHTML = "";
+					document.getElementById("active-player-status"+i).innerHTML = "DEAD";
+					continue;
+				}
 				if(game.Player(i).Cash_Money()!=0)
 					document.getElementById("active-player-money"+i).innerHTML = "$"+game.Player(i).Cash_Money();
 				else document.getElementById("active-player-money"+i).innerHTML = "";
@@ -332,6 +343,12 @@ var Interface_Class = function()
 		},
 		Weather:function(_weather) {
 			document.getElementById('weather-icon').src = _weather.Icon.Source();
+		},
+		Clear:function(){
+			let list = document.getElementById("active-player-list");
+			for (var i = 0; i < list.childNodes.length; ) {
+				list.childNodes[i].remove();
+			}
 		},
 		Set_Up:function(__players) {
 			Avatar.List_Sliders = [];
@@ -365,6 +382,7 @@ var Interface_Class = function()
 				el.id = "player "+i;
 				el.style.background = data_to_hex(Team_Colors.Color[game.Player(i).Color][0])+"77";
 				document.getElementById("active-player-list").appendChild(el);
+				el.Player = game.Player(i);
 				Avatar.List_Sliders.push(el);
 			}
 			makeList(__players-1);
@@ -444,7 +462,7 @@ var Interface_Class = function()
 						console.error("ERROR DRAWING CHANGING PLAYER");
 					}
 				}
-			}, null, 600, 100, self.IS_MOBILE_GAME ? 200 : 400, 250, null, null, .7);
+			}, null, 600, 100, self.IS_MOBILE_GAME ? 200 : 350, 250, null, null, .7);
 			Core.Slide_Drawable_X(collectiveDrawable, -550, 10, function(collectiveDrawable){
 				setTimeout(function(){
 					Core.Fade_Drawable(collectiveDrawable, 0, 10, function(collectiveDrawable){
@@ -1002,7 +1020,7 @@ var Interface_Class = function()
 			},
 			interact:function(){
 				HUD_Avoid_Mouse.idle_time = 0;
-				if(gameWidth>=600)return;
+				// if(gameWidth>=600)return;
 				_avatar.style.opacity = 0;
 				_status.style.opacity = 1;
 				_helpers.style.opacity = .5;
@@ -1984,17 +2002,18 @@ var Interface_Class = function()
 		Music.Retrieve("enemy turn").Play();
 		Music.Retrieve("ally turn").Play();
 	};
-	self.End_Game = function(game_won, players, turns)
+	self.End_Game = function(game_won, Players, turns, change_to_end_screen)
 	{
 		if(open_menu)
 			self.Close_Menu();
+		Avatar.Clear();
 		Animations.kill = true;
 		Music.Stop_All();
 		SFXs.Stop_All();
 		Enviornment.Stop_All();
-		if(players!=null)
+		if(Players!=null)
 			MUSIC = Music.Retrieve("game "+ (game_won ? "won" : "lost")).Play();
-		document.getElementById("end-game-results").innerHTML = (game_won ? "You won!!" : "Good try!");
+		document.getElementById("end-game-results").innerHTML = (game_won ? "YOU WON!!" : "GOOD TRY!");
 		for(var x=1;x<Terrain_Data.TERRE.length;x++)
 		{
 			var _t = Terrain_Data.TERRE[x];
@@ -2006,20 +2025,106 @@ var Interface_Class = function()
 		Canvas.Set_Game(null);
 		Dialog.Next();
 		socket.game_id = null;
-		if(players!=null)
+		if(change_to_end_screen)
 		{
-			players = Core.Array.Organize.Descending(players, function(index){
-				return index.data.turns_alive;
-			}, function(index){
-				return index.data.damage_delt;
-			}, function(index){
-				return index.data.units_killed;
-			}, function(index){
-				return index.data.money_spent;
-			});
-			self = this;
-			changeContent("END GAME", game, true);
-			window.parent.openLobby();
+			if(Players!=null)
+			{
+				Players = Core.Array.Organize.Descending(Players, function(index){
+					return index.data.turns_alive;
+				}, function(index){
+					return index.data.damage_delt;
+				}, function(index){
+					return index.data.units_killed;
+				}, function(index){
+					return index.data.money_spent;
+				});
+
+					// records data
+				let Records = game.Get_Records().get();
+				let __data_turns = new Array(Records.length);
+				let __data_players_standing = new Array(game.Total_Players());
+				let __data_players_delt = new Array(game.Total_Players());
+				let __data_players_recieved = new Array(game.Total_Players());
+				let __data_s,__data_dd,__data_dr;
+
+				for (let _t = 0; _t < __data_turns.length; _t++) {
+					__data_turns[_t] = "Turn "+(_t+1);
+				}
+				for (let _p = 0; _p < __data_players_standing.length; _p++) {
+					__data_s = new Array(Records.length);
+					__data_dd = new Array(Records.length);
+					__data_dr = new Array(Records.length);
+					for (let _t = 0; _t < Records.length; _t++) {
+						__data_s[_t] = Records[_t][_p].rating;
+						__data_dd[_t] = Records[_t][_p].damage_delt;
+						__data_dr[_t] = Records[_t][_p].damage_received;
+					}
+					__data_players_standing[_p] = {
+						label: Players[_p].Name,
+						fill: false,
+						backgroundColor: data_to_hex(Team_Colors.Color[Players[_p].Color][2]),
+						borderColor: data_to_hex(Team_Colors.Color[Players[_p].Color][1])+"77",
+						data: __data_s
+					};
+					__data_players_delt[_p] = {
+						label: Players[_p].Name,
+						fill: false,
+						backgroundColor: data_to_hex(Team_Colors.Color[Players[_p].Color][2]),
+						borderColor: data_to_hex(Team_Colors.Color[Players[_p].Color][1])+"77",
+						data: __data_dd
+					};
+					__data_players_recieved[_p] = {
+						label: Players[_p].Name,
+						fill: false,
+						backgroundColor: data_to_hex(Team_Colors.Color[Players[_p].Color][2]),
+						borderColor: data_to_hex(Team_Colors.Color[Players[_p].Color][1])+"77",
+						data: __data_dr
+					};
+				}
+
+				new Chart(document.getElementById('end-game-standings').getContext('2d'), {
+					// The type of chart we want to create
+					type: 'line',
+
+					// The data for our dataset
+					data: {
+						labels: __data_turns,
+						datasets: __data_players_standing
+					},
+
+					// Configuration options go here
+					options: {}
+				});
+				new Chart(document.getElementById('end-game-damage-delt').getContext('2d'), {
+					// The type of chart we want to create
+					type: 'line',
+
+					// The data for our dataset
+					data: {
+						labels: __data_turns,
+						datasets: __data_players_delt
+					},
+
+					// Configuration options go here
+					options: {}
+				});
+				new Chart(document.getElementById('end-game-damage-recieved').getContext('2d'), {
+					// The type of chart we want to create
+					type: 'line',
+
+					// The data for our dataset
+					data: {
+						labels: __data_turns,
+						datasets: __data_players_recieved
+					},
+
+					// Configuration options go here
+					options: {}
+				});
+				changeContent("END GAME", game.Name, true);
+
+				window.parent.openLobby();
+			}
 		}
 		this.setGame(null);
 		if(online)socket.emit();
@@ -2106,11 +2211,13 @@ var Interface_Class = function()
 	};
 	self.Warn_Hurry = function()
 	{
+		if(game.Game_Over)return;
 		if(game.Active_Player()!=game.Client_Player())return;
 		MUSIC = MUSIC.Switch(Music.Retrieve("hurry warning"));
 	};
 	self.Stop_Hurry = function()
 	{
+		if(game.Game_Over)return;
 		if(game.Active_Player()!=game.Client_Player())return;
 		if(MUSIC!=Music.Retrieve("hurry warning"))return;
 		MUSIC = MUSIC.Switch(Music.Retrieve("player turn"));
@@ -2360,6 +2467,7 @@ var Interface_Class = function()
 var Fast_Fake_Interface = {
 	Fake:true,
 	Draw:function(){},
+	End_Game:function(){},
 	Simple_Draw:function(){},
 	Scroll_To_Tile:function(){},
 	Resource_Draw:function(){},

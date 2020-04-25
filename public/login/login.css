@@ -65,6 +65,7 @@ body{
 .button{
 	background: transparent;
 	color: #D8D4D5;
+  cursor: pointer;
 	border-style: solid;
 	border-width: medium;
 	text-align: center;

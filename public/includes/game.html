@@ -13,6 +13,7 @@
 	</script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
 	<style>
@@ -208,14 +209,27 @@
 	<!-- END GAME SCREEN CONTENT -->
   <div id="ENDGAME" class="w3-container w3-light-grey w3-padding-32 w3-padding-large" >
     <div class="w3-content" style="max-width:600px">
-      <h4 class="w3-center"><b>Game over!</b></h4>
-			<p class="w3-center" id="end-game-results"></p>
-			<p class="w3-center">This end screen will show detailed stats and info about the game in the next build. For now, please enjoy this cute bird :)</p>
+			<div class="w3-row-padding w3-center">
+				<div class="w3-half">
+					<h1 id="end-game-results" class="w3-center">Game over!</h1>
+				</div>
+				<div class="w3-half">
+					<button onclick="changeContent(CONTENT_REDIRECT)" style="margin:20px" class="w3-button w3-block w3-center w3-black">DONE</button>
+				</div>
+			</div>
+			<p>Stats of the game, each turn:</p>
+
+			<h5 class="w3-center">Odds of Winning</h5>
+			<canvas class="w3-center" id="end-game-standings"></canvas>
+			<h5 class="w3-center">Damage Delt</h5>
+			<canvas class="w3-center" id="end-game-damage-delt"></canvas>
+			<h5 class="w3-center">Damage Recieved</h5>
+			<canvas class="w3-center" id="end-game-damage-recieved"></canvas>
 
 			<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 			<lottie-player class="w3-center" src="https://assets6.lottiefiles.com/packages/lf20_U3YTLB.json"  background="transparent"  speed="0.8"  style="width: 300px; height: 300px;"  loop autoplay></lottie-player>
 
-    	<button onclick="changeContent(CONTENT_REDIRECT)" class="w3-button w3-block w3-black w3-margin-bottom">Back to User Maps</button>
+			<button onclick="window.scrollTo(0, 0);" class="w3-button w3-block w3-center w3-black">BACK TO TOP</button>
     </div>
   </div>
 

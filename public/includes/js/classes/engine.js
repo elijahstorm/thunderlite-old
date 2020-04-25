@@ -26,6 +26,21 @@ var Engine_Data = function(data)
 			cities = this.Cities_Map;
 };
 
+let Game_Record_Data = function(){
+	let data = new Array();
+	this.get = function() {
+		var new_data = new Array(data.length);
+		for(let i=0;i<data.length;i++)
+		{
+			new_data[i] = data[i];
+		}
+		return new_data;
+	};
+	this.add = function(_data) {
+		data.push(_data);
+	};
+};
+
 var Engine_Class = function(input, is_sample, is_local)
 {
 	var UI = Fast_Fake_Interface;
@@ -113,6 +128,7 @@ var Engine_Class = function(input, is_sample, is_local)
 		socket.emit('save game', __server_passkey, JSON.stringify(this.Data(true)));
 	};
 
+	let Records;
 	var Terrain_Animations = [];
 	var Units = [];
 	var Cities = [];
@@ -146,9 +162,19 @@ var Engine_Class = function(input, is_sample, is_local)
 	this.End_Game = function(client_won)
 	{
 		Script.Do(client_won ? "win" : "lose");
-
 		this.Game_Over = true;
 		this.Active_Weather.Stop(UI);
+
+		if(turn!=0)
+		{
+			let _turn_data = new Array(Players.length);
+			for (let i = 0; i < Players.length; i++) {
+				_turn_data[i] = Core.Object.Clone(Players[i].data);
+				_turn_data[i].rating = this.Check_Player_Standing(i)+1;
+			}
+			Records.add(_turn_data);
+		}
+
 		if(UI!=Fast_Fake_Interface)
 		{
 			clearLastTimeoutCheck();
@@ -173,10 +199,9 @@ var Engine_Class = function(input, is_sample, is_local)
 		if(is_sample)return;
 		let self = this;
 		setTimeout(function(){
+			UI.End_Game(client_won, Players, turn, self.game_data[3]!=1);
 			if(self.game_data[0]!=false)
 			{
-				if(UI!=Fast_Fake_Interface)
-					UI.End_Game(client_won, Players, turn);
 				if(self.game_data[3]==1)
 					openMapEditor(self.game_data[1], self.game_data[2], client_won);
 				else if(self.game_data[3]==2 && client_won)
@@ -187,8 +212,6 @@ var Engine_Class = function(input, is_sample, is_local)
 					});
 				}
 			}
-			else if(UI!=Fast_Fake_Interface)
-				UI.End_Game(client_won, Players, turn);
 			self.game_data = [false,input,0];
 		}, 750);
 	};
@@ -1005,6 +1028,8 @@ var Engine_Class = function(input, is_sample, is_local)
 		if(currently_playing)return; // dont execute if game already started
 		currently_playing = true;
 
+		Records = new Game_Record_Data;
+
 		if(UI!=Fast_Fake_Interface)
 		{
 			UI.Close_Menu();
@@ -1059,6 +1084,9 @@ var Engine_Class = function(input, is_sample, is_local)
 		if(UI)UI.ReportLeft(slot);
 	};
 
+	this.Get_Records = function() {
+		return Records;
+	};
 	this.Data = function(string)
 	{	/// create a clone of the data for the current game state
 		var self = this;
@@ -1184,7 +1212,7 @@ var Engine_Class = function(input, is_sample, is_local)
 			if(UI!=Fast_Fake_Interface)
 				setTimeout(function(){
 					self.End_Game(client == input);
-				},700);
+				}, 700);
 			return;
 		}
 		console.error("Player not attached to this game.");
@@ -1263,6 +1291,12 @@ var Engine_Class = function(input, is_sample, is_local)
 		{
 			cur_player = 0;
 			turn++;
+			let _turn_data = new Array(Players.length);
+			for (let i = 0; i < Players.length; i++) {
+				_turn_data[i] = Core.Object.Clone(Players[i].data);
+				_turn_data[i].rating = this.Check_Player_Standing(i)+1;
+			}
+			Records.add(_turn_data);
 			runWeather(this);
 		}
 

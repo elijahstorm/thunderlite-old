@@ -1243,7 +1243,7 @@ Menu.MapEditor.Open = function()
 				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+15,y+2,260,20,s);
 			}
 		}, null, 625, 600, 70, 20, "EXIT"), function(){
-			mainMenu();
+			changeContent(CONTENT_REDIRECT);
 			Menu.MapEditor.Erase();
 		}, {
 			Draw:function(c, x, y, w, h, s){
