@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 var Weather = function(name, sightAffect, move_cost, damage, _aniW, _aniH)
 {
 	let sheetAni = Animations.Retrieve(name),

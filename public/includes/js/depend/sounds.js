@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 function Sound_list_class(LOCATION)
 {
 	var SND_LOC = "./sounds/"+LOCATION;

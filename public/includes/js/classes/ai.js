@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 var AI_Class = function(_last_game, _ai_player, _index)
 {
 	if(_index>5)

@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 function validateSignup(user, pass){
 	if(!user||!pass)return false;
 	if(user==""||pass=="")return false;

@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 	/// all weather traverses thru the map
 	/// due to wind
 	/// as the match plays on

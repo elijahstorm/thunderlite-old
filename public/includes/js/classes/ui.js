@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 var Interface_Class = function()
 {
 	this.IS_MOBILE_GAME = window.parent.mobilecheck();

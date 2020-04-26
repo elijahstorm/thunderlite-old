@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 var Engine_Data = function(data)
 {	/// input is data from existing game -> load gamestate
 		if(!data.valid)

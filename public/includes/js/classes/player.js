@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 var Player_Class = function(game, name, team, colors)
 {
 	var self = this;

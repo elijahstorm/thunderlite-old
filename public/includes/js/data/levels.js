@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 var Levels_Class = function()
 {
 	let Script_Reader = function(Game, _srpt_input)

@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 var Team_Colors = {
 	Health_Display:["#FF6347","#FFBF46","#E2FF46","#86FF46"],
 	Color:[ // light to dark

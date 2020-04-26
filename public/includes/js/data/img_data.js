@@ -1,3 +1,8 @@
+/// Code written and created by Elijah Storm
+// Copywrite April 5, 2020
+// for use only in ThunderLite Project
+
+
 var _IMAGE_LIST = [];
 var BLANKIMG = Images.Declare("Misc/empty.png","empty");;
 Animations.Declare(Images.Declare("Sheets/animations/Loading.png","Load"),"Load", 3, true).Frame_Size(4, 4).Stop = false;
