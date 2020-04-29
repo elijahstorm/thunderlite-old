@@ -1815,6 +1815,7 @@ Menu.PreGame.Set = function(index,value){
 Menu.PreGame.Leave = function(){
 	INTERFACE.Game.Send_Move('leave');
 	mainMenu();
+	changeContent(CONTENT_REDIRECT);
 };
 Menu.PreGame.visibleMapID = function(txt){
 	if(txt==null)return "";

@@ -139,15 +139,7 @@ var Interface_Class = function()
 		var overlay = "rgba(0, 0, 0, 0.45)";
 
 		let paintOffWidth = gameWidth;
-		if(paintOffWidth<600)
-		{
-			paintOffWidth+=210;
-		}
 		let paintOffHeight = gameHeight;
-		if(paintOffHeight<600)
-		{
-			paintOffHeight+=65;
-		}
 
 			// paint left
 		if(mapX==0&&drawX>0){
@@ -286,9 +278,11 @@ var Interface_Class = function()
 
 		if(!allow_render)return;
 		self.zoom = zoom;
-		backCanvas.fillStyle = "#3C6BBE";
-		backCanvas.fillRect(0, 0, 810, 665);
-		worldCanvas.clearRect(0, 0, 600, 600);
+		backCanvas.fillStyle = "#000";
+		seaCanvas.fillStyle = "#3C6BBE";
+		backCanvas.fillRect(0,0, 810, 665);
+		seaCanvas.fillRect(0,0,600,600);
+		worldCanvas.clearRect(0,0,600,600);
 		devCanvas.clearRect(0,0,600,600);
 		hudCanvas.clearRect(0,0,600,600);
 		tileCanvas.clearRect(0,0,600,600);
@@ -358,6 +352,10 @@ var Interface_Class = function()
 		Set_Up:function(__players) {
 			Avatar.List_Sliders = [];
 			let el,txt,money,status;
+			let parentList = document.getElementById("active-player-list");
+			for (var i = 0; i < parentList.childNodes.length;) {
+				parentList.childNodes[0].remove();
+			}
 			function makeList(i)
 			{
 				el = document.createElement("li");
@@ -386,7 +384,7 @@ var Interface_Class = function()
 				el.appendChild(status);
 				el.id = "player "+i;
 				el.style.background = data_to_hex(Team_Colors.Color[game.Player(i).Color][0])+"77";
-				document.getElementById("active-player-list").appendChild(el);
+				parentList.appendChild(el);
 				el.Player = game.Player(i);
 				Avatar.List_Sliders.push(el);
 			}
@@ -488,7 +486,7 @@ var Interface_Class = function()
 		open_menu = menu;
 		menu_scale = (no_scale==true) ? false : true;
 		if(menu_scale)
-			menu.Scale(clientWidth/Canvas.MaxWidth, clientHeight/Canvas.MaxHeight);
+			menu.Scale((gameWidth-210)/600, (gameHeight-65)/600);
 		else menu.Scale(1, 1);
 		self.Click = menu.Click;
 		self.Release = menu.Release;
@@ -532,10 +530,12 @@ var Interface_Class = function()
 		HUD_Avoid_Mouse.interact();
 		e.preventDefault();
 
-		var x = Math.round(e.touches[0].clientX);
-		var y = Math.round(e.touches[0].clientY);
+		var x = Math.round(e.touches[0].pageX);
+		var y = Math.round(e.touches[0].pageY);
 
-		y-=84; // this is a temp fix for a mobile bug
+		y-=85; // this is a temp fix for a mobile bug
+		if(clientWidth>600)
+			x-=Math.floor((clientWidth-600)/2);
 
 		self.Click(x,y);
 		touch_start_loc[0] = x;
@@ -559,24 +559,26 @@ var Interface_Class = function()
 		var x = Math.round(e.touches[0].clientX);
 		var y = Math.round(e.touches[0].clientY);
 
-		y-=84; // this is a temp fix for a mobile bug
+		y-=85; // this is a temp fix for a mobile bug
+		if(clientWidth>600)
+			x-=Math.floor((clientWidth-600)/2);
 
-		if(e.touches.length==2)
-		{
-			scroller.doTouchEnd(e.timeStamp);
-			var _x = Math.round(e.touches[1].clientX);
-			var _y = Math.round(e.touches[1].clientY);
-			curPinchDiff = Math.round(Math.sqrt(Math.pow(x - _x, 2)+Math.pow(y - _y, 2)));
-
-			if(prevPinchDiff!=0)
-			{
-				let _zoom = Math.abs(curPinchDiff/prevPinchDiff);
-			}
-
-			prevPinchDiff = curPinchDiff;
-			return false;
-		}
-		else prevPinchDiff = 0;
+		// if(e.touches.length==2)
+		// {
+		// 	scroller.doTouchEnd(e.timeStamp);
+		// 	var _x = Math.round(e.touches[1].clientX);
+		// 	var _y = Math.round(e.touches[1].clientY);
+		// 	curPinchDiff = Math.round(Math.sqrt(Math.pow(x - _x, 2)+Math.pow(y - _y, 2)));
+		//
+		// 	if(prevPinchDiff!=0)
+		// 	{
+		// 		let _zoom = Math.abs(curPinchDiff/prevPinchDiff);
+		// 	}
+		//
+		// 	prevPinchDiff = curPinchDiff;
+		// 	return false;
+		// }
+		// else prevPinchDiff = 0;
 
 		if(Math.abs(x-touch_start_loc[0])<5 &&
 			Math.abs(y-touch_start_loc[1])<5)
@@ -604,7 +606,9 @@ var Interface_Class = function()
 		var x = Math.round(e.touches[0].clientX);
 		var y = Math.round(e.touches[0].clientY);
 
-		y-=84; // this is a temp fix for a mobile bug
+		y-=85; // this is a temp fix for a mobile bug
+		if(clientWidth>600)
+			x-=Math.floor((clientWidth-600)/2);
 
 		if(!in_hl_path)
 		{
@@ -632,13 +636,19 @@ var Interface_Class = function()
 	const ___mousedown = function(e){
 		try {
 			HUD_Avoid_Mouse.interact();
-			if(!self.Click(e.layerX,e.layerY))return;
+
+			let x = e.pageX,
+				y = e.pageY-85;
+			if(clientWidth>600)
+				x-=Math.floor((clientWidth-600)/2);
+
+			if(!self.Click(x, y))return;
 			if(e.target.tagName.match(/input|textarea|select/i)) {
 				return;
 			}
 			scroller.doTouchStart([{
-				pageX: e.pageX,
-				pageY: e.pageY
+				pageX: x,
+				pageY: y
 			}], e.timeStamp);
 			mousedown = true;
 			return false;
@@ -651,7 +661,11 @@ var Interface_Class = function()
 	const ___mouseup = function(e){
 		try {
 			if(e.which==3)return true;
-			self.Release(e.layerX,e.layerY);
+			let x = e.pageX,
+				y = e.pageY-85;
+			if(clientWidth>600)
+				x-=Math.floor((clientWidth-600)/2);
+			self.Release(x, y);
 			if(!mousedown)return;
 			scroller.doTouchEnd(e.timeStamp);
 			mousedown = false;
@@ -664,13 +678,21 @@ var Interface_Class = function()
 	};
 	const ___contextmenu = function(e){
 		e.preventDefault();
-		self.Right_Click(e.layerX,e.layerY);
+		let x = e.pageX,
+			y = e.pageY-85;
+		if(clientWidth>600)
+			x-=Math.floor((clientWidth-600)/2);
+		self.Right_Click(x, y);
 		return false;
 	};
 	const ___mousemove = function(e){
+		let x = e.pageX,
+			y = e.pageY-85;
+		if(clientWidth>600)
+			x-=Math.floor((clientWidth-600)/2);
 		if(!mousedown)
 		{
-			self.Mouse_Move(e.layerX,e.layerY);
+			self.Mouse_Move(x, y);
 			return;
 		}
 		if(selected_unit!=null)
@@ -679,8 +701,8 @@ var Interface_Class = function()
 			selected_unit.Mover.Draw();
 		}
 		scroller.doTouchMove([{
-			pageX: e.pageX,
-			pageY: e.pageY
+			pageX: x,
+			pageY: y
 		}], e.timeStamp);
 		return false;
 	};
@@ -1013,7 +1035,7 @@ var Interface_Class = function()
 			scared:function(x, y){
 				if(_status.style.opacity<1)return;
 				if(x<=_status.clientWidth+HUD_Avoid_Mouse.avoid)
-				if(clientHeight-y<=_status.clientHeight+HUD_Avoid_Mouse.avoid+50)  // +50 for the endTurn button
+				if(clientHeight-y-135<=_status.clientHeight+HUD_Avoid_Mouse.avoid)  // -85 for header, -55 for the endTurn button
 				{
 					_status.style.opacity = .25;
 				}
@@ -1129,21 +1151,22 @@ var Interface_Class = function()
 		locking:false,
 		zooming:true
 	});
-	self.reflow = function(w, h){
-		w = w>810 ? 810 : w;
-		h = h>665 ? 665 : h;
-		gameWidth = w;
-		gameHeight = h;
-		self.gameWidth = gameWidth;
-		self.gameHeight = gameHeight;
+	self.reflow = function(w, h)
+	{	// client -> container size, game -> playable area
 		clientWidth = w;
 		clientHeight = h;
+
+		gameWidth = w>600 ? 600 : w;
+		gameHeight = (h>600 ? 600 : h) - 85;
+
+		self.gameWidth = gameWidth;
+		self.gameHeight = gameHeight;
 		self.gameXScale = gameWidth/600;
 		self.gameYScale = gameHeight/600;
 		Dialog_Display.Scale(self.gameXScale, self.gameYScale);
 		HUD_Display.Scale(self.gameXScale, self.gameYScale);
 		if(open_menu && menu_scale){
-			open_menu.Scale(clientWidth/Canvas.MaxWidth, clientHeight/Canvas.MaxHeight);
+			open_menu.Scale((gameWidth-210)/600, (gameHeight-65)/600);
 			return;
 		}
 		if(game==null)return;
@@ -1482,11 +1505,17 @@ var Interface_Class = function()
 					}
 
 					let row_holder = document.getElementById(id_start+index);
-					row_holder.appendChild(img);
-					row_holder.onclick = function() {
-						onClick(img);
-					};
-				}, 10, index);
+					try {
+						row_holder.appendChild(img);
+						row_holder.onclick = function() {
+							onClick(img);
+						};
+					} catch (e) {
+						console.error(id_start+index);
+					} finally {
+
+					}
+				}, 0, index);
 			}
 		}
 	};
@@ -1659,7 +1688,7 @@ var Interface_Class = function()
 
 		makeList(third1, "U vs The World");
 		makeList(third2, "Ancient Europe");
-		makeList(third3, "Han Dynasty");
+		makeList(third3, "Shogun Isolation");
 
 		let __unlocked_data = Levels.Current();
 		let __data = new Array(__unlocked_data.length);
@@ -2034,18 +2063,102 @@ var Interface_Class = function()
 		{
 			if(Players!=null)
 			{
-				Players = Core.Array.Organize.Descending(Players, function(index){
-					return index.data.turns_alive;
-				}, function(index){
-					return index.data.damage_delt;
-				}, function(index){
-					return index.data.units_killed;
-				}, function(index){
-					return index.data.money_spent;
-				});
-
 					// records data
-				let Records = game.Get_Records().get();
+				function showList() {
+						// order and rank winners
+					Players = Core.Array.Organize.Descending(Players, function(index){
+						return index.data.turns_alive;
+					}, function(index){
+						return index.data.damage_delt;
+					}, function(index){
+						return index.data.units_killed;
+					}, function(index){
+						return index.data.money_spent;
+					});
+
+						// clear table for clean display
+					let LISTHOLDER = document.getElementById("end-game-list"), listEl;
+					for (let i = 0; i < LISTHOLDER.childNodes.length;) {
+						LISTHOLDER.childNodes[0].remove();
+					}
+
+					let header = document.createElement('tr');
+					let head_data = document.createElement('th');
+					head_data.innerHTML = "Player";
+					header.appendChild(head_data);
+
+					head_data = document.createElement('th');
+					head_data.innerHTML = "Turns Alive";
+					header.appendChild(head_data);
+
+					head_data = document.createElement('th');
+					head_data.innerHTML = "Units Killed";
+					header.appendChild(head_data);
+
+					head_data = document.createElement('th');
+					head_data.innerHTML = "Money Spent";
+					header.appendChild(head_data);
+
+					LISTHOLDER.appendChild(header);
+
+						// put winning order in ranked list
+					for (let i = 0; i < Players.length; i++) {
+						listEl = document.createElement('tr');
+						listEl.style.textAlign = "left";
+						listEl.style.backgroundColor = data_to_hex(Team_Colors.Color[Players[i].Color][0]);
+
+						let td1 = document.createElement('td');
+						let td2 = document.createElement('td');
+						let td3 = document.createElement('td');
+						let td4 = document.createElement('td');
+
+						let pic = document.createElement('img');
+						pic.src = Players[i].Icon.Source();
+						pic.style.height = "65px";
+						pic.className = "INFO-DATA";
+
+						let place = document.createElement('h1');
+						place.innerHTML = ""+(i+1);
+						place.className = "INFO-DATA";
+
+						let name = document.createElement('h3');
+						name.innerHTML = "<b>"+Players[i].Name+"</b>";
+						name.className = "INFO-DATA";
+
+						let turns = document.createElement('div');
+						turns.innerHTML = Players[i].data.turns_alive;
+						turns.className = "INFO-DATA";
+
+						let kills = document.createElement('div');
+						kills.innerHTML = Players[i].data.units_killed;
+						kills.className = "INFO-DATA";
+
+						let money = document.createElement('div');
+						money.innerHTML = "$"+Players[i].data.money_spent;
+						money.className = "INFO-DATA";
+
+						td1.appendChild(place);
+						td1.appendChild(pic);
+						td1.appendChild(name);
+						td2.appendChild(turns);
+						td3.appendChild(kills);
+						td4.appendChild(money);
+						listEl.appendChild(td1);
+						listEl.appendChild(td2);
+						listEl.appendChild(td3);
+						listEl.appendChild(td4);
+
+						LISTHOLDER.appendChild(listEl);
+					}
+				}
+				let Records;
+				try {
+					Records = game.Get_Records().get();
+				} catch (e) {
+					LOG.popup("Apologies, there was an error with the detailed game record data.");
+					showList();
+					return;
+				}
 				let __data_turns = new Array(Records.length);
 				let __data_players_standing = new Array(game.Total_Players());
 				let __data_players_delt = new Array(game.Total_Players());
@@ -2126,6 +2239,9 @@ var Interface_Class = function()
 					// Configuration options go here
 					options: {}
 				});
+
+				showList();
+
 				changeContent("END GAME", game.Name, true);
 
 				window.parent.openLobby();

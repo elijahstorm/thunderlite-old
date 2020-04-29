@@ -1022,7 +1022,7 @@ io.on('connection', function(socket){
 	socket.on('gamedata id', function(mapid){
 		db.gamedata.find({Map_Id:mapid, PUBLISHED:true}, function(err, data){
 			if(err){
-				socket.send({type:500});
+				socket.send({type:500,errType:0});
 				return;
 			}
 			if(data.length==0){
@@ -1038,15 +1038,15 @@ io.on('connection', function(socket){
 		if(sort_by.mapowner!=null)
 		if(sort_by.mapowner.charAt(0)=="^")
 		{
-			sort_by.mapowner = RegExp(".*"+sort_by.mapowner.substring(1, sort_by.mapowner.length)+".*");
+			sort_by.mapowner = RegExp(".*"+sort_by.mapowner.substring(1, sort_by.mapowner.length)+".*", 'i');
 		}
 		let _search_name = sort_by.mapdata;
 		if(_search_name!=null)
-			sort_by.mapdata = null;
+			sort_by.mapdata = RegExp(".*");
 
 		db.gamedata.find(sort_by, function(err, data){
 			if(err){
-				socket.send({type:500});
+				socket.send({type:500,errType:1});
 				return;
 			}
 			if(data.length==0){
@@ -1056,10 +1056,11 @@ io.on('connection', function(socket){
 					return;
 				}
 				sort_by.mapdata = RegExp(".*" + _search_name + ".*");
-				sort_by.mapowner = null;
+				sort_by.mapowner = RegExp(".*");
+
 				db.gamedata.find(sort_by, function(err, data){
 					if(err){
-						socket.send({type:500});
+						socket.send({type:500,errType:2});
 						return;
 					}
 					if(data.length==0){
@@ -1183,11 +1184,11 @@ io.on('connection', function(socket){
 	socket.on('userdata get', function(query){
 		db.users.find({username:socket.username}, function(err, data){
 			if(err){
-				socket.send({type:500});
+				socket.send({type:500,errType:3});
 				return;
 			}
 			if(data.length==0){
-				socket.send({type:500});
+				socket.send({type:500,errType:4});
 				return;
 			}
 			if(query=="progress")
@@ -1199,18 +1200,18 @@ io.on('connection', function(socket){
 	socket.on('userdata add', function(query){
 		db.users.find({username:socket.username}, function(err, data){
 			if(err){
-				socket.send({type:500});
+				socket.send({type:500,errType:5});
 				return;
 			}
 			if(data.length==0){
-				socket.send({type:500});
+				socket.send({type:500,errType:6});
 				return;
 			}
 			if(query.type=="progress")
 			{	// unlock next story level
 				if(query.section<0 || query.section>=3)
 				{	// invalid input error
-					socket.send({type:500,info:socket.username+": level campaign progress of "+query.section});
+					socket.send({type:500,errType:7});
 					return;
 				}
 				let __progress = data[0].story_prog;

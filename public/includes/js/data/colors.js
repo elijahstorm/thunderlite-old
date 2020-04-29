@@ -10,7 +10,7 @@ var Team_Colors = {
 		[[255,144,133],[233,51,46],[170,22,44],[102,26,94]], // red
 		[[169,207,255],[69,164,225],[43,95,199],[61,49,127]], // blue
 		[[142,255,152],[59,255,20],[67,193,56],[22,145,15]], // green
-		[[255,255,0],[229,229,43],[206,109,28],[125,137,13]], // yellow
+		[[255,255,142],[229,229,43],[206,109,28],[125,137,13]], // yellow
 	],
 	Player:["White","Red","Blue","Green","Yellow"],
 	Flags:[Images.Retrieve("White Flag"),Images.Retrieve("Red Flag"),Images.Retrieve("Blue Flag"),Images.Retrieve("Green Flag"),Images.Retrieve("Yellow Flag")],

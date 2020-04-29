@@ -19,8 +19,8 @@ var report = function(err){
 }
 
 function eraseCookie(){
-	document.cookie = "user;expires=-1";
-	document.cookie = "pass;expires=-1";
+	document.cookie = "user;SameSite=Strict;expires=-1";
+	document.cookie = "pass;SameSite=Strict;expires=-1";
 }
 
 window.onload = function(){

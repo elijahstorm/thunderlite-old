@@ -371,7 +371,7 @@ window.onload = function(){
 			/** loading published games */
 		else if(data.type==500)
 		{	// error requesting data
-			console.error("Could not get data request. CODE:",data.type);
+			console.error("Could not get data request. CODE:",data.type,data.errType);
 		}
 		else if(data.type==501)
 		{	// map index does not exist

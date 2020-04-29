@@ -45,7 +45,7 @@ var LOG = {
 			setTimeout(function() {
 				POPUP.style.opacity = '0';
 				POPUP.style.transform =  "translate(-300px, 0px)";
-			}, 2000);
+			}, 500);
 		});
 		POPUP.addEventListener('transitionend', () => POPUP.remove());
 		if(LOG.first_popup)
@@ -566,6 +566,7 @@ window.onload = function(){
 	backCanvas = initiateCanvas("backgroundCanvas");
 	Background_Display = Canvas.Create_Canvas(backCanvas, "back");
 
+	seaCanvas = initiateCanvas("seaCanvas");
 	worldCanvas = initiateCanvas("worldCanvas");
 	terrainCanvas = initiateCanvas("terrainCanvas");
 	charCanvas = initiateCanvas("charCanvas");
