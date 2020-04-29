@@ -1057,7 +1057,8 @@ var Engine_Class = function(input, is_sample, is_local)
 						if(Connected_Players[cur_player]==null)
 						{	/// start AI
 							setTimeout(function(){
-								AI.Solve(self,active_player);
+								AI.Solve(self, active_player);
+								UI.interact();
 							}, AI.TIMEOUT*2);
 						}
 					});
@@ -1320,8 +1321,9 @@ var Engine_Class = function(input, is_sample, is_local)
 					if(Connected_Players[cur_player]==null)
 					{	/// start AI
 						setTimeout(function(){
-							AI.Solve(self,active_player);
-						}, AI.TIMEOUT*3);
+							AI.Solve(self, active_player);
+							UI.interact();
+						}, AI.TIMEOUT*2);
 					}
 				});
 			});

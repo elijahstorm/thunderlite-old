@@ -192,9 +192,9 @@ img.MAPCHOICEIMG{
 	width: 150px;
 	min-width: 150px;
 	max-width: 150px;
-	/* height: 400px; */
+	height: 400px;
 	min-height: 300px;
-	max-height: 500px;
+	max-height: 600px;
 
 	background: #fffd;
 	overflow: hidden;

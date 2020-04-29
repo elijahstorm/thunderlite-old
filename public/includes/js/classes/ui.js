@@ -353,6 +353,7 @@ var Interface_Class = function()
 			Avatar.List_Sliders = [];
 			let el,txt,money,status;
 			let parentList = document.getElementById("active-player-list");
+			// document.getElementById('avatarCanvas').style.height =  ?  : "400px";
 			for (var i = 0; i < parentList.childNodes.length;) {
 				parentList.childNodes[0].remove();
 			}
@@ -1066,6 +1067,9 @@ var Interface_Class = function()
 		};
 		Canvas.Add_Ticker(HUD_Avoid_Mouse.tick);
 	}
+	self.interact = function() {
+		HUD_Avoid_Mouse.interact();
+	};
 	var m_move_fnc = function(x, y){
 		HUD_Avoid_Mouse.scared(x, y);
 		if(!allow_input)return;

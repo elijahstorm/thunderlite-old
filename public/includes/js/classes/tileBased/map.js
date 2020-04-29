@@ -3,7 +3,7 @@
 // for use only in ThunderLite Project
 
 
-var TILESIZE = window.parent.mobilecheck() ? 40 : 60;
+var TILESIZE = window.parent.mobilecheck() ? 50 : 60;
 
 var Converter = {
 	Screen:{

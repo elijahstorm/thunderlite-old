@@ -21,7 +21,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 		Domination:4
 	};
 	let SUB_GAME_AI = false;
-	let TIMEOUT = 735;
+	self.TIMEOUT = 735;
 	let FAKE_GAME;
 	self.LOGGING = false;
 	let LOGGER = function(args){
@@ -107,7 +107,7 @@ var AI_Class = function(_last_game, _ai_player, _index)
 				setTimeout(function(){
 					INTERFACE.Draw();
 					STATUS_CHOICE(Check_Standings(__player), __game, __player);
-				}, TIMEOUT);
+				}, self.TIMEOUT);
 			}))
 				__city.End_Turn();
 			return;
@@ -1402,7 +1402,7 @@ LOGGER(__unit.Name);
 			setTimeout(function(){
 				INTERFACE.Draw();
 				STATUS_CHOICE(Check_Standings(__player), __game, __player);
-			}, TIMEOUT);
+			}, self.TIMEOUT);
 			return;
 		}
 
@@ -1480,7 +1480,7 @@ LOGGER(__unit.Name);
 			setTimeout(function(){
 				INTERFACE.Draw();
 				STATUS_CHOICE(Check_Standings(__player), __game, __player);
-			}, TIMEOUT);
+			}, self.TIMEOUT);
 			return;
 		}
 
@@ -1601,7 +1601,7 @@ LOGGER(__target.X, __target.Y);
 					setTimeout(function(){
 						INTERFACE.Draw();
 						STATUS_CHOICE(Check_Standings(__player), __game, __player);
-					}, TIMEOUT);
+					}, self.TIMEOUT);
 					return true;
 				}
 			}
@@ -1621,7 +1621,7 @@ LOGGER(__target.X, __target.Y);
 					setTimeout(function(){
 						INTERFACE.Draw();
 						STATUS_CHOICE(Check_Standings(__player), __game, __player);
-					}, TIMEOUT);
+					}, self.TIMEOUT);
 					return true;
 				}
 			}
@@ -2065,7 +2065,7 @@ LOGGER(currentUnit.Name);
 				setTimeout(function(){
 					INTERFACE.Draw();
 					STATUS_CHOICE(Check_Standings(aiPlayer), __game, aiPlayer);
-				}, TIMEOUT);
+				}, self.TIMEOUT);
 			} catch (e) {
 				console.error(" - - - > Caught AI Error :", e);
 				aiPlayer.End_Turn();
