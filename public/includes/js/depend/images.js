@@ -20,6 +20,17 @@ function Image_list_class()
 			img = src.Image();
 			callback();
 		}
+		else if(name==null)
+		{
+			loaded = false;
+			img = new Image();
+			img.src = src;
+			let self = this;
+			img.onload = function()
+			{
+				loaded = true;
+			};
+		}
 		else
 		{
 			loaded = false;
@@ -109,6 +120,12 @@ function Image_list_class()
 			}
 		}
 		return null;
+	};
+	this.Source = function(src)
+	{
+		if(typeof(src)!=="string")return;
+		if(src==null || src=="")return;
+		return new Image_Class(src);
 	};
 
 	this.Done = function()

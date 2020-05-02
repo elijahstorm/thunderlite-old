@@ -22,11 +22,7 @@ Images.Declare("Icons/moves/tile_attack.png","tile attack");
 Images.Declare("Icons/moves/tile_danger.png","tile danger");
 var ERRORIMG = Images.Declare("Misc/ERROR.png","ERROR");
 
-Images.Declare("Icons/players/face0.png","Player Face0");
-Images.Declare("Icons/players/face1.png","Player Face1");
-Images.Declare("Icons/players/face2.png","Player Face2");
-Images.Declare("Icons/players/face3.png","Player Face3");
-
+Images.Declare("Icons/profile/pic0.png","Unused Profile Pic");
 
 Images.Declare("Icons/uploaded.png","Uploaded");
 Images.Declare("Icons/erase.png","Erase");

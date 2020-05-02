@@ -280,11 +280,20 @@ window.onload = function(){
 		else if(data.type==20)
 		{	// caching user info and validating connection
 			socket.index = data.index;
-			CONNECTED = true;
-			CHECK_CONNECTION();
-			if(gameFrame.src!="game.html")
-				gameFrame.src = "includes/game.html";
-			document.title = socket.username+" playing ThunderLite";
+			START_CONNECTION();
+		}
+		else if(data.type==20.5)
+		{	// caching user profile pictures
+			if(game.CONTENTGRAB()!=1)return;
+			let g = game.INTERFACE.Game;
+			let pics = JSON.parse(data.pics);
+
+			for(let i in pics)
+			{
+				if(pics[i]==null)
+					continue;
+				g.Player(i).Icon = new game.Images.Source(pics[i]);
+			}
 		}
 		else if(data.type==21)
 		{	// setup game to play
@@ -368,10 +377,23 @@ window.onload = function(){
 			game.LOG.popup(playerName+" reconnected!", "#FFF");
 		}
 
+			/** user profile information */
+		else if(data.type==300)
+		{	// report total unlocked story levels
+			if(game.CONTENTGRAB()!=2)return;
+			game.Report_Data(data.profile);
+		}
+
 			/** loading published games */
 		else if(data.type==500)
 		{	// error requesting data
 			console.error("Could not get data request. CODE:",data.type,data.errType);
+			if(data.errType==8)
+			{
+				if(game.CONTENTGRAB()!=2)return;
+				game.Report_Error(data.error);
+				return;
+			}
 		}
 		else if(data.type==501)
 		{	// map index does not exist
@@ -463,7 +485,7 @@ window.onload = function(){
 			/** in-game error messages */
 		else if(data.type==100)
 		{	// could not connect to game message
-			if(game.LOG)game.LOG.popup("ERROR:Could not connect to game "+data.game, "#F00");
+			if(game.LOG)game.LOG.popup("ERROR: Could not connect to game "+data.game, "#F00");
 		}
 
 			/** logs */
@@ -539,6 +561,13 @@ function setConnection(val){
 	CONNECTION_ACTIVE.SET(val);
 }
 
+function START_CONNECTION(){
+	CONNECTED = true;
+	CHECK_CONNECTION();
+	if(gameFrame.src!="game.html")
+		gameFrame.src = "includes/game.html";
+	document.title = socket.username+" playing ThunderLite";
+}
 function CHECK_CONNECTION(){
 	if(CONNECTION_TIMEOUT>5)
 	{

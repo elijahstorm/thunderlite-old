@@ -1,4 +1,33 @@
 var express = require('express');
+var bcrypt = require('bcrypt');
+
+const cryptPassword = function(password, callback) {
+	bcrypt.genSalt(10, function(err, salt) {
+		if (err)
+			return callback(err);
+
+		bcrypt.hash(password, salt, function(err, hash) {
+			return callback(err, hash);
+		});
+	});
+};
+const comparePassword = function(plainPass, hashword, callback) {
+	bcrypt.compare(plainPass, hashword, function(err, isPasswordMatch) {
+		return err == null ?
+			callback(null, isPasswordMatch) :
+			callback(err);
+	});
+};
+
+var nodemailer = require('nodemailer');
+const Service_Transport = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'thunderlitedev@gmail.com',
+    pass: 'LoudCr0ws5'
+  }
+});
+
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
@@ -13,6 +42,94 @@ server.listen(port, function(){
 	console.log('\********** Server listening on port %d **********', port);
 });
 
+function SEND_EMAIL(type, data) {
+	let mailOptions;
+	if(type=="verify email")
+	{
+		// SEND EMAIL
+		// data.email
+		// data.code
+
+		mailOptions = {
+		  from: 'thunderlitedev@gmail.com',
+		  to: data.email,
+		  subject: 'ThunderLite email verification',
+		  text: "Your code to update your email is: "+data.code+". If this was not you, please ignore this message. Nothing will change unless you take action."
+		};
+	}
+	else if(type=="email")
+	{
+		// alert user of email change.
+
+		mailOptions = {
+		  from: 'thunderlitedev@gmail.com',
+		  to: data.email,
+		  subject: 'ThunderLite email updated',
+		  text: 'Thank you for updating your email, '+data.name+'. Contact will continue to come to this email.'
+		};
+	}
+	else if(type=="password")
+	{
+		// alert user of password change.
+
+		mailOptions = {
+		  from: 'thunderlitedev@gmail.com',
+		  to: data.email,
+		  subject: 'ThunderLite password updated',
+		  text: 'If this was not you, please contact us.'
+		};
+	}
+	else if(mailOptions==null)
+		return;
+	Service_Transport.sendMail(mailOptions, function(error, info){
+	  if (error) {
+	    timestamp("EMAIL ERROR", error);
+	  } else {
+	    timestamp('Email sent: ' + info.response);
+	  }
+	});
+}
+function DATA_CHECK(type, data) {
+	if(type=="email")
+	{
+		if(typeof(data)!=="string")
+			return false;
+		if(data.indexOf('@')==-1)
+			return false;
+		return true;
+	}
+	if(type=="SET verify email")
+	{
+
+		return true;
+	}
+	if(type=="verify email")
+	{
+
+		return true;
+	}
+	if(type=="password")
+	{
+		if(typeof(data)!=="string")
+			return false;
+		if(data=="")return false;
+		if(data.indexOf("/")!=-1)return false;
+		if(data.indexOf("\\")!=-1)return false;
+		if(data.indexOf(" ")!=-1)return false;
+		if(data.indexOf(".")!=-1)return false;
+		if(data.indexOf(":")!=-1)return false;
+		if(data.indexOf(";")!=-1)return false;
+		return true;
+	}
+	if(type=="pic")
+	{
+		if(typeof(data)!=="string")
+			return false;
+		if(data=="")return false;
+		return true;
+	}
+	return false;
+}
 
 // Routing
 app.use(express.static(__dirname + '/public'));
@@ -230,43 +347,6 @@ var Game = function(map, name, slots){
 			if(last_i!=null)
 			if(playerData[i][1]!=playerData[last_i][1]){
 					// games report differing data
-
-console.log(" ");
-console.log(" ");
-console.log(" ");
-console.log("++player",i);
-console.log(" ");
-console.log(" ");
-console.log(playerData[i][1]);
-console.log(" ");
-console.log(" ");
-console.log("+last+player",last_i);
-console.log(" ");
-console.log(" ");
-console.log(playerData[last_i][1]);
-
-console.log(" ");
-console.log(" ");
-console.log(" ");
-console.log(" ");
-console.log(" ");
-console.log(playerData[i][1].length, playerData[last_i][1].length);
-console.log(" ");
-console.log(" ");
-console.log(" ");
-
-let INDEX = 0;
-for(;INDEX<playerData[i][1].length;INDEX++)
-{
-	if(playerData[i][1].charAt(INDEX)!=playerData[last_i][1].charAt(INDEX))
-	{
-		console.log("found at",INDEX,":",playerData[i][1].charAt(INDEX),"->",playerData[last_i][1].charAt(INDEX),".");
-	}
-}
-console.log(" ");
-console.log(" ");
-console.log(" ");
-
 				badCallbackFnc();
 				return;
 			}
@@ -598,7 +678,7 @@ io.on('connection', function(socket){
 		var game = Game_List.Game(game_id);
 		var connections = game.Data();
 		var names = [];
-		for(var i in connections)
+		for(let i in connections)
 		{
 			if(connections[i]==null)
 			{
@@ -606,7 +686,7 @@ io.on('connection', function(socket){
 			}
 			else names.push(Connections.Socket(connections[i]).username);
 		}
-		for(var i in connections)
+		for(let i in connections)
 		{
 			if(connections[i]!=null)
 				continue;
@@ -700,10 +780,31 @@ io.on('connection', function(socket){
 			passkey:__new_passkey
 		});
 		var players = game.Data();
-		for(var i in players)
+		let Pics = new Array(players.length);
+		for(let i in players)
 		{
 			if(players[i]==null)continue;
-			Connections.Socket(players[i]).vars.lobby_listening = false;
+			let _SOCKET = Connections.Socket(players[i]);
+			_SOCKET.vars.lobby_listening = false;
+			db.users.findOne({username:_SOCKET.username}, function(err, data){
+				if(err)return;
+				if(data==null)return;
+				Pics[i] = data.pic;
+				for(let check_all in Pics)
+				{	// check to see if every pics has been downloaded
+					if(Pics[check_all]==null)
+					{	// if no picture data has been recieved yet
+						if(players[check_all]==null)
+							continue;	// if this player isn't a user, then ignore
+						return;	// close and don't let final Pics send to everyone
+					}
+				}
+					// once all pics are primed, then send the data to all the users in the game
+				game.Send(__new_passkey, {
+					type:20.5,
+					pics:JSON.stringify(Pics)
+				});
+			});
 		}
 		game.started = true;
 		timestamp("Game",game.index_in_server,"->",game.Name(),"started");
@@ -725,10 +826,33 @@ io.on('connection', function(socket){
 
 	socket.on('log', function(msg){
 		timestamp(socket.username+": "+msg);
+
+
+			db.users.find({}, function(err, data){
+				if(err){
+					socket.send({type:500,errType:5});
+					return;
+				}
+
+				for(let i in data)
+				{
+					// encrypt passwords
+					cryptPassword(data[i].password, function functionName(err, hashPass) {
+						if(err!=null)
+						{
+							socket.send({type:500,errType:8,error:"encryption"});
+							return;
+						}
+							// update stored password
+						db.users.update({username:data[i].username}, {$set:{
+							password:hashPass
+						}});
+					});
+				}
+			});
 	});
 
-	function Make_Unique_Map_Index(onFinish)
-	{
+	function Make_Unique_Map_Index(onFinish){
 		function make_letter(){ // 65 = A, 97 = a
 			let start = Math.random()>0.5 ? 65 : 97;
 			let index = Math.floor(Math.random()*26)+start;
@@ -1087,6 +1211,7 @@ io.on('connection', function(socket){
 			{
 				arr.push({
 					game:data[data.length-i-1].mapdata,
+					mapid:data[data.length-i-1].Map_Id,
 					name:data[data.length-i-1].mapowner
 				});
 			}
@@ -1103,21 +1228,29 @@ io.on('connection', function(socket){
 				return;
 			}
 			if(data.length==0){
-				db.users.save({
-					username:username,
-					password:password,
-					email:email,
-					story_prog:[1,1,1],
-					level:1,
-					points:0,
-					totalGames:0,
-					gamesWon:0
-				}, function(err, saved){
+				cryptPassword(password, function functionName(err, hashPass) {
+					if(err!=null)
+					{
+						socket.send({type:8});
+						return;
+					}
+					db.users.save({
+						pic:null,
+						username:username,
+						password:hashPass,
+						email:email,
+						story_prog:[1,1,1],
+						level:1,
+						points:0,
+						totalGames:0,
+						gamesWon:0
+					}, function(err, saved){
 					if(err||!saved)socket.send({type:8});
 					else{
 						socket.send({type:9});
 						timestamp("New user",saved.username,"added");
 					}
+				});
 				});
 			}
 			else socket.send({type:5});
@@ -1128,41 +1261,47 @@ io.on('connection', function(socket){
 		db.users.find({username:username}, function(err, data){
 			if(err||!data||data.length==0){
 				socket.send({type:6});
-			}else if(data.length==1){
-				if(data[0].password!=password){
-					socket.send({type:7});
-					return;
-				}
-				var activeCons = Connections.Active();
-				var rejoined = false;
-				for(var i in activeCons){
-					if(activeCons[i].username!=username)continue;
-					if(!activeCons[i].vars.online){
-						Connections.Reconnect(activeCons[i].index, socket);
-						rejoined = true;
-						var game = Game_List.Game(socket.vars.in_game);
-						if(game){
-							game.Rejoin(SUDO_ROUTE_PASS, socket.vars.slotIndex, socket.index);
-						}
-						break;
-					}else{
-						timestamp("ERROR: user",username,"tried to join twice at once");
-						socket.send({type:8});
+				return;
+			}
+			if(data.length==1){
+				comparePassword(password, data[0].password, function(err, is_correct) {
+					if(!is_correct){
+						socket.send({type:7});
 						return;
 					}
-				}
-				if(!rejoined){
-					socket.index = Connections.Add(socket);
-					socket.username = username;
-					timestamp("user",username,"connected:",socket.index);
-				}
-				socket.send({
-					type:20,
-					index:socket.index
+					var activeCons = Connections.Active();
+					var rejoined = false;
+					for(var i in activeCons){
+						if(activeCons[i].username!=username)continue;
+						if(!activeCons[i].vars.online){
+							Connections.Reconnect(activeCons[i].index, socket);
+							rejoined = true;
+							var game = Game_List.Game(socket.vars.in_game);
+							if(game){
+								game.Rejoin(SUDO_ROUTE_PASS, socket.vars.slotIndex, socket.index);
+							}
+							break;
+						}else{
+							timestamp("ERROR: user",username,"tried to join twice at once");
+							socket.send({type:8});
+							return;
+						}
+					}
+					if(!rejoined){
+						socket.index = Connections.Add(socket);
+						socket.username = username;
+						timestamp("user",username,"connected:",socket.index);
+					}
+					socket.send({
+						type:20,
+						index:socket.index
+					});
+					socket.vars.online = true;
+					socket.broadcast.emit('user joined', socket.username);
 				});
-				socket.vars.online = true;
-				socket.broadcast.emit('user joined', socket.username);
-			}else socket.send({type:8});
+				return;
+			}
+			socket.send({type:8});
 		});
 	});
 	socket.on('disconnect', function(){
@@ -1182,28 +1321,42 @@ io.on('connection', function(socket){
 		Connections.Disconnect(socket.index);
 	});
 	socket.on('userdata get', function(query){
-		db.users.find({username:socket.username}, function(err, data){
+		db.users.findOne({username:socket.username}, function(err, data){
 			if(err){
 				socket.send({type:500,errType:3});
 				return;
 			}
-			if(data.length==0){
+			if(data==null){
 				socket.send({type:500,errType:4});
+				return;
+			}
+			if(query=="profile")
+			{	// all open data for connected user, hiding important data
+				let requestData = {};
+				requestData.username = data.username;
+				requestData.level = data.level;
+				requestData.points = data.points;
+				requestData.email = data.email;
+				requestData.gamesWon = data.gamesWon;
+				requestData.totalGames = data.totalGames;
+				requestData.pic = data.pic;
+				socket.send({type:300, profile:requestData});
 				return;
 			}
 			if(query=="progress")
 			{	// unlocked story data
-				socket.send({type:504, story_prog:data[0].story_prog});
+				socket.send({type:504, story_prog:data.story_prog});
+				return;
 			}
 		});
 	});
 	socket.on('userdata add', function(query){
-		db.users.find({username:socket.username}, function(err, data){
+		db.users.findOne({username:socket.username}, function(err, data){
 			if(err){
 				socket.send({type:500,errType:5});
 				return;
 			}
-			if(data.length==0){
+			if(data==null){
 				socket.send({type:500,errType:6});
 				return;
 			}
@@ -1214,7 +1367,7 @@ io.on('connection', function(socket){
 					socket.send({type:500,errType:7});
 					return;
 				}
-				let __progress = data[0].story_prog;
+				let __progress = data.story_prog;
 				if(__progress[query.section]>=5)
 				{	// cannot grow level further
 					socket.send({type:601});
@@ -1225,6 +1378,108 @@ io.on('connection', function(socket){
 				db.users.update({username:socket.username}, {$set:{
 					story_prog:__progress
 				}});
+			}
+		});
+	});
+	socket.on('userdata update', function(query){
+		db.users.findOne({username:socket.username}, function(err, data){
+			if(err){
+				socket.send({type:500,errType:5});
+				return;
+			}
+			if(data==null){
+				socket.send({type:500,errType:6});
+				return;
+			}
+			if(query.type=="email")
+			{	// starts email verification process
+				if(!DATA_CHECK("email", query.new_email))
+				{	// invalid input error
+					socket.send({type:500,errType:8,error:"email"});
+					return;
+				}
+
+				let CODE = 123456789;
+				DATA_CHECK("SET verify email", {
+					user:socket.username,
+					new_email:query.new_email,
+					code:CODE
+				});
+
+				SEND_EMAIL("verify email", {
+					name:socket.username,
+					email:socket.email,
+					code:CODE
+				});
+			}
+			if(query.type=="verify email")
+			{	// finishes email verification process and updates new email if succesful
+				if(!DATA_CHECK("email", query.new_email))
+				{	// invalid input error
+					socket.send({type:500,errType:8,error:"email"});
+					return;
+				}
+				if(!DATA_CHECK("verify email", {
+					user:socket.username,
+					new_email:query.new_email,
+					code:query.verify_code
+				}))
+				{	// invalid input error
+					socket.send({type:500,errType:8,error:"verify email"});
+					return;
+				}
+
+				// here is the final email update, after verification
+				db.users.update({username:socket.username}, {$set:{
+					email:query.new_email
+				}});
+				timestamp("user",socket.username,"updated email.");
+				SEND_EMAIL("email", {
+					name:socket.username,
+					email:query.new_email
+				});
+				return;
+			}
+			if(query.type=="password")
+			{	// update password
+				if(!DATA_CHECK("password", query.new_pass))
+				{	// invalid input error
+					socket.send({type:500,errType:8,error:"password"});
+					return;
+				}
+
+					// encrypt passwords
+				cryptPassword(query.new_pass, function functionName(err, hashPass) {
+					if(err!=null)
+					{
+						socket.send({type:500,errType:8,error:"encryption"});
+						return;
+					}
+						// update stored password
+					db.users.update({username:socket.username}, {$set:{
+						password:hashPass
+					}});
+					timestamp("user",socket.username,"updated their password.");
+					SEND_EMAIL("password", {
+						email:socket.email
+					});
+				});
+				return;
+			}
+			if(query.type=="pic")
+			{	// update profile pic
+				if(!DATA_CHECK("pic", query.new_pic))
+				{	// invalid input error
+					socket.send({type:500,errType:8,error:"pic"});
+					return;
+				}
+
+				// update profile pic
+				db.users.update({username:socket.username}, {$set:{
+					pic:query.new_pic
+				}});
+				timestamp("user",socket.username,"updated their picture.");
+				return;
 			}
 		});
 	});

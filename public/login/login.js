@@ -122,7 +122,7 @@ function toggleMemory() {
 function sendMsgBtn(){
 	if(stayCheck){
 		var date = new Date();
-		date.setTime(date.getTime()+604800000);
+		date.setTime(date.getTime()+4838400000);
 		var expires = date.toGMTString();
 		document.cookie = "user="+user.value+";SameSite=Strict;expires="+expires+";path=/";
 		document.cookie = "pass="+pass.value+";SameSite=Strict;expires="+expires+";path=/";

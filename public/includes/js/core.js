@@ -20,6 +20,10 @@ let MUSIC;
 var FRAMERATEDISPLAY;
 var lastLoop = new Date;
 var parentFrame = window.parent.document.getElementById('gameFrame');
+const CONTENTPAGE = 1; // Content -> Game
+function CONTENTGRAB() {
+	return CONTENTPAGE;
+}
 
 var	fps = 30,
 	paused = false,
@@ -54,7 +58,7 @@ var LOG = {
 			if(INTERFACE!=null)
 			if(!INTERFACE.IS_MOBILE_GAME)
 			{
-				LOG.popup("Click to remove logs. Moving your mouse over a log will remove it after two seconds.");
+				LOG.popup("Click to remove logs. Moving your mouse over a log will remove it after a second.");
 				return;
 			}
 			LOG.popup("Tap to remove logs.");
@@ -500,9 +504,9 @@ var Core = {
 	}
 };
 
-var online = false;
-var socket;
-var LOADER;
+let online = false;
+let socket;
+let LOADER;
 window.onload = function(){
 	if(window.parent)socket = window.parent.socket;
 	if(socket)online = true;

@@ -1465,9 +1465,14 @@ var Interface_Class = function()
 			/// start load maps
 		for(let index in _data_text)
 		{
+			let MAPID = _data_text[index].mapid;
 			names[index] = _data_text[index].name;
 			_data_text[index] = decrypt_game_data(_data_text[index].game);
 			_read_game_data[index] = Map_Reader.String(_data_text[index]);
+			if(MAPID!=null)
+			{	// for updates to the MAP ID post game upload.
+				_read_game_data[index].id = MAPID;
+			}
 
 			if(_read_game_data[index].Valid)
 			{
