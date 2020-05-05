@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/elijahstormmusic/ThunderLite#readme",
   "dependencies": {
-    "bcrypt": "^4.0.1",
+    "bcryptjs": "^2.4.3",
     "express": "^4.17.1",
     "mongo": "^0.1.0",
     "mongojs": "^2.6.0",

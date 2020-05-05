@@ -7,135 +7,844 @@ Menu.Button = [	"#056937",	"#08AF5C",	"#726962",	"#FFB200",	"#4B5148",	"#FDF5BF"
 				// back	 	// hover	// shadow	// text		// idle		// active	// act.txt
 
 /*** Map Editor ***/
+let MapEditorClass = function() {
+	let initalized = false;
+
+	function Allowed(_tile) {
+		if(ACTIVE_TYPE==TYPES.UNIT)
+		{
+			if(ACTIVE_PLAYER==-1)return false;
+			var _unit = Char_Data.CHARS[ACTIVE_INDEX];
+			var _ter = Terrain_Data.TERRE[map_list[_tile]];
+			if(_ter.Type==7)	// units cannot exist on impassable terrain
+				return false;
+			if(_ter.Type==6)	// ground units cannot traverse sea terrain
+			if(_unit.Type==0)
+				return false;
+			if(_ter.Type==2)	// only foot units can climb rugged terrain
+			if(_unit.Move_Type==1 || _unit.Move_Type==2)
+				return false;
+			if(_ter.Type!=6)	// sea units cannot traverse ground terrain
+			if(_unit.Type==2)
+				return false;
+		}
+		else if(ACTIVE_TYPE==TYPES.CITY)
+		{
+			var _city = Building_Data.PLACE[ACTIVE_INDEX];
+			var _ter = Terrain_Data.TERRE[map_list[_tile]];
+			if(_ter.Type==7)	// cities cannot be on impassable terrain
+				return false;
+			if(_ter.Type==2)	// cities cannot be on rugged terrain
+				return false;
+			if(_ter.Type==6)	// ground cities can't exist on sea terrain
+			if(_city.Terrain==0)
+				return false;
+			if(_ter.Type!=6)	// sea cities can't exist on ground terrain
+			if(_city.Terrain==2)
+				return false;
+		}
+		else if(ACTIVE_TYPE==TYPES.TERRAIN)
+		{
+			var _ter = Terrain_Data.TERRE[ACTIVE_INDEX];
+
+			if(Terrain_Data.Get("Shore")==ACTIVE_INDEX)
+			{			// connections must be near at least one ground and one sea type
+				var ground = false,
+					sea = false,
+					ter_check;
+				if(_tile<map_list.length)
+				{
+					ter_check = Terrain_Data.TERRE[map_list[_tile+1]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile>0)
+				{
+					ter_check = Terrain_Data.TERRE[map_list[_tile-1]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile+height<map_list.length)
+				{
+					ter_check = Terrain_Data.TERRE[map_list[_tile+height]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile-height>0)
+				{
+					ter_check = Terrain_Data.TERRE[map_list[_tile-height]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				return (ground && sea);
+			}
+			if(_ter.Type==6)
+			{
+				if(Terrain_Data.Get("Sea")!=ACTIVE_INDEX)
+				{		// sea interior cannot be placed near sea border
+					if(_tile<map_list.length)
+					if(Terrain_Data.TERRE[map_list[_tile+1]].Type!=6)
+						return false;
+					if(_tile>0)
+					if(Terrain_Data.TERRE[map_list[_tile-1]].Type!=6)
+						return false;
+					if(_tile+height<map_list.length)
+					if(Terrain_Data.TERRE[map_list[_tile+height]].Type!=6)
+						return false;
+					if(_tile-height>0)
+					if(Terrain_Data.TERRE[map_list[_tile-height]].Type!=6)
+						return false;
+				}
+			}
+			else if(_ter.Type==8)
+			{			// connections must be near at least one ground and one sea type
+				var ground = false,
+					sea = false,
+					ter_check;
+				if(_tile<map_list.length)
+				{
+					ter_check = Terrain_Data.TERRE[map_list[_tile+1]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile>0)
+				{
+					ter_check = Terrain_Data.TERRE[map_list[_tile-1]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile+height<map_list.length)
+				{
+					ter_check = Terrain_Data.TERRE[map_list[_tile+height]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile-height>0)
+				{
+					ter_check = Terrain_Data.TERRE[map_list[_tile-height]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(!ground || !sea)
+					return false;
+			}
+		}
+		return true;
+	};
+	let Tile_Array;
+
+	let DATA = {
+		id:-1,
+		name:"",
+		width:10,
+		height:10,
+		map_list:null,
+		max_players:2,
+		players:2,
+		units:new Array(),
+		cities:new Array(),
+		weather:new Array(3),
+		__script__:""
+	};
+	let CHOICE = {
+		TERRAIN:0,
+		UNITS:1,
+		CITY:2,
+		WEATHER:3
+	};
+	let SERVER = {
+		LOAD:'download',
+		SAVE:'update',
+		PLAYTEST:'mark playtested',
+		DELETE:'delete',
+		PUBLISH:'publish',
+		data_saved:false,
+		beaten_game:false,
+		local_saved_map:-1,
+		new_map:true,
+		Report_List:function(){},
+		onReportGameList:function(fnc)
+		{
+			SERVER.Report_List = fnc;
+		}
+	};
+	let TYPE = CHOICE.TERRAIN;
+	let SELECTION = 0;
+	let PAGE = 0;
+	let BLANK = BLANKIMG.Source();
+	let SFX = SFXs.Retrieve("editor sheet");
+
+	function send_map_data_to_server(type, data) {
+		if(!online)return;
+		if(SERVER.new_map && type=='update')
+			type = 'upload';
+
+		socket.emit('mapdata '+type, socket.password, data);
+	}
+	function display_server_saved_maps(fnc1, fnc2, fnc3) {
+		let _read_game_data = new Array(9),
+			_data_text = new Array(9),
+			_game_imgs = new Array(9);
+		if(fnc1==null) {
+			fnc1 = function(_load){
+				if(!confirm("This will delete the map "+_read_game_data[_load].Name+".\n\nDelete and Replace?"))return;
+
+				SERVER.local_saved_map = _load;
+
+				while(DATA.name=="" || DATA.name==null || DATA.name=="Unnamed Custom Map")
+					DATA.name = prompt("Give your map a name", DATA.name);
+				if(DATA.name==null)
+					return;
+
+				send_map_data_to_server(SERVER.DELETE, _read_game_data[_load].id);
+
+				setTimeout(function(){
+					send_map_data_to_server(SERVER.SAVE, {
+						index:DATA.id==-1 ? SERVER.local_saved_map : DATA.id,
+						name:DATA.name,
+						map:encrypt_game_data(map_data_to_str())
+					});
+				}, 500);
+				SERVER.data_saved = true;
+			};
+		}
+		if(fnc2==null) {
+			fnc2 = function(_new){
+				SERVER.local_saved_map = _new;
+
+				while(DATA.name=="" || DATA.name==null || DATA.name=="Unnamed Custom Map")
+					DATA.name = prompt("Give your map a name", DATA.name);
+				if(DATA.name==null)
+					return;
+
+				send_map_data_to_server(SERVER.SAVE, {
+					index:DATA.id==-1 ? SERVER.local_saved_map : DATA.id,
+					name:DATA.name,
+					map:encrypt_game_data(map_data_to_str())
+				});
+				DATA.data_saved = true;
+			};
+		}
+
+		SERVER.onReportGameList(function(_list_data){
+				/// start load maps
+			for(let _m in _list_data)
+			{
+				try {
+					let curMap = _list_data[_m];
+					var index = curMap.saveindex;
+					_data_text[index] = decrypt_game_data(curMap.map);
+					_read_game_data[index] = Map_Reader.String(_data_text[index]);
+					_read_game_data[index].id = curMap.map_id;
+					_read_game_data[index].uploaded = curMap.uploaded;
+
+					if(_read_game_data[index].Valid)
+					{
+						setTimeout(function(index){
+							var sampledGame = new Engine_Class(_read_game_data[index], true);
+							sampledGame.Set_Interface(INTERFACE);
+							sampledGame.FORCE_MERGE_DISPLAY = true;
+
+							let canvas = document.createElement("canvas");
+							canvas.width = 600;
+							canvas.height = 600;
+							let ctx = canvas.getContext("2d");
+							Canvas.ScaleImageData(ctx, INTERFACE.Get_Sample(sampledGame), 0, 0, 10/sampledGame.Terrain_Map.Width, 10/sampledGame.Terrain_Map.Height);
+
+							_game_imgs[index].src = canvas.toDataURL("image/png");
+							sampledGame.End_Game();
+						}, 5, index);
+					}
+				} catch (e) {
+					_read_game_data[index] = null;
+					console.error(e);
+				}
+			}
+
+			let container = document.getElementById("e-p-content"),
+				casing, img, uploaded, delete_btn;
+			for(let i=0;i<container.childNodes.length;)
+			{
+				container.childNodes[i].remove();
+			}
+
+			for(let i=0;i<9;i++)
+			{
+				casing = document.createElement('div');
+				casing.style.width = "25%";
+				casing.style.margin = "10px";
+				casing.style.display = "inline-block";
+				container.appendChild(casing);
+
+				if(_read_game_data[i]!=null)
+				{	// image display
+					_game_imgs[i] = document.createElement('img');
+					_game_imgs[i].onclick = function() {
+						self.Open(i, _read_game_data[i]);
+					};
+					delete_btn = document.createElement('img');
+					delete_btn.onclick = function() {
+						if(!confirm("Do you really want to delete "+_read_game_data[i].Name+"?"))return;
+						send_map_data_to_server(SERVER.DELETE, _read_game_data[i].id);
+					};
+					casing.appendChild(delete_btn);
+				}
+				else
+				{	// empty new game here
+					_game_imgs[i] = document.createElement('div');
+					_game_imgs[i].onclick = function() {
+						self.Open(i);
+					};
+				}
+				_game_imgs[i].style.maxWidth = "100%";
+				_game_imgs[i].innerHTML = '<i class="fas fa-plus-square"></i>';
+				_game_imgs[i].style.height = "100%";
+				_game_imgs[i].style.backgroundColor = "aqua";
+				_game_imgs[i].style.borderRadius = "5px";
+				casing.appendChild(_game_imgs[i]);
+			}
+		});
+
+		send_map_data_to_server(SERVER.LOAD);
+		document.getElementById("editor-popup").style.display = "block";
+	}
+	function map_data_to_str() {
+		var str = ""+DATA.id+";";
+		str+=DATA.name+";";
+		str+=DATA.width+";";
+		str+=DATA.height+";";
+		for(var i=0;i<DATA.map_list.length;i++)
+		str+=DATA.map_list[i]+":";
+		str+=";";
+		for(var i=0;i<DATA.max_players;i++)
+		str+=DATA.players[i]+":";
+		str+=";";
+		for(var i=0;i<DATA.units.length;i++)
+		str+=DATA.units[i]+":";
+		str+=";";
+		for(var i=0;i<DATA.cities.length;i++)
+		str+=DATA.cities[i]+":";
+		str+=";";
+		str+=(DATA.weather[0] ? "1" : "0");
+		for(let j=1;j<DATA.weather.length;j++)
+		{
+			str+=""+DATA.weather[j][0]+""+DATA.weather[j][1]+"-"+DATA.weather[j][2]+":";
+		}
+		str+=";";
+
+		return str+DATA.__script__+";";
+	}
+	this.Server_Response = {
+		Map_List:function(data)
+		{
+			SERVER.Report_List(data);
+		},
+		Report_Id:function(data)
+		{
+			SERVER.new_map = false;
+			id = data;
+		},
+		Updated_With_Server:function(value)
+		{
+			data_saved = value;
+		}
+	};
+
+	let MUSIC_CHANGING = false;
+	function Change_Music(change) {
+		if(MUSIC_CHANGING)return;
+		MUSIC_CHANGING = true;
+		MUSIC = MUSIC.Switch(Music.Retrieve("editor "+change), 3000);
+		setTimeout(function(){
+			MUSIC_CHANGING = false;
+		}, 3000);
+	}
+	function Play_Placement_SFX() {
+		SFX.Play_Out(Math.floor(Math.random()*(SFX.Sprite_Amount())));
+	}
+	function refreshChoiceImages() {
+		let image_list;
+		if(TYPE==CHOICE.TERRAIN)
+		 	image_list = Terrain_Data.TERRE;
+		else if(TYPE==CHOICE.UNITS)
+		 	image_list = Char_Data.CHARS;
+		else if(TYPE==CHOICE.WEATHER)
+			image_list = Weather_Data.WEATHER;
+		else if(TYPE==CHOICE.CITY)
+		{
+			image_list = Building_Data.PLACE;
+			for (let i = 1; i < 11; i++) {
+				if(image_list[i+(10*PAGE)]==null)
+					document.getElementById("editor-selection" + (i) + "img").src = BLANK;
+				else document.getElementById("editor-selection" + (i) + "img").src =
+					image_list[i+(10*PAGE)].Sprite.Source();
+			}
+			return;
+		}
+		for (let i = 1; i < 11; i++) {
+			if(image_list[i+(10*PAGE)]==null)
+				document.getElementById("editor-selection" + (i) + "img").src = BLANK;
+			else document.getElementById("editor-selection" + (i) + "img").src =
+				image_list[i+(10*PAGE)].Sprite[0].Source();
+		}
+	}
+	function CHANGECHOICE(changeTo) {
+		if(changeTo==CHOICE.TERRAIN)
+		{
+			TYPE = CHOICE.TERRAIN;
+			refreshChoiceImages();
+		}
+		else if(changeTo==CHOICE.UNITS)
+		{
+			TYPE = CHOICE.UNITS;
+			refreshChoiceImages();
+		}
+		else if(changeTo==CHOICE.CITY)
+		{
+			TYPE = CHOICE.CITY;
+			refreshChoiceImages();
+		}
+		else if(changeTo==CHOICE.WEATHER)
+		{
+			TYPE = CHOICE.WEATHER;
+			refreshChoiceImages();
+		}
+		else if(changeTo==CHOICE.ERASE)
+			TYPE = CHOICE.ERASE;
+	}
+	function CHOOSEINDEX(index) {
+		if(document.getElementById("editor-selection" + (index) + "img").src==BLANK)
+			return;
+		document.getElementById("editor-selection" + SELECTION).className = "w3-col editor-selections";
+		SELECTION = index;
+		document.getElementById("editor-selection" + SELECTION).className += " editor-selected";
+	}
+	function SELECT(tile) {
+		var _x = Math.floor(tile/DATA.height);
+		var _y = tile%DATA.height;
+
+		if(!Allowed(tile))
+		{
+
+			return;
+		}
+
+		SERVER.data_saved = false;
+		SERVER.beaten_game = false;
+
+		let INDEX = PAGE*10+SELECTION;
+		if(TYPE==CHOICE.TERRAIN)
+		{
+			if(SELECTION==0){
+				document.getElementById("editor-tile"+tile+"img").src = Terrain_Data.TERRE[1].Sprite[0].Source();
+			} else {
+				document.getElementById("editor-tile"+tile+"img").src = Terrain_Data.TERRE[INDEX].Sprite[0].Source();
+					DATA.map_list[tile] = INDEX;
+					var _ter = Terrain_Data.TERRE[INDEX];
+					for(var j in DATA.cities)
+					{
+						if(DATA.cities[j][1]==_x && DATA.cities[j][2]==_y)
+						{
+							var _city = Building_Data.PLACE[DATA.cities[j][0]];
+							if(_ter.Type==0)
+							if(_city.Terrain==2)
+							{
+								DATA.cities.splice(j, 1);
+								break;
+							}
+							if(_ter.Type==6)
+							if(_city.Terrain==0)
+							{
+								DATA.cities.splice(j, 1);
+								break;
+							}
+							break;
+						}
+					}
+					for(var j in units)
+					{
+						if(DATA.units[j][1]==_x && DATA.units[j][2]==_y)
+						{
+							var _unit = Char_Data.CHARS[DATA.units[j][0]];
+							if(_ter.Type==0)
+							if(_unit.Move_Type==6 || _unit.Move_Type==7)
+							{
+								DATA.units.splice(j, 1);
+								break;
+							}
+							if(_ter.Type==6)
+							if(_unit.Move_Type==0 || _unit.Move_Type==1 || _unit.Move_Type==2)
+							{
+								DATA.units.splice(j, 1);
+								break;
+							}
+							break;
+						}
+					}
+
+					let _wateramt = 49;
+					for(let i=0;i<DATA.map_list.length;i++)
+					{
+						if(DATA.map_list[i]>=12)
+						{
+							_wateramt++;
+						}
+					}
+					if(_wateramt>=DATA.width*DATA.height/2)
+					{
+						if(MUSIC.Name().includes("plains"))
+						{
+							Change_Music("water");
+						}
+					}
+					else
+					{
+						if(MUSIC.Name().includes("water"))
+						{
+							Change_Music("plains");
+						}
+					}
+			}
+		}
+		else if(TYPE==CHOICE.UNITS)
+		{
+			if(SELECTION==0) {
+				document.getElementById("editor-tile"+tile+"imgUNI").src = BLANK;
+			} else {
+				document.getElementById("editor-tile"+tile+"imgUNI").src = Char_Data.CHARS[INDEX].Sprite[0].Source();
+				var found = false;
+				for(var j in DATA.units)
+				{
+					if(DATA.units[j][1]==_x && DATA.units[j][2]==_y)
+					{
+						DATA.units[j][0] = INDEX;
+						DATA.units[j][3] = ACTIVE_PLAYER;
+						found = true;
+						break;
+					}
+				}
+				if(!found)
+				{
+					DATA.units.push([INDEX, _x, _y, ACTIVE_PLAYER]);
+				}
+			}
+		}
+		else if(TYPE==CHOICE.CITY)
+		{
+			if(SELECTION==0) {
+				document.getElementById("editor-tile"+tile+"imgBUI").src = BLANK;
+			} else {
+				document.getElementById("editor-tile"+tile+"imgBUI").src = Building_Data.PLACE[INDEX].Sprite.Source();
+				var found = false;
+				for(var j in DATA.cities)
+				{
+					if(DATA.cities[j][1]==_x && DATA.cities[j][2]==_y)
+					{
+						DATA.cities[j][0] = INDEX;
+						DATA.cities[j][3] = ACTIVE_PLAYER;
+						found = true;
+						break;
+					}
+				}
+				if(!found)
+				{
+					DATA.cities.push([INDEX, _x, _y, ACTIVE_PLAYER]);
+				}
+			}
+		}
+		else if(TYPE==CHOICE.WEATHER)
+		{
+			if(SELECTION==0) {
+				document.getElementById("editor-tile"+tile+"imgWEA").src = BLANK;
+			} else {
+				document.getElementById("editor-tile"+tile+"imgWEA").src = Weather_Data.WEATHER[INDEX].Sprite[0].Source();
+			}
+		}
+
+		Play_Placement_SFX();
+	}
+
+	this.Save = function() {
+		if(SERVER.data_saved)return;
+
+		if(SERVER.local_saved_map==-1)
+		{	// ask to save, because user created a map before saving
+			display_server_saved_maps();
+			return;
+		}
+
+		while(DATA.name=="" || DATA.name==null || DATA.name=="Unnamed Custom Map" || DATA.name.includes(";"))
+			DATA.name = prompt("Give your map a name", DATA.name);
+		if(DATA.name==null)
+			return;
+
+		send_map_data_to_server(SERVER.SAVE, {
+			index:DATA.id==-1 ? SERVER.local_saved_map : DATA.id,
+			name:DATA.name,
+			map:encrypt_game_data(map_data_to_str())
+		});
+		SERVER.data_saved = true;
+	};
+	this.Load = function() {
+		display_server_saved_maps();
+	};
+	this.Test = function() {
+		let each_player = new Array(DATA.max_players);
+		for(let i=0;i<each_player.length;i++)
+			each_player[i] = false;
+		for(let i in DATA.units)
+			each_player[DATA.units[i][3]] = true;
+		for(let i in each_player)
+		{
+			if(!each_player[i])
+			{
+				LOG.popup("Each player must have at least one unit to Test.", "#f00",3000);
+				return;
+			}
+		}
+		// all players have to have at least one unit to play
+
+		if(SERVER.local_saved_map==-1)
+		{	// ask to save, because user created a map before saving
+			display_server_saved_maps();
+			return;
+		}
+
+		new_custom_game(map_data_to_str(), [DATA.name], true, SERVER.local_saved_map, 1);
+	};
+	this.Options = function() {
+
+	};
+	this.Upload = function() {
+		if(!SERVER.beaten_game)return;
+		if(!SERVER.data_saved)return;
+
+		send_map_data_to_server(SERVER.PUBLISH, DATA.id);
+		LOG.popup("Successfully uploaded.");
+	};
+	this.Page_Left = function() {
+		if(PAGE==0)
+			return;
+		PAGE--;
+		refreshChoiceImages();
+	};
+	this.Page_Right = function() {
+		if(TYPE==CHOICE.TERRAIN)
+		{
+			if(PAGE*10+11>=Terrain_Data.TERRE.length)
+				return;
+		}
+		else if(TYPE==CHOICE.UNITS)
+		{
+			if(PAGE*10+11>=Char_Data.CHARS.length)
+				return;
+		}
+		else if(TYPE==CHOICE.CITY)
+		{
+			if(PAGE*10+11>=Building_Data.PLACE.length)
+				return;
+		}
+		else if(TYPE==CHOICE.WEATHER)
+		{
+			if(PAGE*10+11>=Weather_Data.WEATHER.length)
+				return;
+		}
+		PAGE++;
+		refreshChoiceImages();
+	};
+	this.Choose = function(choice) {
+		PAGE = 0;
+		CHANGECHOICE(choice);
+	};
+
+	this.Init = function() {
+		if(initalized)return;
+		initalized = true;
+		let tileHolder = document.getElementById('editor-tile-holder');
+		for(let i=0;i<tileHolder.childNodes.length;)
+			tileHolder.childNodes[0].remove();
+		let tile, img, index = -1;
+		for(let x=0;x<10;x++)
+		{
+			for(let y=0;y<10;y++)
+			{
+				tile = document.createElement('div');
+				tile.className = "w3-col editor-tile";
+				tile.id = "editor-tile" + (++index);
+				tile.onclick = function() {
+					SELECT(parseInt(this.id.split("editor-tile")[1]));
+				};
+
+				img = document.createElement('img');
+				img.className = "editor-tile-ter";
+				img.id = "editor-tile" + (index) + "img";
+				img.src = Terrain_Data.TERRE[1].Sprite[0].Source();
+
+				tile.appendChild(img);
+
+				img = document.createElement('img');
+				img.className = "editor-tile-img";
+				img.id = "editor-tile" + (index) + "imgBUI";
+				img.src = BLANK;
+
+				tile.appendChild(img);
+
+				img = document.createElement('img');
+				img.className = "editor-tile-img";
+				img.id = "editor-tile" + (index) + "imgUNI";
+				img.src = BLANK;
+
+				tile.appendChild(img);
+
+				img = document.createElement('img');
+				img.className = "editor-tile-img";
+				img.id = "editor-tile" + (index) + "imgWEA";
+				img.src = BLANK;
+
+				tile.appendChild(img);
+				tileHolder.appendChild(tile);
+			}
+		}
+
+		let selectionHolder = document.getElementById('editor-selction-holder');
+		let selection;
+		for(index=1;index<11;index++)
+		{
+			selection = document.createElement('div');
+			selection.className = "w3-col editor-selections";
+			selection.style.width = "50px";
+			selection.id = "editor-selection" + (index);
+			selection.onclick = function() {
+				CHOOSEINDEX(parseInt(this.id.split("editor-selection")[1]));
+			};
+
+			img = document.createElement('img');
+			img.id = "editor-selection" + (index) + "img";
+			img.className = "editor-selections-img";
+			img.style.maxHeight = "44px";
+			img.src = Terrain_Data.TERRE[index].Sprite[0].Source();
+
+			selection.appendChild(img);
+			selectionHolder.appendChild(selection);
+		}
+
+		index = 0;
+		selection = document.createElement('div');
+		selection.className = "w3-col editor-selections";
+		selection.style.width = "50px";
+		selection.id = "editor-selection" + (index);
+		selection.onclick = function() {
+			CHOOSEINDEX(parseInt(this.id.split("editor-selection")[1]));
+		};
+
+		img = document.createElement('i');
+		img.id = "editor-selection" + (index) + "img";
+		img.className = "editor-selections-img";
+		img.style.fontSize = "200%";
+		img.className = "fas fa-eraser";
+
+		selection.appendChild(img);
+		selectionHolder.appendChild(selection);
+
+		index = 11;
+		selection = document.createElement('div');
+		selection.className = "w3-col editor-selections";
+		selection.style.width = "50px";
+		selection.id = "editor-selection" + (index);
+		selection.onclick = function() {
+			CHOOSEINDEX(parseInt(this.id.split("editor-selection")[1]));
+		};
+
+		img = document.createElement('i');
+		img.id = "editor-selection" + (index) + "img";
+		img.className = "editor-selections-img";
+		img.style.fontSize = "200%";
+		img.className = "fas fa-question";
+
+		selection.appendChild(img);
+		selectionHolder.appendChild(selection);
+
+		CHOOSEINDEX(1);
+	};
+	this.Open = function(save_data_index, game_data, tested_complete) {
+		if(tested_complete)
+		{
+			send_map_data_to_server(SERVER.PLAYTEST, game_data.id);
+			SERVER.beaten_game = true;
+			SERVER.data_saved = true;
+		}
+
+		ACTIVE_INDEX = 1;
+		ACTIVE_PLAYER = 0;
+		ACTIVE_TYPE = 0;
+		OLD_TYPE = 1;
+		SERVER.local_saved_map = (save_data_index==null) ? -1 : save_data_index;
+		DATA.units = new Array();
+		DATA.cities = new Array();
+		DATA.name = "Unnamed Custom Map";
+		DATA.players = ["Red","Blue","Green","Yellow"];
+		DATA.max_players = 2;
+		DATA.id = -1;
+
+		if(game_data==null || !game_data.Valid)
+		{
+			DATA.map_list = null;
+			// Map_Size(10, 10);
+			// Update_Active_List(TYPES.TERRAIN);
+			SERVER.new_map = true;
+			return;
+		}
+		SERVER.new_map = false;
+
+		var data = game_data.Data.Get();
+		DATA.id = game_data.id;
+		DATA.name = data.name;
+		DATA.width = data.t_width;
+		DATA.height = data.t_height;
+
+		// Map_Size(width, height);
+		DATA.map_list = new Array(width*height);
+		for(let x=0,i=0;x<DATA.width;x++)
+		for(let y=0;y<DATA.height;y++)
+		DATA.map_list[i++] = data.terrain[x][y];
+
+		DATA.players = data.p_list;
+		DATA.max_players = DATA.players.length;
+		DATA.units = data.u_list;
+		DATA.cities = data.c_list;
+		DATA.weather = data.w_data;
+		DATA.__script__ = data.__script;
+
+		CHANGECHOICE(CHOICE.TERRAIN);
+	};
+};
+var Map_Editor = new MapEditorClass;
+
+
+
+
+
 Menu.MapEditor = new Menu.Menu_Class("#7F9172");
 Menu.MapEditor.Open = function()
 {
 	Animations.Retrieve("Load").Remove_All();
 	with(Menu.MapEditor){
-		let SERVER = {
-			LOAD:'download',
-			SAVE:'update',
-			PLAYTEST:'mark playtested',
-			DELETE:'delete',
-			PUBLISH:'publish',
-			new_map:true,
-			Report_List:null,
-			onReportGameList:function(fnc)
-			{
-				SERVER.Report_List = fnc;
-			}
-		};
-		let SFX = SFXs.Retrieve("editor sheet");
-		let MUSIC_CHANGING = false;
-		if(!MUSIC.Name().includes("editor"))
-		{
-			Music.Stop_All();
-			MUSIC = Music.Retrieve("editor plains").Play();
-			Music.Retrieve("editor water").Play().Howl().volume(0);
-		}
-	 	let oldcloser = Menu.MapEditor.Close;
-		Menu.MapEditor.Close = function()
-		{
-			Music.Retrieve("editor water").Stop();
-			Music.Retrieve("editor plains").Stop();
-			oldcloser();
-		};
-		function Change_Music(change)
-		{
-			if(MUSIC_CHANGING)return;
-			MUSIC_CHANGING = true;
-			MUSIC = MUSIC.Switch(Music.Retrieve("editor "+change), 3000);
-			setTimeout(function(){
-				MUSIC_CHANGING = false;
-			}, 3000)
-		}
-		function Play_Placement_SFX(type)
-		{
-			SFX.Play_Out(Math.floor(Math.random()*(SFX.Sprite_Amount())));
-		}
-
-		function send_map_data_to_server(type, data)
-		{
-			if(!online)return;
-			if(SERVER.new_map && type=='update')
-				type = 'upload';
-
-			socket.emit('mapdata '+type, {name:socket.username,pass:socket.password}, data);
-		}
-		Menu.MapEditor.Server_Response = {
-			Map_List:function(data)
-			{
-				SERVER.Report_List(data);
-			},
-			Report_Id:function(data)
-			{
-				SERVER.new_map = false;
-				id = data;
-			},
-			Updated_With_Server:function(value)
-			{
-				data_saved = value;
-			}
-		};
-
-		function Map_Data_To_Str(){
-			var str = ""+id+";";
-			str+=name+";";
-			str+=width+";";
-			str+=height+";";
-			for(var i=0;i<map_list.length;i++)
-				str+=map_list[i]+":";
-			str+=";";
-			for(var i=0;i<max_players;i++)
-				str+=players[i]+":";
-			str+=";";
-			for(var i=0;i<units.length;i++)
-				str+=units[i]+":";
-			str+=";";
-			for(var i=0;i<cities.length;i++)
-				str+=cities[i]+":";
-			str+=";";
-			str+=(weather[0] ? "1" : "0");
-			for(let j=1;j<weather.length;j++)
-			{
-				str+=""+weather[j][0]+""+weather[j][1]+"-"+weather[j][2]+":";
-			}
-			str+=";";
-
-			return str+__script__+";";
-		}
-		Menu.MapEditor.Log_Data = function()
-		{	// delete this later
-			return encrypt_game_data(Map_Data_To_Str());
-		};
-
-		var POPUP_TINTER = new Canvas.Drawable(Shape.Box, null,
-							-10, -10, 900, 900, "#ccc", null, .2),
-			POPUP_INDEX = -1,
-			POPUP_LENGTH = 0,
-			POPUP_CLOSER = function(){
-				if(POPUP_INDEX!=null)
-					Remove(POPUP_INDEX, POPUP_LENGTH);
-				POPUP_INDEX = -1;
-				POPUP_LENGTH = 0;
-				if(	Menu.MapEditor.Current_Scale!=null)
-				{
-					document.getElementById('inputHandler').removeChild(document.getElementById('canvasScriptInput'));
-					document.getElementById('inputHandler').removeChild(document.getElementById('learnScriptLink'));
-				}
-				Menu.MapEditor.Current_Scale = null;
-				inputHandler.clearRect(0, 0, 900, 900);
-				Draw();
-			},
-			POPUP_ADDER = function(_drawer, _clicker, _hover, _right_click){
-				if(_drawer==null)
-				{
-					POPUP_CLOSER();
-					POPUP_INDEX = Add(POPUP_TINTER, POPUP_CLOSER, Shape.Box);
-				}
-				else Add(_drawer, _clicker, _hover, _right_click);
-				POPUP_LENGTH++;
-			};
 
 		function open_script_editor()
 		{
@@ -301,157 +1010,6 @@ Menu.MapEditor.Open = function()
 			POPUP_ADDER(new Canvas.Drawable(Shape.Pie, null, 175, 150, 400, 400, __weather_pie_data));
 
 		}
-
-
-			/// load saved data
-		let _read_game_data,_data_text,_game_imgs,loader_icons;
-		function display_server_saved_maps(fnc1, fnc2, fnc3)
-		{
-			if(fnc1==null)
-			{
-				fnc1 = function(_load){
-					if(!confirm("This will delete the map "+_read_game_data[_load].Name+".\n\nDelete and Replace?"))return;
-
-					local_saved_map = _load;
-					POPUP_CLOSER();
-
-					while(name=="" || name==null || name=="Unnamed Custom Map")
-						name = prompt("Give your map a name", name);
-					if(name==null)
-						return;
-
-					send_map_data_to_server(SERVER.DELETE, _read_game_data[_load].id);
-
-					setTimeout(function(){
-						send_map_data_to_server(SERVER.SAVE, {
-							index:id==-1 ? local_saved_map : id,
-							name:name,
-							map:encrypt_game_data(Map_Data_To_Str())
-						});
-					}, 500);
-					data_saved = true;
-					Draw();
-				};
-			}
-			if(fnc2==null)
-			{
-				fnc2 = function(_new){
-					local_saved_map = _new;
-					POPUP_CLOSER();
-
-					while(name=="" || name==null || name=="Unnamed Custom Map")
-						name = prompt("Give your map a name", name);
-					if(name==null)
-						return;
-
-					send_map_data_to_server(SERVER.SAVE, {
-						index:id==-1 ? local_saved_map : id,
-						name:name,
-						map:encrypt_game_data(Map_Data_To_Str())
-					});
-					data_saved = true;
-					Draw();
-				};
-			}
-			_read_game_data = new Array(9);
-			_data_text = new Array(9);
-			_game_imgs = new Array(9);
-			loader_icons = new Array(9);
-
-			POPUP_ADDER();									// declare popup about to be used
-
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 150, 125, 400, 480, "#777"), function(){});
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 150, 125, 400, 30, "#999"));
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("20pt Verdana", "#fff"), null, 160, 130, 400, 30, "Your Maps"));
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 525, 130, 20, 20, "#F49097"), POPUP_CLOSER);
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 527, 132, 20, 18, "X"), POPUP_CLOSER);
-
-			let uploadImg = Images.Retrieve("Uploaded");
-
-			SERVER.onReportGameList(function(_list_data){
-					/// start load maps
-				for(let _m in _list_data)
-				{
-					try {
-						let curMap = _list_data[_m];
-						var index = curMap.saveindex;
-						_data_text[index] = decrypt_game_data(curMap.map);
-						_read_game_data[index] = Map_Reader.String(_data_text[index]);
-						_read_game_data[index].id = curMap.map_id;
-						_read_game_data[index].uploaded = curMap.uploaded;
-
-						if(_read_game_data[index].Valid)
-						{
-							setTimeout(function(index){
-								console.time('drawing map '+index+' sample');
-								var sampledGame = new Engine_Class(_read_game_data[index], true);
-								sampledGame.Set_Interface(INTERFACE);
-								_game_imgs[index] = INTERFACE.Get_Sample(sampledGame);
-								sampledGame.End_Game();
-								Menu.MapEditor.Draw();
-								console.timeEnd('drawing map '+index+' sample');
-							}, 50, index);
-						}
-					} catch (e) {
-						_read_game_data[index] = null;
-						console.error(e);
-					} finally {
-
-					}
-				}
-
-				for(var i=0;i<9;i++)
-				{
-					if(_read_game_data[i]!=null)
-					{
-						loader_icons[i] = Animations.Retrieve("Load").New(menuCanvas, (230+(110*(i%3)))*Menu.MapEditor.xScale, (215+(140*Math.floor(i/3)))*Menu.MapEditor.yScale, 30*Menu.MapEditor.xScale, 30*Menu.MapEditor.yScale, true);
-						POPUP_ADDER(new Canvas.Drawable({
-							Draw:function(c,x,y,w,h,_load){
-								if(_game_imgs[_load]!=null)
-								{
-									loader_icons[_load].values.show = false;
-									Canvas.ScaleImageData(c, _game_imgs[_load], (x+2)*Menu.MapEditor.xScale, (y+2)*Menu.MapEditor.yScale, w/(_game_imgs[_load].width-4)*Menu.MapEditor.xScale, 100/(_game_imgs[_load].height-4)*Menu.MapEditor.yScale);
-								}
-								new Text_Class("10pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,_read_game_data[_load].Name);
-
-								if(_read_game_data[_load].uploaded)
-									uploadImg.Draw(c,x+5,y+5,w/4,h/4);
-							}
-						}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), fnc1, null, fnc3);
-						continue;
-					}
-
-					// empty new game here
-
-					POPUP_ADDER(new Canvas.Drawable({
-						Draw:function(c,x,y,w,h){
-							Shape.Rectangle.Draw(c,x+2,y+2,w-4,100-4,"#55D6C2");
-							new Text_Class("15pt Verdana", "#fff").Draw(c,x+5,y+h-25,w,h,"new map");
-						}
-					}, null, 190+(110*(i%3)), 175+(140*Math.floor(i/3)), 100, 130, i), fnc2);
-				}
-					/// end load map
-
-				for(var x=1;x<Terrain_Data.TERRE.length;x++)
-				{
-					var _t = Terrain_Data.TERRE[x];
-
-					if(_t.Connnection==5 || _t.Connnection==3)
-					{
-						Animations.Retrieve(_t.Name+" Ani").Remove_All();
-					}
-				}
-				Select_Animation.Remove_All();
-				Repair_Animation.Remove_All();
-
-				Menu.MapEditor.Draw();
-			});
-
-			send_map_data_to_server(SERVER.LOAD);
-
-			Draw();
-		}
-
 
 
 
@@ -736,22 +1294,6 @@ Menu.MapEditor.Open = function()
 			Draw();
 		};
 
-		function toSTR(list, _x, _y)
-		{
-			var str = "",
-				i = 0;
-
-			for(var x=0;x<_x;x++)
-			{
-				for(var y=0;y<_y;y++)
-				{
-					str+=list[i++]+", ";
-				}
-				str+="\n";
-			}
-
-			return str;
-		}
 		function make_map_bigger(new_x, new_y, start_x, start_y)
 		{
 			var new_list = new Array(new_x*new_y),
@@ -829,434 +1371,8 @@ Menu.MapEditor.Open = function()
 			}
 		}
 
-		var local_saved_map = 0;
-		var id = -1;
-		var name;
-		var width=10,height=10;
-		var x_scale = 600/width;
-		var y_scale = 600/height;
-		var map_list = null;
-		var players;
-		var max_players;
-		var get_max_players = function()
-		{
-			return max_players;
-		};
-		var units;
-		var cities;
-		var weather = [false];
-		let __script__ = "";
-		var data_saved = true;
-		var beaten_game = false;
-		var TYPES = {
-			TERRAIN:0,
-			UNIT:1,
-			CITY:2,
-			WEATHER:3,
-			ERASE:4
-		};
 
-		var ACTIVE_INDEX = 1,								// active list data
-			ACTIVE_DRAWABLE = {
-				Draw:function(c,x,y,w,h,s){
-					var index,
-						__type = ACTIVE_TYPE;
-					if(__type==TYPES.ERASE)
-						__type = OLD_TYPE;
-					if(__type==TYPES.TERRAIN)
-						index = Terrain_Data.TERRE;
-					else if(__type==TYPES.UNIT)
-						index = Char_Data.CHARS;
-					else if(__type==TYPES.CITY)
-						index = Building_Data.PLACE;
-					else if(__type==TYPES.WEATHER)
-						index = Weather_Data.WEATHER;
 
-					if(index==null)return;
-
-					var img = index[s].Sprite;
-					if(__type!=TYPES.CITY)
-						img = img[0];
-					Shape.Rectangle.Draw(c,x,y,w,h,"#313A35");
-					if(img.Image().height>60)
-					{
-						var xtra_height = (img.Image().height-60)*(40/60);
-						img.Draw(c,x,y-xtra_height,w,h+xtra_height);
-						return;
-					}
-					img.Draw(c,x,y,w,h);
-					if(index==Terrain_Data.TERRE && s==Terrain_Data.Get("Shore"))
-						index[s].Borders[10].Draw(c,x,y,w,h);
-				}
-			},
-			ACTIVE_CLICKABLE = function(_index){
-				if(ACTIVE_TYPE==TYPES.ERASE)
-				{
-					ACTIVE_TYPE = OLD_TYPE;
-					ACTIVE_HIGHLIGHT.Alpha.Set(1);
-				}
-				ACTIVE_INDEX = _index;
-				ACTIVE_HIGHLIGHT.State.Set(ACTIVE_INDEX);
-				Menu.MapEditor.Mouse_Move(0, 0);
-			},
-			ACTIVE_PLAYER = 0,
-			ACTIVE_TYPE = 0,
-			OLD_TYPE = 1;
-
-		var VIEW_ACTIVE_LIST = [-1,0];
-		var FIRST_MAP_DRAW = -1,
-			MAP_DRAWER = {									// tile display
-				Draw:function(c,_x,_y,w,h,s){
-					var tile_x = Math.floor(s/height);
-					var tile_y = s%height;
-
-					var img = Terrain_Data.TERRE[map_list[s]].Sprite[0];
-					if(img.Image().height>60)
-					{
-						var xtra_height = (img.Image().height-60)*(y_scale/60);
-						img.Draw(c,_x,_y-xtra_height,w,h+xtra_height);
-						return;
-					}
-					img.Draw(c,_x,_y,w,h);
-					if(map_list[s]==Terrain_Data.Get("Shore"))
-						Terrain_Data.TERRE[map_list[s]].Borders[10].Draw(c,_x,_y,w,h);
-					for(var j in cities)
-					{
-						if(cities[j][1]==tile_x && cities[j][2]==tile_y)
-						{
-							Team_Colors.Draw(c,_x,_y+17,h-17,{
-								Color:cities[j][3]+1
-							});
-							Building_Data.PLACE[cities[j][0]].Sprite.Draw(c,_x+5,_y+5,w-10,h-10);
-						}
-					}
-					for(var j in units)
-					{
-						if(units[j][1]==tile_x && units[j][2]==tile_y)
-						{
-							Team_Colors.Draw(c,_x,_y+17,h-17,{
-								Color:units[j][3]+1
-							});
-							Char_Data.CHARS[units[j][0]].Sprite[0].Draw(c,_x+5,_y+5,w-10,h-10);
-						}
-					}
-				}
-			},
-			MAP_CLICKER = function(tile){					// tile click function
-				var _x = Math.floor(tile/height);
-				var _y = tile%height;
-
-				if(!Allowed(tile))
-				{
-					Menu.MapEditor.Mouse_Move(0, 0);
-					ERROR_DISPLAY.X.Set(10+(x_scale*_x));
-					ERROR_DISPLAY.Y.Set(30+(y_scale*_y));
-					ERROR_DISPLAY.Alpha.Set(1);
-					Core.Fade_Drawable(ERROR_DISPLAY, 0, 3, function(){
-						ERROR_DISPLAY.Alpha.Set(1);
-						Core.Fade_Drawable(ERROR_DISPLAY, 0, 7);
-					});
-					return;
-				}
-
-				data_saved = false;
-				beaten_game = false;
-				Play_Placement_SFX(ACTIVE_TYPE);
-
-				if(ACTIVE_TYPE==TYPES.ERASE)
-				{
-					for(var i in units)
-					{
-						if(_x==units[i][1])
-						if(_y==units[i][2])
-						{
-							units.splice(i, 1);
-							Menu.MapEditor.Mouse_Move(0, 0);
-							Draw();
-							return;
-						}
-					}
-					for(var i in cities)
-					{
-						if(_x==cities[i][1])
-						if(_y==cities[i][2])
-						{
-							cities.splice(i, 1);
-							Menu.MapEditor.Mouse_Move(0, 0);
-							Draw();
-							return;
-						}
-					}
-					if(Terrain_Data.TERRE[map_list[tile]].Type==6)
-						map_list[tile] = 12;
-					else map_list[tile] = 1;
-					Menu.MapEditor.Mouse_Move(0, 0);
-					Draw();
-					return;
-				}
-
-				if(ACTIVE_TYPE==TYPES.TERRAIN)
-				{
-					map_list[tile] = ACTIVE_INDEX;
-					var _ter = Terrain_Data.TERRE[ACTIVE_INDEX];
-					for(var j in cities)
-					{
-						if(cities[j][1]==_x && cities[j][2]==_y)
-						{
-							var _city = Building_Data.PLACE[cities[j][0]];
-							if(_ter.Type==0)
-							if(_city.Terrain==2)
-							{
-								cities.splice(j, 1);
-								break;
-							}
-							if(_ter.Type==6)
-							if(_city.Terrain==0)
-							{
-								cities.splice(j, 1);
-								break;
-							}
-							break;
-						}
-					}
-					for(var j in units)
-					{
-						if(units[j][1]==_x && units[j][2]==_y)
-						{
-							var _unit = Char_Data.CHARS[units[j][0]];
-							if(_ter.Type==0)
-							if(_unit.Move_Type==6 || _unit.Move_Type==7)
-							{
-								units.splice(j, 1);
-								break;
-							}
-							if(_ter.Type==6)
-							if(_unit.Move_Type==0 || _unit.Move_Type==1 || _unit.Move_Type==2)
-							{
-								units.splice(j, 1);
-								break;
-							}
-							break;
-						}
-					}
-
-					let _wateramt = 49;
-					for(let i=0;i<map_list.length;i++)
-					{
-						if(map_list[i]>=12)
-						{
-							_wateramt++;
-						}
-					}
-					if(_wateramt>=width*height/2)
-					{
-						if(MUSIC.Name().includes("plains"))
-						{
-							Change_Music("water");
-						}
-					}
-					else
-					{
-						if(MUSIC.Name().includes("water"))
-						{
-							Change_Music("plains");
-						}
-					}
-				}
-				else if(ACTIVE_TYPE==TYPES.UNIT)
-				{
-					var found = false;
-					for(var j in units)
-					{
-						if(units[j][1]==_x && units[j][2]==_y)
-						{
-							units[j][0] = ACTIVE_INDEX;
-							units[j][3] = ACTIVE_PLAYER;
-							found = true;
-							break;
-						}
-					}
-					if(!found)
-					{
-						units.push([ACTIVE_INDEX, _x, _y, ACTIVE_PLAYER]);
-					}
-				}
-				else if(ACTIVE_TYPE==TYPES.CITY)
-				{
-					var found = false;
-					for(var j in cities)
-					{
-						if(cities[j][1]==_x && cities[j][2]==_y)
-						{
-							cities[j][0] = ACTIVE_INDEX;
-							cities[j][3] = ACTIVE_PLAYER;
-							found = true;
-							break;
-						}
-					}
-					if(!found)
-					{
-						cities.push([ACTIVE_INDEX, _x, _y, ACTIVE_PLAYER]);
-					}
-				}
-				else if(ACTIVE_TYPE==TYPES.WEATHER)
-				{
-					LOG.popup("weather not implemented yet");
-					// map_list[tile] = ACTIVE_INDEX;
-				}
-				Menu.MapEditor.Mouse_Move(0, 0);
-				Draw();
-			};
-
-		Add(new Canvas.Drawable(Images.Retrieve("map editor border"), null, 0, 0, 805, 660)); // border img
-		Add(new Canvas.Drawable(Shape.Box, null, 9, 29, 602, 602, "#F2EFDE", null, 1));			// map border
-
-		Add(new Canvas.Drawable(Shape.Rectangle, null, 611, 29, 3, 602, "#BFACAA", null, 1));	// divider
-		Add(new Canvas.Drawable(Shape.Box, null, 615, 29, 165, 602, "#F2EFDE", null, 1));		// tools border
-		Add(new Canvas.Drawable(Shape.Rectangle, null, 616, 30, 163, 600, "#313A35", null, 1));	// tools background
-		Add(new Canvas.Drawable(Shape.Rectangle, null, 616, 181, 163, 3, "#F2EFDE", null, 1));	// divider
-		Add(new Canvas.Drawable(Shape.Rectangle, null, 616, 541, 163, 3, "#F2EFDE", null, 1));	// divider
-
-			// bottom buttons
-		Add(new Canvas.Drawable({							// test btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-				new Text_Class(""+(h/2)+"pt Verdana", Menu.Button[2]).Draw(c,x+6,y+8,260,20,s);
-				new Text_Class(""+(h/2)+"pt Verdana", Menu.Button[3]).Draw(c,x+5,y+7,260,20,s);
-			}
-		}, null, 700, 550, 70, 35, "TEST"), function(){
-			var each_player = new Array(max_players);
-			for(var i=0;i<each_player.length;i++)
-				each_player[i] = false;
-			for(var i in units)
-				each_player[units[i][3]] = true;
-			for(var i in each_player)
-			{
-				if(!each_player[i])
-				{
-					LOG.popup("Each player must have at least one unit to Test.", "#f00",3000);
-					return;
-				}
-			}
-			// all players have to have at least one unit to play
-
-			if(local_saved_map==-1)
-			{	// ask to save, because user created a map before saving
-				display_server_saved_maps();
-				return;
-			}
-
-			new_custom_game(Map_Data_To_Str(), [name], true, local_saved_map, 1);
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(h/2)+"pt Verdana", Menu.Button[2]).Draw(c,x+6,y+8,260,20,s);
-				new Text_Class(""+(h/2)+"pt Verdana", Menu.Button[3]).Draw(c,x+5,y+7,260,20,s);
-			}
-		});
-		Add(new Canvas.Drawable({							// upload btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(beaten_game && data_saved) ? 0:4]);
-				new Text_Class(""+(h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+8,y+9,260,20,s);
-				new Text_Class(""+(h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+7,y+8,260,20,s);
-			}
-		}, null, 700, 590, 70, 30, "UPLOAD"), function(){
-			if(!beaten_game)return;
-			if(!data_saved)return;
-
-			var color = "#fff";
-			send_map_data_to_server(SERVER.PUBLISH, id);
-			LOG.popup("Successfully uploaded.");
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(beaten_game && data_saved) ? 1:4]);
-				new Text_Class(""+(h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+8,y+9,260,20,s);
-				new Text_Class(""+(h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+7,y+8,260,20,s);
-			}
-		});
-		Add(new Canvas.Drawable({							// save btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(!data_saved) ? 5:4]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[(!data_saved) ? 5 : 2]).Draw(c,x+12,y+5,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[(!data_saved) ? 6 : 3]).Draw(c,x+11,y+3,260,20,s);
-			}
-		}, null, 625, 550, 70, 20, "SAVE"), function(){
-			if(data_saved)return;
-
-			if(local_saved_map==-1)
-			{	// ask to save, because user created a map before saving
-				display_server_saved_maps();
-				return;
-			}
-
-			while(name=="" || name==null || name=="Unnamed Custom Map" || name.includes(";"))
-				name = prompt("Give your map a name", name);
-			if(name==null)
-				return;
-
-			send_map_data_to_server(SERVER.SAVE, {
-				index:id==-1 ? local_saved_map : id,
-				name:name,
-				map:encrypt_game_data(Map_Data_To_Str())
-			});
-			data_saved = true;
-			Draw();
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(!data_saved) ? 1:4]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+12,y+5,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+11,y+3,260,20,s);
-			}
-		});
-		Add(new Canvas.Drawable({							// load maps btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+12,y+5,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+11,y+3,260,20,s);
-			}
-		}, null, 625, 575, 70, 20, "LOAD"),
-		function(){
-			display_server_saved_maps(function(_load){
-				Erase();
-				Open();
-				Menu.MapEditor.New(_load, _read_game_data[_load]);
-				Draw();
-			}, function(_new){
-				Erase();
-				Open();
-				Menu.MapEditor.New(_new);
-				Draw();
-			}, function(_delete){
-					if(!confirm("Do you really want to delete "+_read_game_data[_delete].Name+"?"))return;
-
-					send_map_data_to_server(SERVER.DELETE, _read_game_data[_delete].id);
-
-					POPUP_CLOSER();
-					Draw();
-				});
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+12,y+5,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+11,y+3,260,20,s);
-			}
-		});
-		Add(new Canvas.Drawable({							// exit btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+17,y+3,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+15,y+2,260,20,s);
-			}
-		}, null, 625, 600, 70, 20, "EXIT"), function(){
-			changeContent(CONTENT_REDIRECT);
-			Menu.MapEditor.Erase();
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+17,y+3,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+15,y+2,260,20,s);
-			}
-		});
 
 		Player_Text = new Canvas.Drawable({
 			Draw:function(c,x,y,w,h,s){
@@ -1305,149 +1421,7 @@ Menu.MapEditor.Open = function()
 		});
 		Add(Player_Text);
 
-		var ERROR_DISPLAY = new Canvas.Drawable({
-			Draw:function(c,x,y,w,h,s){
-				Shape.Rectangle.Draw(c,x,y,w,h,"#F00");
-			}
-		}, null, -100, -100, 10, 10);
-		Allowed = function(_tile)
-		{
-			if(ACTIVE_TYPE==TYPES.UNIT)
-			{
-				if(ACTIVE_PLAYER==-1)return false;
-				var _unit = Char_Data.CHARS[ACTIVE_INDEX];
-				var _ter = Terrain_Data.TERRE[map_list[_tile]];
-				if(_ter.Type==7)	// units cannot exist on impassable terrain
-					return false;
-				if(_ter.Type==6)	// ground units cannot traverse sea terrain
-				if(_unit.Type==0)
-					return false;
-				if(_ter.Type==2)	// only foot units can climb rugged terrain
-				if(_unit.Move_Type==1 || _unit.Move_Type==2)
-					return false;
-				if(_ter.Type!=6)	// sea units cannot traverse ground terrain
-				if(_unit.Type==2)
-					return false;
-			}
-			else if(ACTIVE_TYPE==TYPES.CITY)
-			{
-				var _city = Building_Data.PLACE[ACTIVE_INDEX];
-				var _ter = Terrain_Data.TERRE[map_list[_tile]];
-				if(_ter.Type==7)	// cities cannot be on impassable terrain
-					return false;
-				if(_ter.Type==2)	// cities cannot be on rugged terrain
-					return false;
-				if(_ter.Type==6)	// ground cities can't exist on sea terrain
-				if(_city.Terrain==0)
-					return false;
-				if(_ter.Type!=6)	// sea cities can't exist on ground terrain
-				if(_city.Terrain==2)
-					return false;
-			}
-			else if(ACTIVE_TYPE==TYPES.TERRAIN)
-			{
-				var _ter = Terrain_Data.TERRE[ACTIVE_INDEX];
 
-				if(Terrain_Data.Get("Shore")==ACTIVE_INDEX)
-				{			// connections must be near at least one ground and one sea type
-					var ground = false,
-						sea = false,
-						ter_check;
-					if(_tile<map_list.length)
-					{
-						ter_check = Terrain_Data.TERRE[map_list[_tile+1]];
-						if(ter_check.Type==6)
-							sea = true;
-						else if(ter_check.Type<6 && ter_check.Type>=0)
-							ground = true;
-					}
-					if(_tile>0)
-					{
-						ter_check = Terrain_Data.TERRE[map_list[_tile-1]];
-						if(ter_check.Type==6)
-							sea = true;
-						else if(ter_check.Type<6 && ter_check.Type>=0)
-							ground = true;
-					}
-					if(_tile+height<map_list.length)
-					{
-						ter_check = Terrain_Data.TERRE[map_list[_tile+height]];
-						if(ter_check.Type==6)
-							sea = true;
-						else if(ter_check.Type<6 && ter_check.Type>=0)
-							ground = true;
-					}
-					if(_tile-height>0)
-					{
-						ter_check = Terrain_Data.TERRE[map_list[_tile-height]];
-						if(ter_check.Type==6)
-							sea = true;
-						else if(ter_check.Type<6 && ter_check.Type>=0)
-							ground = true;
-					}
-					return (ground && sea);
-				}
-				if(_ter.Type==6)
-				{
-					if(Terrain_Data.Get("Sea")!=ACTIVE_INDEX)
-					{		// sea interior cannot be placed near sea border
-						if(_tile<map_list.length)
-						if(Terrain_Data.TERRE[map_list[_tile+1]].Type!=6)
-							return false;
-						if(_tile>0)
-						if(Terrain_Data.TERRE[map_list[_tile-1]].Type!=6)
-							return false;
-						if(_tile+height<map_list.length)
-						if(Terrain_Data.TERRE[map_list[_tile+height]].Type!=6)
-							return false;
-						if(_tile-height>0)
-						if(Terrain_Data.TERRE[map_list[_tile-height]].Type!=6)
-							return false;
-					}
-				}
-				else if(_ter.Type==8)
-				{			// connections must be near at least one ground and one sea type
-					var ground = false,
-						sea = false,
-						ter_check;
-					if(_tile<map_list.length)
-					{
-						ter_check = Terrain_Data.TERRE[map_list[_tile+1]];
-						if(ter_check.Type==6)
-							sea = true;
-						else if(ter_check.Type<6 && ter_check.Type>=0)
-							ground = true;
-					}
-					if(_tile>0)
-					{
-						ter_check = Terrain_Data.TERRE[map_list[_tile-1]];
-						if(ter_check.Type==6)
-							sea = true;
-						else if(ter_check.Type<6 && ter_check.Type>=0)
-							ground = true;
-					}
-					if(_tile+height<map_list.length)
-					{
-						ter_check = Terrain_Data.TERRE[map_list[_tile+height]];
-						if(ter_check.Type==6)
-							sea = true;
-						else if(ter_check.Type<6 && ter_check.Type>=0)
-							ground = true;
-					}
-					if(_tile-height>0)
-					{
-						ter_check = Terrain_Data.TERRE[map_list[_tile-height]];
-						if(ter_check.Type==6)
-							sea = true;
-						else if(ter_check.Type<6 && ter_check.Type>=0)
-							ground = true;
-					}
-					if(!ground || !sea)
-						return false;
-				}
-			}
-			return true;
-		};
 		Map_Size = function(_x, _y, start_x, start_y)
 		{													// in here puts the tile click controls
 			if(_x>30 || _y>30)return;
@@ -1500,230 +1474,6 @@ Menu.MapEditor.Open = function()
 						"#666607", null, .4));
 			FIRST_MAP_DRAW = Add(ERROR_DISPLAY)-(i);
 		};
-
-		var ACTIVE_HIGHLIGHT = new Canvas.Drawable({
-			Draw:function(c,x,y,w,h,s){
-				if(VIEW_ACTIVE_LIST[1]==14)
-					s = s%14;
-				else s = s%13;
-				Shape.Box.Draw(c,x+(80*Math.floor(--s/7)),y+(50*(s%7)),w,h,Menu.Button[3]);
-			}
-		}, null, 623, 191, 45, 45, 1);
-		ACTIVE_HIGHLIGHT.Index = Menu.MapEditor;
-		Add(ACTIVE_HIGHLIGHT);
-
-		Update_Active_List = function(__type, page)
-		{													// this changes the active choice
-			var index;
-			if(__type==TYPES.ERASE)
-				__type = OLD_TYPE;
-			if(__type==TYPES.TERRAIN)
-				index = Terrain_Data.TERRE;
-			else if(__type==TYPES.UNIT)
-				index = Char_Data.CHARS;
-			else if(__type==TYPES.CITY)
-				index = Building_Data.PLACE;
-			else if(__type==TYPES.WEATHER)
-				index = Weather_Data.WEATHER;
-			if(index==null)return;
-			if(page==null)page = 0;
-
-			if(ACTIVE_INDEX>index.length-1)
-			{	// puts data at max, if its over limit
-				ACTIVE_INDEX = index.length-1;
-				ACTIVE_HIGHLIGHT.State.Set(ACTIVE_INDEX);
-			}
-
-			if(VIEW_ACTIVE_LIST[0]<FIRST_MAP_DRAW)
-				FIRST_MAP_DRAW-=VIEW_ACTIVE_LIST[1];
-
-			Remove(VIEW_ACTIVE_LIST[0], VIEW_ACTIVE_LIST[1]);
-
-			VIEW_ACTIVE_LIST = [-1,0];
-			ACTIVE_TYPE = __type;
-
-			var data_loc = 0;
-			for(var i=0;page*13+i<index.length-1 && i<13;i++)
-			{
-				VIEW_ACTIVE_LIST[1]++;
-				data_loc = Add(new Canvas.Drawable(ACTIVE_DRAWABLE, null,
-						625+(80*Math.floor(i/7)), 193+(50*(i%7)),
-						40, 40, page*13+i+1),
-					ACTIVE_CLICKABLE, new Canvas.Drawable(Shape.Rectangle, null,
-						625+(80*Math.floor(i/7)), 193+(50*(i%7)), 40, 40,
-						"#666607", null, .4));
-				if(i==0)VIEW_ACTIVE_LIST[0] = data_loc;
-			}
-			if(page*13+15==index.length)
-			{
-				VIEW_ACTIVE_LIST[1]++;
-				Add(new Canvas.Drawable({
-					Draw:function(c,x,y,w,h,s){
-						var img = index[s].Sprite;
-						if(ACTIVE_TYPE!=TYPES.CITY)
-							img = img[0];
-						Shape.Rectangle.Draw(c,x,y,w,h,"#313A35");
-						if(img.Image().height>60)
-						{
-							var xtra_height = (img.Image().height-60)*(40/60);
-							img.Draw(c,x,y-xtra_height,w,h+xtra_height);
-							return;
-						}
-						img.Draw(c,x,y,w,h);
-					}
-				}, null, 705, 493, 40, 40, page*13+14), function(_index){
-					if(ACTIVE_TYPE==TYPES.ERASE)
-					{
-						ACTIVE_TYPE = OLD_TYPE;
-						ACTIVE_HIGHLIGHT.Alpha.Set(1);
-					}
-					ACTIVE_INDEX = _index;
-					ACTIVE_HIGHLIGHT.State.Set(ACTIVE_INDEX);
-				}, new Canvas.Drawable(Shape.Rectangle, null, 625+(80*Math.floor(i/7)), 193+(50*(i%7)), 40, 40, "#666607", null, .4));
-			}
-			else if(index.length>13)
-			{
-				if(page!=0)
-				{
-					VIEW_ACTIVE_LIST[1]++;
-					Add(new Canvas.Drawable({		// left
-						Draw:function(c, x, y, w, h, s){
-							Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+3,260,20,s);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+2,260,20,s);
-						}
-					}, null, 705, 495, 18, 30, "<"), function(){
-						Update_Active_List(__type, page-1);
-					}, {
-						Draw:function(c, x, y, w, h, s){
-							Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+3,260,20,s);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+2,260,20,s);
-						}
-					});
-				}
-				if(page*13+14<index.length)
-				{
-					VIEW_ACTIVE_LIST[1]++;
-					Add(new Canvas.Drawable({		// left
-						Draw:function(c, x, y, w, h, s){
-							Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+3,260,20,s);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+2,260,20,s);
-						}
-					}, null, 728, 495, 18, 30, ">"), function(){
-						Update_Active_List(__type, page+1);
-					}, {
-						Draw:function(c, x, y, w, h, s){
-							Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+3,260,20,s);
-							new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+2,260,20,s);
-						}
-					});
-				}
-			}
-			Draw();
-		};
-
-		Add(new Canvas.Drawable({							// TERRAIN btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(ACTIVE_TYPE==TYPES.TERRAIN) ? 5 : 0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[(ACTIVE_TYPE==TYPES.TERRAIN) ? 5 : 2]).Draw(c,x+8,y+4,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[(ACTIVE_TYPE==TYPES.TERRAIN) ? 6 : 3]).Draw(c,x+6,y+3,260,20,s);
-			}
-		}, null, 625, 35, 70, 20, "Terrain"), function(){
-			Update_Active_List(TYPES.TERRAIN);
-			ACTIVE_HIGHLIGHT.Alpha.Set(1);
-			Menu.MapEditor.Mouse_Move(0, 0);
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+8,y+4,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+6,y+3,260,20,s);
-			}
-		});
-		Add(new Canvas.Drawable({							// UNIT btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(ACTIVE_TYPE==TYPES.UNIT) ? 5 : 0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[(ACTIVE_TYPE==TYPES.UNIT) ? 5 : 2]).Draw(c,x+15,y+4,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[(ACTIVE_TYPE==TYPES.UNIT) ? 6 : 3]).Draw(c,x+14,y+3,260,20,s);
-			}
-		}, null, 625, 60, 70, 20, "Units"), function(){
-			Update_Active_List(TYPES.UNIT);
-			ACTIVE_HIGHLIGHT.Alpha.Set(1);
-			Menu.MapEditor.Mouse_Move(0, 0);
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+15,y+4,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+14,y+3,260,20,s);
-			}
-		});
-		Add(new Canvas.Drawable({							// CITY btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(ACTIVE_TYPE==TYPES.CITY) ? 5 : 0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[(ACTIVE_TYPE==TYPES.CITY) ? 5 : 2]).Draw(c,x+14,y+4,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[(ACTIVE_TYPE==TYPES.CITY) ? 6 : 3]).Draw(c,x+13,y+3,260,20,s);
-			}
-		}, null, 700, 35, 70, 20, "Cities"), function(){
-			Update_Active_List(TYPES.CITY);
-			ACTIVE_HIGHLIGHT.Alpha.Set(1);
-			Menu.MapEditor.Mouse_Move(0, 0);
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+14,y+4,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+13,y+3,260,20,s);
-			}
-		});
-		Add(new Canvas.Drawable({							// WEATHER btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(ACTIVE_TYPE==TYPES.WEATHER) ? 5 : 0]);
-				new Text_Class(""+(3*h/5)+"pt Verdana", Menu.Button[(ACTIVE_TYPE==TYPES.WEATHER) ? 5 : 2]).Draw(c,x+2,y+4,260,20,s);
-				new Text_Class(""+(3*h/5)+"pt Verdana", Menu.Button[(ACTIVE_TYPE==TYPES.WEATHER) ? 6 : 3]).Draw(c,x+1,y+3,260,20,s);
-			}
-		}, null, 700, 60, 70, 20, "Weather"), function(){
-			Update_Active_List(TYPES.WEATHER);
-			ACTIVE_HIGHLIGHT.Alpha.Set(1);
-			Menu.MapEditor.Mouse_Move(0, 0);
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(3*h/5)+"pt Verdana", Menu.Button[2]).Draw(c,x+2,y+4,260,20,s);
-				new Text_Class(""+(3*h/5)+"pt Verdana", Menu.Button[3]).Draw(c,x+1,y+3,260,20,s);
-			}
-		});
-		Add(new Canvas.Drawable({							// ERASE btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[(ACTIVE_TYPE==TYPES.ERASE) ? 5 : 0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[(ACTIVE_TYPE==TYPES.ERASE) ? 5 : 2]).Draw(c,x+7,y+5,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[(ACTIVE_TYPE==TYPES.ERASE) ? 6 : 3]).Draw(c,x+6,y+4,260,20,s);
-			}
-		}, null, 625, 100, 70, 25, "Erase"), function(){
-			OLD_TYPE = ACTIVE_TYPE;
-			ACTIVE_TYPE = TYPES.ERASE;
-			ACTIVE_HIGHLIGHT.Alpha.Set(0);
-			Menu.MapEditor.Mouse_Move(0, 0);
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+7,y+5,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+6,y+4,260,20,s);
-			}
-		});
-		Add(new Canvas.Drawable({							// MAP btn
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+12,y+5,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+11,y+3,260,20,s);
-			}
-		}, null,700, 100, 70, 25, "MAP"), MAP_OPTION_ADDER, {							// MAP icon
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+12,y+5,260,20,s);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+11,y+3,260,20,s);
-			}
-		});
 
 		Menu.MapEditor.New = function(save_data_index, game_data, tested_complete){
 			if(tested_complete)
@@ -1780,6 +1530,8 @@ Menu.MapEditor.Open = function()
 		};
 	}
 };
+
+Menu.MapEditor = null;
 
 /*** In game unit popup, unit double click ***/
 Menu.Game_Prompt = new Menu.Menu_Class();

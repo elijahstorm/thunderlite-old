@@ -511,6 +511,7 @@ window.onload = function(){
 	if(window.parent)socket = window.parent.socket;
 	if(socket)online = true;
 	LOG.container = document.getElementById("logger-container");
+	window.parent.first_time_opening_lobby = true;
 
 	// game setup
 	FRAMERATEDISPLAY = document.getElementById("frames");
@@ -845,14 +846,10 @@ function join_game(data)
 }
 
 function openMapEditor(game_data, data_index, testing_won){
-	INTERFACE.Close_Menu();
-	INTERFACE.Set_Controls(document.getElementById("inputHandler"));
-	INTERFACE.Allow_Controls(true);
 	window.parent.setConnection(1);
 
-	Menu.MapEditor.Open();
-	Menu.MapEditor.New(data_index, game_data, testing_won);
-	INTERFACE.Display_Menu(Menu.MapEditor);
+	Map_Editor.Init();
+	Map_Editor.Open(data_index, game_data, testing_won);
 }
 
 function changeContent(choice, title, dontAsk)
@@ -922,13 +919,9 @@ function changeContent(choice, title, dontAsk)
 			INTERFACE.setGame(null);
 			break;
 		case "MAP EDITOR":
-			document.getElementById("GAMECONTENT").style.display = "block";
+			document.getElementById("MAPEDITOR").style.display = "block";
 			document.getElementById("CONTENT_TITLE").innerHTML = "Map Editor";
 			openMapEditor();
-
-				// remove
-			document.getElementById("gameHelpers").style.display = "none";
-			document.getElementById("canvasHolder").style.top = "0px";
 			break;
 		case "CONTACT US":
 			document.getElementById("CONTACT").style.display = "block";

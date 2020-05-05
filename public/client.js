@@ -43,7 +43,7 @@ function logOut(){
 
 var gameFrame, chatFrame;
 var game;
-let first_time_opening_lobby = true;
+var first_time_opening_lobby = true;
 var title_box_alert = function(updated){
 	var old = document.title;
 	this.time = 1000;
@@ -154,6 +154,7 @@ window.onload = function(){
 				game.chooseContent("MULTIPLAYER", null, true);
 			}
 			else game.chooseContent("GAME LOBBY", null, true);
+
 			if(first_time_opening_lobby)
 			{
 				game.changeContent(game.CONTENT_REDIRECT);
@@ -430,56 +431,58 @@ window.onload = function(){
 			/** client saved custom map data */
 		else if(data.type==700)
 		{	// error requesting mapdata
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
+
+			console.error("ERROR with server mapdata",data.type);
 		}
 		else if(data.type==701)
 		{	// download existing maps
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
 
-			game.Menu.MapEditor.Server_Response.Map_List(data.data);
+			game.Map_Editor.Server_Response.Map_List(data.data);
 		}
 		else if(data.type==702)
 		{	// UNUSED
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
 		}
 		else if(data.type==703)
 		{	// delete existing map
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
 		}
 		else if(data.type==704)
 		{	// report map playtested
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
 		}
 		else if(data.type==705)
 		{	// publish playtested map
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
 		}
 		else if(data.type==706)
 		{	// report newly uploaded map's unique Identification\
-			if(game.Menu.MapEditor.Server_Response==null)return;
-			game.Menu.MapEditor.Server_Response.Report_Id(data.mapid);
+			if(game.CONTENTGRAB()!=1)return;
+			game.Map_Editor.Server_Response.Report_Id(data.mapid);
 		}
 		else if(data.type==707)
 		{	// report faulty map upload -- try again?
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
 		}
 		else if(data.type==708)
 		{	// user has too many maps saved, delete old map or update exsisting map
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
 		}
 		else if(data.type==709)
 		{	// cannot find map with that ID on server... if you think this is an accident on our part, please report the incident to us
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
 		}
 		else if(data.type==710)
 		{	// map succesfully updated / deleted / renammed
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
 
-			game.Menu.MapEditor.Server_Response.Updated_With_Server(true);
+			game.Map_Editor.Server_Response.Updated_With_Server(true);
 		}
 		else if(data.type==777)
 		{	// unlucky general error -- don't know what caused error here
-			if(game.Menu.MapEditor.Server_Response==null)return;
+			if(game.CONTENTGRAB()!=1)return;
 		}
 
 			/** in-game error messages */
@@ -617,6 +620,11 @@ function openLobby(){
 	socket.emit('lobby on');
 	game.document.getElementById("refreshLobby").href = "lobby.html";
 }
+function closeLobby() {
+	socket.emit('lobby off');
+	lobby.src = "holder.html";
+	lobby = null;
+}
 function openChat(){
 	document.getElementById('chat-container').style.display = "block";
 	chatFrame = document.getElementById('chatFrame').contentWindow;
@@ -624,7 +632,7 @@ function openChat(){
 	refreshChatList();
 }
 function refreshChat(){
-	document.getElementById('chatFrame').src = "http://localhost:5000/includes/chat.html";
+	document.getElementById('chatFrame').src = "includes/chat.html";
 }
 function closeChat(){
 	document.getElementById('chat-container').style.display = "none";

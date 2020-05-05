@@ -1,5 +1,5 @@
 var express = require('express');
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 
 const cryptPassword = function(password, callback) {
 	bcrypt.genSalt(10, function(err, salt) {
@@ -35,10 +35,10 @@ var port = process.env.PORT || 3000;
 var mongo = require('mongojs')
 var db = mongo(process.env.MONGODB_URI || 'mongodb://localhost/datatest');
 
-db.on('error', function(err){
+db.on('error', function(err) {
 	console.log('Data Base ERR:', err);
 });
-server.listen(port, function(){
+server.listen(port, function() {
 	console.log('\********** Server listening on port %d **********', port);
 });
 
@@ -81,7 +81,7 @@ function SEND_EMAIL(type, data) {
 	}
 	else if(mailOptions==null)
 		return;
-	Service_Transport.sendMail(mailOptions, function(error, info){
+	Service_Transport.sendMail(mailOptions, function(error, info) {
 	  if (error) {
 	    timestamp("EMAIL ERROR", error);
 	  } else {
@@ -134,7 +134,7 @@ function DATA_CHECK(type, data) {
 // Routing
 app.use(express.static(__dirname + '/public'));
 
-function timestamp(){
+function timestamp() {
 	var str = "";
 	for(var i in arguments)
 	{
@@ -228,7 +228,7 @@ var data_list = function()
 		return running;
 	};
 };
-var con_handler = function(){
+var con_handler = function() {
 	var active = new data_list();
 	var amt = 0;
 	this.Socket = function(index)
@@ -273,11 +273,11 @@ var con_handler = function(){
 var Connections = new con_handler();
 
 let SUDO_ROUTE_PASS = Math.random();
-setInterval(function(){
+setInterval(function() {
 	SUDO_ROUTE_PASS = Math.random();
 }, 300000); // refresh passkey every 5 minutes
 
-var Game = function(map, name, slots){
+var Game = function(map, name, slots) {
 	let __passkey = null;
 	function passkey_check(input_key)
 	{
@@ -305,11 +305,11 @@ var Game = function(map, name, slots){
 		// 1 most recent game data
 		// 2 received game data for most recent check
 	}
-	self.Set = function(index, value){
+	self.Set = function(index, value) {
 		if(index>=playerData.length)return;
 		playerData[index][0] = value;
 	};
-	self.Data = function(index){
+	self.Data = function(index) {
 		var arr = [];
 		for(var i in playerData)
 		{
@@ -317,13 +317,13 @@ var Game = function(map, name, slots){
 		}
 		return arr;
 	};
-	self.Length = function(){
+	self.Length = function() {
 		return playerData.length;
 	};
-	self.Name = function(){
+	self.Name = function() {
 		return name;
 	};
-	self.Map = function(){
+	self.Map = function() {
 		return map;
 	};
 	self.index_in_server = -1;
@@ -331,21 +331,21 @@ var Game = function(map, name, slots){
 	self.started = false;
 
 	var lastValidGameState = null;
-	var goodCallbackFnc = function(){};
-	var badCallbackFnc = function(){};
-	function recievedGameData(playerIndex){
+	var goodCallbackFnc = function() {};
+	var badCallbackFnc = function() {};
+	function recievedGameData(playerIndex) {
 		playerData[playerIndex][2] = true;
-		for(var i in playerData){
+		for(var i in playerData) {
 			if(!playerData[i][2])
-			if(playerData[i][0]!=null){
+			if(playerData[i][0]!=null) {
 				return; // someone has not sent in game data yet
 			}
 		} // if loop ends without returning, then all data has been recieved, now ready for check
 
-		for(var i=0,last_i=null;i<playerData.length;i++){
+		for(var i=0,last_i=null;i<playerData.length;i++) {
 			if(playerData[i][0]==null)continue;
 			if(last_i!=null)
-			if(playerData[i][1]!=playerData[last_i][1]){
+			if(playerData[i][1]!=playerData[last_i][1]) {
 					// games report differing data
 				badCallbackFnc();
 				return;
@@ -355,26 +355,26 @@ var Game = function(map, name, slots){
 		lastValidGameState = playerData[0][1];
 		goodCallbackFnc();
 	};
-	self.Check_Data = function(input_passkey, goodCallback, badCallback, requestIndex, requestData){
+	self.Check_Data = function(input_passkey, goodCallback, badCallback, requestIndex, requestData) {
 		if(!passkey_check(input_passkey))return;
 		self.Send(input_passkey, {type:14}, requestIndex); // request everyone else send data
-		for(var i in playerData){
+		for(var i in playerData) {
 			// clear last check
 			playerData[i][2] = false;
 		}
 		if(typeof goodCallback==='function')
 			goodCallbackFnc = goodCallback;
-		else goodCallbackFnc = function(){};
+		else goodCallbackFnc = function() {};
 		if(typeof badCallback==='function')
 			badCallbackFnc = badCallback;
-		else badCallbackFnc = function(){};
+		else badCallbackFnc = function() {};
 		self.Update_Data(input_passkey, requestIndex, requestData);
 	};
-	self.Update_Data = function(input_passkey, socketIndex, gameData){
+	self.Update_Data = function(input_passkey, socketIndex, gameData) {
 		if(!passkey_check(input_passkey))return;
 		var playerIndex = null;
-		for(var i in playerData){
-			if(playerData[i][0]==socketIndex){
+		for(var i in playerData) {
+			if(playerData[i][0]==socketIndex) {
 				playerIndex = i;
 				break;
 			}
@@ -383,7 +383,7 @@ var Game = function(map, name, slots){
 		playerData[playerIndex][1] = gameData;
 		recievedGameData(playerIndex);
 	};
-	self.Revert = function(input_passkey){
+	self.Revert = function(input_passkey) {
 		if(!passkey_check(input_passkey))return;
 
 		var game = self;
@@ -410,7 +410,7 @@ var Game = function(map, name, slots){
 		});
 	};
 
-	self.Leave = function(input_passkey, socketIndex, rejoinTime, outOfTimeFnc){
+	self.Leave = function(input_passkey, socketIndex, rejoinTime, outOfTimeFnc) {
 		if(!passkey_check(input_passkey))return;
 		var empty = true;
 		var playerIndex;
@@ -434,17 +434,17 @@ var Game = function(map, name, slots){
 		else if(playerIndex!=null)
 		{
 			playerData[playerIndex][0] = null;
-			if(!self.started){	// if game hasn't started, just remove immediately
+			if(!self.started) {	// if game hasn't started, just remove immediately
 				self.Send(input_passkey, {type:24,slot:playerIndex});
 				if(typeof outOfTimeFnc==='function')outOfTimeFnc();
 				return;
 			}
-			if(rejoinTime){ // give player chance to reconnect
+			if(rejoinTime) { // give player chance to reconnect
 				self.Send(input_passkey, {type:28,slot:playerIndex}); // warn that player lost connection
 				var disconPlayer = Connections.Socket(socketIndex); // disconnected player
 				if(disconPlayer!=null)
 					timestamp("user",disconPlayer.username,"lost connection mid game");
-				setTimeout(function(){
+				setTimeout(function() {
 					if(playerData[playerIndex][0]!=null)return;
 					self.Send(input_passkey, {type:24,slot:playerIndex}); // report player failed to reconnect
 					if(typeof outOfTimeFnc==='function')outOfTimeFnc();
@@ -455,7 +455,7 @@ var Game = function(map, name, slots){
 			}
 		}
 	};
-	self.Rejoin = function(input_passkey, playerIndex, socketIndex){
+	self.Rejoin = function(input_passkey, playerIndex, socketIndex) {
 		if(!passkey_check(input_passkey))return;
 		if(!playerData[playerIndex])return;
 		if(playerData[playerIndex][0]!=null)return;
@@ -464,7 +464,7 @@ var Game = function(map, name, slots){
 		playerData[playerIndex][0] = socketIndex;
 		self.Send(input_passkey, {type:29,slot:playerIndex}, socketIndex); // report player reconnected
 		var gamestate = lastValidGameState;
-		if(gamestate==null){ // this is the case if the game hasn't started
+		if(gamestate==null) { // this is the case if the game hasn't started
 			gamestate = self.Map(); // so send new game data
 		}
 
@@ -491,7 +491,7 @@ var Game = function(map, name, slots){
 			}
 		});
 	};
-	self.Send = function(input_passkey, msg){
+	self.Send = function(input_passkey, msg) {
 		if(!passkey_check(input_passkey))return;
 		if(!msg)return;
 		// extra arguments means socket indexes excluded from message
@@ -516,7 +516,7 @@ var Game = function(map, name, slots){
 		}
 	};
 };
-var gl_handler = function(){
+var gl_handler = function() {
 	var games = new data_list();
 	var amt = 0;
 	this.Length = function()
@@ -557,7 +557,7 @@ var gl_handler = function(){
 let Game_List = new gl_handler();
 let Lobby = new data_list();
 
-function send_lobby_info(data, sender){
+function send_lobby_info(data, sender) {
 	var active = Connections.Active();
 	for(var i in active)
 	{
@@ -569,20 +569,20 @@ function send_lobby_info(data, sender){
 	}
 }
 
-io.on('connection', function(socket){
+io.on('connection', function(socket) {
 	socket.vars = {
 		online:false,
 		in_game:null,
 		lobby_listening:true
 	};
 
-	socket.on('lobby on', function(){
+	socket.on('lobby on', function() {
 		socket.vars.lobby_listening = true;
 	});
-	socket.on('lobby off', function(){
+	socket.on('lobby off', function() {
 		socket.vars.lobby_listening = false;
 	});
-	socket.on('refresh lobby', function(){
+	socket.on('refresh lobby', function() {
 		if(!socket.vars.lobby_listening)return;
 		var data = [];
 		var open_games = Lobby.Active();
@@ -618,13 +618,13 @@ io.on('connection', function(socket){
 		});
 	});
 
-	socket.on('save game', function(__input_passkey, data){
+	socket.on('save game', function(__input_passkey, data) {
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
 		socket.vars.game_data = data;
 		game.Update_Data(__input_passkey, socket.index, data);
 	});
-	socket.on('send move', function(__input_passkey, unit, x, y, path){
+	socket.on('send move', function(__input_passkey, unit, x, y, path) {
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
 		game.Send(__input_passkey, {
@@ -634,7 +634,7 @@ io.on('connection', function(socket){
 			path:path
 		}, socket.index);
 	});
-	socket.on('send build', function(__input_passkey, source, input, direction){
+	socket.on('send build', function(__input_passkey, source, input, direction) {
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
 		game.Send(__input_passkey, {
@@ -644,19 +644,19 @@ io.on('connection', function(socket){
 			dir:direction
 		}, socket.index);
 	});
-	socket.on('next player', function(__input_passkey, gameData){
+	socket.on('next player', function(__input_passkey, gameData) {
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
-		game.Check_Data(__input_passkey, function(){ // check game data
+		game.Check_Data(__input_passkey, function() { // check game data
 			// game data good, continue game.
 			game.Send(__input_passkey, {type:10}, socket.index);
-		}, function(){
+		}, function() {
 			timestamp("ERROR: game",game.index_in_server,game.Name(),"invalid, reverting to last saved point.");
 			game.Revert(__input_passkey);
 		}, socket.index, gameData);
 	});
 
-	socket.on('open', function(map, name, slots){
+	socket.on('open', function(map, name, slots) {
 		var game = new Game(map, name, slots);
 		var game_id = Game_List.Add(game, socket.index);
 		socket.vars.slotIndex = 0;
@@ -673,7 +673,7 @@ io.on('connection', function(socket){
 			index_in_server:game_id
 		});
 	});
-	socket.on('join', function(game_id){
+	socket.on('join', function(game_id) {
 		// search node
 		var game = Game_List.Game(game_id);
 		var connections = game.Data();
@@ -699,15 +699,15 @@ io.on('connection', function(socket){
 			socket.vars.slotIndex = i;
 			connections[i] = socket.index;
 			names[i] = socket.username;
-			db.gamedata.find({Map_Id:game.Map(), PUBLISHED:true}, function(err, data){
-				if(err){
+			db.gamedata.find({Map_Id:game.Map(), PUBLISHED:true}, function(err, data) {
+				if(err) {
 					socket.send({
 						type:100,
 						game:game_id
 					});
 					return;
 				}
-				if(data.length==0){
+				if(data.length==0) {
 					socket.send({
 						type:100,
 						game:game_id
@@ -739,7 +739,7 @@ io.on('connection', function(socket){
 			game:game_id
 		});
 	});
-	socket.on('leave', function(__input_passkey){
+	socket.on('leave', function(__input_passkey) {
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
 		game.Leave(__input_passkey, socket.index);
@@ -747,7 +747,7 @@ io.on('connection', function(socket){
 		socket.vars.lobby_listening = true;
 		timestamp(socket.username,"left game",game.Name());
 	});
-	socket.on('close', function(){
+	socket.on('close', function() {
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
 		timestamp("game "+socket.vars.in_game+" closed");
@@ -768,7 +768,7 @@ io.on('connection', function(socket){
 		}
 		Game_List.Close(socket.vars.in_game);
 	});
-	socket.on('start', function(){
+	socket.on('start', function() {
 		var game = Game_List.Game(socket.vars.in_game);
 		if(game==null)return;
 		let __new_passkey = game.Passkey();
@@ -786,7 +786,7 @@ io.on('connection', function(socket){
 			if(players[i]==null)continue;
 			let _SOCKET = Connections.Socket(players[i]);
 			_SOCKET.vars.lobby_listening = false;
-			db.users.findOne({username:_SOCKET.username}, function(err, data){
+			db.users.findOne({username:_SOCKET.username}, function(err, data) {
 				if(err)return;
 				if(data==null)return;
 				Pics[i] = data.pic;
@@ -815,7 +815,7 @@ io.on('connection', function(socket){
 		Lobby.Remove(game.lobby);
 		game.lobby = -1;
 	});
-	socket.on('chat', function(__input_passkey, msg){
+	socket.on('chat', function(__input_passkey, msg) {
 		if(socket.vars.in_game==null)return;
 		Game_List.Game(socket.vars.in_game).Send(__input_passkey, {
 			type:13,
@@ -824,12 +824,13 @@ io.on('connection', function(socket){
 		}, socket.index);
 	});
 
-	socket.on('log', function(msg){
+	socket.on('log', function(msg) {
 		timestamp(socket.username+": "+msg);
 
 
-			db.users.find({}, function(err, data){
-				if(err){
+		// remove this ASAP
+			db.users.find({}, function(err, data) {
+				if(err) {
 					socket.send({type:500,errType:5});
 					return;
 				}
@@ -850,10 +851,14 @@ io.on('connection', function(socket){
 					});
 				}
 			});
+			// end REMOVE
+
+
+
 	});
 
-	function Make_Unique_Map_Index(onFinish){
-		function make_letter(){ // 65 = A, 97 = a
+	function Make_Unique_Map_Index(onFinish) {
+		function make_letter() { // 65 = A, 97 = a
 			let start = Math.random()>0.5 ? 65 : 97;
 			let index = Math.floor(Math.random()*26)+start;
 			if(start==65)
@@ -872,11 +877,11 @@ io.on('connection', function(socket){
 			}
 			return index;
 		}
-		function make_number(){	// 1 to 9
+		function make_number() {	// 1 to 9
 			let index = Math.random()*9+1;
 			return Math.floor(index);
 		}
-		db.gamedata.find({}, function(err, existing_maps){
+		db.gamedata.find({}, function(err, existing_maps) {
 			let unique_str_id, remake = true;
 			while(remake)
 			{
@@ -901,262 +906,295 @@ io.on('connection', function(socket){
 			onFinish(unique_str_id);
 		});
 	}
-	socket.on('mapdata download', function(userpass){
-
-		db.users.find({username:userpass.name}, function(err, data){
-			if(err || data.length==0){
+	socket.on('mapdata download', function(userpass) {
+		db.users.findOne({username:socket.username}, function(err, DATABASE) {
+			if(err || DATABASE==null) {
 				socket.send({type:700});
 				return;
 			}
-			if(data[0].password!=userpass.pass)
-			{	// invalid username and password -- possible potential hijacking attempt
-				socket.send({type:700});
-				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
-				return;
-			}
-		});
-		db.gamedata.find({mapowner:userpass.name}, function(err, data){
-			if(err){
-				socket.send({type:700});
-				return;
-			}
-			let report_data = new Array();
-
-			for(let i=0;i<data.length;i++)
-			{
-				report_data.push({
-					saveindex:data[i].saveindex,
-					map:data[i].mapdata,
-					uploaded:data[i].PUBLISHED,
-					map_id:data[i].Map_Id
-				});
-			}
-
-			socket.send({type:701, data:report_data});
-		});
-	});
-	socket.on('mapdata upload', function(userpass, input_data){
-		db.users.find({username:userpass.name}, function(err, data){
-			if(err || data.length==0){
-				socket.send({type:700});
-				return;
-			}
-			if(data[0].password!=userpass.pass)
-			{	// invalid username and password -- possible potential hijacking attempt
-				socket.send({type:700});
-				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
-				return;
-			}
-		});
-		Make_Unique_Map_Index(function(__index){
-			db.gamedata.find({mapowner:userpass.name}, function(err, data){
-				if(err){
-					socket.send({type:777});
+			comparePassword(userpass, DATABASE.password, function(err, is_correct) {
+				if(err) {
+					socket.send({type:700});
 					return;
 				}
-				if(data.length<9){
+				if(!is_correct)
+				{	// invalid username and password -- possible potential hijacking attempt
+					socket.send({type:700});
+					timestamp("Possible potential hijacking attempt targeted at user:", socket.username);
+					return;
+				}
+				db.gamedata.find({mapowner:socket.username}, function(err, data) {
+					if(err) {
+						socket.send({type:700});
+						return;
+					}
+					let report_data = new Array();
+
 					for(let i=0;i<data.length;i++)
 					{
-						if(data[i].saveindex==input_data.index)
-						{
-							socket.send({type:777});
-							return;
-						}
+						report_data.push({
+							saveindex:data[i].saveindex,
+							map:data[i].mapdata,
+							uploaded:data[i].PUBLISHED,
+							map_id:data[i].Map_Id
+						});
 					}
-					db.gamedata.save({
-						mapowner:userpass.name,
-						saveindex:input_data.index,
-						mapdata:input_data.map,
-						mapname:input_data.name,
-						playtested:false,
-						last_playtested:null,
-						upload_date:new Date(),
-						PUBLISHED:false,
-						publish_date:null,
-						Map_Id:__index
-					}, function(err, saved){
-						if(err||!saved)socket.send({type:707});
-						else{
-							socket.send({type:706,mapid:__index});
-							timestamp("User saved map with map ID:", __index);
-						}
-					});
-				}
-				else socket.send({type:708});
+
+					socket.send({type:701, data:report_data});
+				});
 			});
 		});
 	});
-	socket.on('mapdata update', function(userpass, input_data){
+	socket.on('mapdata upload', function(userpass, input_data) {
+		db.users.find({username:socket.username}, function(err, DATABASE) {
+			if(err || DATABASE==null) {
+				socket.send({type:700});
+				return;
+			}
+			comparePassword(userpass, DATABASE.password, function(err, is_correct) {
+				if(err) {
+					socket.send({type:700});
+					return;
+				}
+				if(!is_correct)
+				{	// invalid username and password -- possible potential hijacking attempt
+					socket.send({type:700});
+					timestamp("Possible potential hijacking attempt targeted at user:", socket.username);
+					return;
+				}
+				Make_Unique_Map_Index(function(__index) {
+					db.gamedata.find({mapowner:socket.username}, function(err, data) {
+						if(err) {
+							socket.send({type:777});
+							return;
+						}
+						if(data.length<9) {
+							for(let i=0;i<data.length;i++)
+							{
+								if(data[i].saveindex==input_data.index)
+								{
+									socket.send({type:777});
+									return;
+								}
+							}
+							db.gamedata.save({
+								mapowner:socket.username,
+								saveindex:input_data.index,
+								mapdata:input_data.map,
+								mapname:input_data.name,
+								playtested:false,
+								last_playtested:null,
+								upload_date:new Date(),
+								PUBLISHED:false,
+								publish_date:null,
+								Map_Id:__index
+							}, function(err, saved) {
+								if(err||!saved)socket.send({type:707});
+								else{
+									socket.send({type:706,mapid:__index});
+									timestamp("User saved map with map ID:", __index);
+								}
+							});
+						}
+						else socket.send({type:708});
+					});
+				});
+			});
+		});
+	});
+	socket.on('mapdata update', function(userpass, input_data) {
+		db.users.findOne({username:socket.username}, function(err, DATABASE) {
+			if(err || DATABASE==null) {
+				socket.send({type:700});
+				return;
+			}
+			comparePassword(userpass, DATABASE.password, function(err, is_correct) {
+				if(err) {
+					socket.send({type:700});
+					return;
+				}
+				if(!is_correct)
+				{	// invalid username and password -- possible potential hijacking attempt
+					socket.send({type:700});
+					timestamp("Possible potential hijacking attempt targeted at user:", socket.username);
+					return;
+				}
+				db.gamedata.find({Map_Id:input_data.index}, function(err, data) {
+					if(err) {
+						socket.send({type:777});
+						return;
+					}
+					if(data.length!=0) {
+						if(data[0].mapowner!=socket.username)
+						{
+							timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+							socket.send({type:709});
+							return;
+						}
+						db.gamedata.update({Map_Id:data[0].Map_Id}, {$set:{
+							mapdata:input_data.map,
+							playtested:false,
+							PUBLISHED:false
+						}}, function(err, saved) {
+							if(err||!saved)socket.send({type:707});
+							else{
+								socket.send({type:710});
+								timestamp("MAP EDITOR -> "+socket.username+" updated map with map ID:", input_data.index);
+							}
+						});
+					}
+					else socket.send({type:709});
+				});
+			});
+		});
+	});
+	socket.on('mapdata mark playtested', function(userpass, mapid) {
+		db.users.findOne({username:socket.username}, function(err, DATABASE) {
+			if(err || DATABASE==null) {
+				socket.send({type:700});
+				return;
+			}
+			comparePassword(userpass, DATABASE.password, function(err, is_correct) {
+				if(err) {
+					socket.send({type:700});
+					return;
+				}
+				if(!is_correct)
+				{	// invalid username and password -- possible potential hijacking attempt
+					socket.send({type:700});
+					timestamp("Possible potential hijacking attempt targeted at user:", socket.username);
+					return;
+				}
+				db.gamedata.find({Map_Id:mapid}, function(err, data) {
+					if(err) {
+						socket.send({type:777});
+						return;
+					}
+					if(data.length!=0) {
+						if(data[0].mapowner!=socket.username)
+						{
+							timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+							socket.send({type:709});
+							return;
+						}
+						db.gamedata.update({Map_Id:mapid}, {$set:{
+							playtested:true,
+							last_playtested:new Date()
+						}}, function(err, saved) {
+							if(err||!saved)socket.send({type:707});
+							else{
+								socket.send({type:710});
+								timestamp("MAP EDITOR -> "+socket.username+" playtested map with map ID:", data[0].Map_Id);
+							}
+						});
+					}
+					else socket.send({type:709});
+				});
+			});
+		});
+	});
+	socket.on('mapdata delete', function(userpass, mapid) {
+		db.users.findOne({username:socket.username}, function(err, DATABASE) {
+			if(err || DATABASE==null) {
+				socket.send({type:700});
+				return;
+			}
+			comparePassword(userpass, DATABASE.password, function(err, is_correct) {
+				if(err) {
+					socket.send({type:700});
+					return;
+				}
+				if(!is_correct)
+				{	// invalid username and password -- possible potential hijacking attempt
+					socket.send({type:700});
+					timestamp("Possible potential hijacking attempt targeted at user:", socket.username);
+					return;
+				}
+				db.gamedata.find({Map_Id:mapid}, function(err, data) {
+					if(err) {
+						socket.send({type:777});
+						return;
+					}
+					if(data.length!=0) {
+						if(data[0].mapowner!=socket.username)
+						{
+							timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+							socket.send({type:709});
+							return;
+						}
+						db.gamedata.remove({Map_Id:mapid}, function(err, saved) {
+							if(err||!saved)socket.send({type:707});
+							else{
+								socket.send({type:710});
+								timestamp("MAP EDITOR -> "+socket.username+" deleted map with map ID:", data[0].Map_Id);
+							}
+						});
+					}
+					else socket.send({type:709});
+				});
+			});
+		});
+	});
+	socket.on('mapdata publish', function(userpass, mapid) {
+		db.users.findOne({username:socket.username}, function(err, DATABASE) {
+			if(err || DATABASE==null) {
+				socket.send({type:700});
+				return;
+			}
+			comparePassword(userpass, DATABASE.password, function(err, is_correct) {
+				if(err) {
+					socket.send({type:700});
+					return;
+				}
+				if(!is_correct)
+				{	// invalid username and password -- possible potential hijacking attempt
+					socket.send({type:700});
+					timestamp("Possible potential hijacking attempt targeted at user:", socket.username);
+					return;
+				}
+				db.gamedata.find({Map_Id:mapid}, function(err, data) {
+					if(err) {
+						socket.send({type:777});
+						return;
+					}
+					if(data.length!=0) {
+						if(data[0].mapowner!=socket.username)
+						{
+							timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+							socket.send({type:709});
+							return;
+						}
+						db.gamedata.update({Map_Id:mapid}, {$set:{
+							PUBLISHED:true,
+							publish_date:new Date()
+						}}, function(err, saved) {
+							if(err||!saved)socket.send({type:707});
+							else{
+								socket.send({type:710});
+								timestamp("MAP EDITOR -> "+socket.username+" PUBLISHED map with map ID:", data[0].Map_Id);
+							}
+						});
+					}
+					else socket.send({type:709});
+				});
+			});
+		});
+	});
 
-		db.users.find({username:userpass.name}, function(err, data){
-			if(err || data.length==0){
-				socket.send({type:700});
-				return;
-			}
-			if(data[0].password!=userpass.pass)
-			{	// invalid username and password -- possible potential hijacking attempt
-				socket.send({type:700});
-				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
-				return;
-			}
-		});
-		db.gamedata.find({Map_Id:input_data.index}, function(err, data){
-			if(err){
-				socket.send({type:777});
-				return;
-			}
-			if(data.length!=0){
-				if(data[0].mapowner!=userpass.name)
-				{
-					timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
-					socket.send({type:709});
-					return;
-				}
-				db.gamedata.update({Map_Id:data[0].Map_Id}, {$set:{
-					mapdata:input_data.map,
-					playtested:false,
-					PUBLISHED:false
-				}}, function(err, saved){
-					if(err||!saved)socket.send({type:707});
-					else{
-						socket.send({type:710});
-						timestamp("MAP EDITOR -> "+userpass.name+" updated map with map ID:", input_data.index);
-					}
-				});
-			}
-			else socket.send({type:709});
-		});
-	});
-	socket.on('mapdata mark playtested', function(userpass, mapid){
-
-		db.users.find({username:userpass.name}, function(err, data){
-			if(err || data.length==0){
-				socket.send({type:700});
-				return;
-			}
-			if(data[0].password!=userpass.pass)
-			{	// invalid username and password -- possible potential hijacking attempt
-				socket.send({type:700});
-				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
-				return;
-			}
-		});
-		db.gamedata.find({Map_Id:mapid}, function(err, data){
-			if(err){
-				socket.send({type:777});
-				return;
-			}
-			if(data.length!=0){
-				if(data[0].mapowner!=userpass.name)
-				{
-					timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
-					socket.send({type:709});
-					return;
-				}
-				db.gamedata.update({Map_Id:mapid}, {$set:{
-					playtested:true,
-					last_playtested:new Date()
-				}}, function(err, saved){
-					if(err||!saved)socket.send({type:707});
-					else{
-						socket.send({type:710});
-						timestamp("MAP EDITOR -> "+userpass.name+" playtested map with map ID:", data[0].Map_Id);
-					}
-				});
-			}
-			else socket.send({type:709});
-		});
-	});
-	socket.on('mapdata delete', function(userpass, mapid){
-		db.users.find({username:userpass.name}, function(err, data){
-			if(err || data.length==0){
-				socket.send({type:700});
-				return;
-			}
-			if(data[0].password!=userpass.pass)
-			{	// invalid username and password -- possible potential hijacking attempt
-				socket.send({type:700});
-				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
-				return;
-			}
-		});
-		db.gamedata.find({Map_Id:mapid}, function(err, data){
-			if(err){
-				socket.send({type:777});
-				return;
-			}
-			if(data.length!=0){
-				if(data[0].mapowner!=userpass.name)
-				{
-					timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
-					socket.send({type:709});
-					return;
-				}
-				db.gamedata.remove({Map_Id:mapid}, function(err, saved){
-					if(err||!saved)socket.send({type:707});
-					else{
-						socket.send({type:710});
-						timestamp("MAP EDITOR -> "+userpass.name+" deleted map with map ID:", data[0].Map_Id);
-					}
-				});
-			}
-			else socket.send({type:709});
-		});
-	});
-	socket.on('mapdata publish', function(userpass, mapid){
-		db.users.find({username:userpass.name}, function(err, data){
-			if(err || data.length==0){
-				socket.send({type:700});
-				return;
-			}
-			if(data[0].password!=userpass.pass)
-			{	// invalid username and password -- possible potential hijacking attempt
-				socket.send({type:700});
-				timestamp("Possible potential hijacking attempt targeted at user:", userpass.name);
-				return;
-			}
-		});
-		db.gamedata.find({Map_Id:mapid}, function(err, data){
-			if(err){
-				socket.send({type:777});
-				return;
-			}
-			if(data.length!=0){
-				if(data[0].mapowner!=userpass.name)
-				{
-					timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
-					socket.send({type:709});
-					return;
-				}
-				db.gamedata.update({Map_Id:mapid}, {$set:{
-					PUBLISHED:true,
-					publish_date:new Date()
-				}}, function(err, saved){
-					if(err||!saved)socket.send({type:707});
-					else{
-						socket.send({type:710});
-						timestamp("MAP EDITOR -> "+userpass.name+" PUBLISHED map with map ID:", data[0].Map_Id);
-					}
-				});
-			}
-			else socket.send({type:709});
-		});
-	});
-
-	socket.on('gamedata id', function(mapid){
-		db.gamedata.find({Map_Id:mapid, PUBLISHED:true}, function(err, data){
-			if(err){
+	socket.on('gamedata id', function(mapid) {
+		db.gamedata.find({Map_Id:mapid, PUBLISHED:true}, function(err, data) {
+			if(err) {
 				socket.send({type:500,errType:0});
 				return;
 			}
-			if(data.length==0){
+			if(data.length==0) {
 				socket.send({type:501});
 				return;
 			}
 			socket.send({type:502, data:data[0].mapdata});
 		});
 	});
-	socket.on('gamedata get', function(sort_by, start_index, end_amt, userSearch){
+	socket.on('gamedata get', function(sort_by, start_index, end_amt, userSearch) {
 		sort_by.PUBLISHED = true;
 			/// let users search for things that just contain and aren't exact matches
 		if(sort_by.mapowner!=null)
@@ -1168,12 +1206,12 @@ io.on('connection', function(socket){
 		if(_search_name!=null)
 			sort_by.mapdata = RegExp(".*");
 
-		db.gamedata.find(sort_by, function(err, data){
-			if(err){
+		db.gamedata.find(sort_by, function(err, data) {
+			if(err) {
 				socket.send({type:500,errType:1});
 				return;
 			}
-			if(data.length==0){
+			if(data.length==0) {
 				if(sort_by.mapowner==null)
 				{
 					socket.send({type:501});
@@ -1182,12 +1220,12 @@ io.on('connection', function(socket){
 				sort_by.mapdata = RegExp(".*" + _search_name + ".*");
 				sort_by.mapowner = RegExp(".*");
 
-				db.gamedata.find(sort_by, function(err, data){
-					if(err){
+				db.gamedata.find(sort_by, function(err, data) {
+					if(err) {
 						socket.send({type:500,errType:2});
 						return;
 					}
-					if(data.length==0){
+					if(data.length==0) {
 						socket.send({type:501});
 						return;
 					}
@@ -1220,14 +1258,14 @@ io.on('connection', function(socket){
 		});
 	});
 
-	socket.on('new user', function(username, password, email){
+	socket.on('new user', function(username, password, email) {
 		if(socket.vars.online)return;
-		db.users.find({username:username}, function(err, data){
-			if(err){
+		db.users.find({username:username}, function(err, data) {
+			if(err) {
 				socket.send({type:8});
 				return;
 			}
-			if(data.length==0){
+			if(data.length==0) {
 				cryptPassword(password, function functionName(err, hashPass) {
 					if(err!=null)
 					{
@@ -1244,7 +1282,7 @@ io.on('connection', function(socket){
 						points:0,
 						totalGames:0,
 						gamesWon:0
-					}, function(err, saved){
+					}, function(err, saved) {
 					if(err||!saved)socket.send({type:8});
 					else{
 						socket.send({type:9});
@@ -1256,28 +1294,28 @@ io.on('connection', function(socket){
 			else socket.send({type:5});
 		});
 	});
-	socket.on('connect user', function(username, password){
+	socket.on('connect user', function(username, password) {
 		if(socket.vars.online)return;
-		db.users.find({username:username}, function(err, data){
-			if(err||!data||data.length==0){
+		db.users.find({username:username}, function(err, data) {
+			if(err||!data||data.length==0) {
 				socket.send({type:6});
 				return;
 			}
-			if(data.length==1){
+			if(data.length==1) {
 				comparePassword(password, data[0].password, function(err, is_correct) {
-					if(!is_correct){
+					if(!is_correct) {
 						socket.send({type:7});
 						return;
 					}
 					var activeCons = Connections.Active();
 					var rejoined = false;
-					for(var i in activeCons){
+					for(var i in activeCons) {
 						if(activeCons[i].username!=username)continue;
-						if(!activeCons[i].vars.online){
+						if(!activeCons[i].vars.online) {
 							Connections.Reconnect(activeCons[i].index, socket);
 							rejoined = true;
 							var game = Game_List.Game(socket.vars.in_game);
-							if(game){
+							if(game) {
 								game.Rejoin(SUDO_ROUTE_PASS, socket.vars.slotIndex, socket.index);
 							}
 							break;
@@ -1287,7 +1325,7 @@ io.on('connection', function(socket){
 							return;
 						}
 					}
-					if(!rejoined){
+					if(!rejoined) {
 						socket.index = Connections.Add(socket);
 						socket.username = username;
 						timestamp("user",username,"connected:",socket.index);
@@ -1304,14 +1342,14 @@ io.on('connection', function(socket){
 			socket.send({type:8});
 		});
 	});
-	socket.on('disconnect', function(){
+	socket.on('disconnect', function() {
 		if(!socket.vars.online)return;
 		socket.vars.online = false;
 		// echo globally that this client has left
 		socket.broadcast.emit('user left', socket.username);
 		var game = Game_List.Game(socket.vars.in_game);
-		if(game){	// if in game, allow 30 secs to reconnect before removal
-			game.Leave(SUDO_ROUTE_PASS, socket.index, 30000, function(){
+		if(game) {	// if in game, allow 30 secs to reconnect before removal
+			game.Leave(SUDO_ROUTE_PASS, socket.index, 30000, function() {
 					// if they reconnect the system will auto join them to the game
 					// if they havent reconnected after 30secs, remove them from server
 				Connections.Disconnect(socket.index);
@@ -1320,13 +1358,13 @@ io.on('connection', function(socket){
 		}
 		Connections.Disconnect(socket.index);
 	});
-	socket.on('userdata get', function(query){
-		db.users.findOne({username:socket.username}, function(err, data){
-			if(err){
+	socket.on('userdata get', function(query) {
+		db.users.findOne({username:socket.username}, function(err, data) {
+			if(err) {
 				socket.send({type:500,errType:3});
 				return;
 			}
-			if(data==null){
+			if(data==null) {
 				socket.send({type:500,errType:4});
 				return;
 			}
@@ -1350,13 +1388,13 @@ io.on('connection', function(socket){
 			}
 		});
 	});
-	socket.on('userdata add', function(query){
-		db.users.findOne({username:socket.username}, function(err, data){
-			if(err){
+	socket.on('userdata add', function(query) {
+		db.users.findOne({username:socket.username}, function(err, data) {
+			if(err) {
 				socket.send({type:500,errType:5});
 				return;
 			}
-			if(data==null){
+			if(data==null) {
 				socket.send({type:500,errType:6});
 				return;
 			}
@@ -1381,13 +1419,13 @@ io.on('connection', function(socket){
 			}
 		});
 	});
-	socket.on('userdata update', function(query){
-		db.users.findOne({username:socket.username}, function(err, data){
-			if(err){
+	socket.on('userdata update', function(query) {
+		db.users.findOne({username:socket.username}, function(err, data) {
+			if(err) {
 				socket.send({type:500,errType:5});
 				return;
 			}
-			if(data==null){
+			if(data==null) {
 				socket.send({type:500,errType:6});
 				return;
 			}
@@ -1484,29 +1522,29 @@ io.on('connection', function(socket){
 		});
 	});
 
-	socket.on('print data', function(){
+	socket.on('print data', function() {
 		timestamp("!** Request to print data by:", socket.username);
 		if(socket.username!="storm")
 			return;	// check for admin permission
 		timestamp("Request permitted to:", socket.username);
 
-		db.users.find({}, function(err, data){
-			if(err||!data){
+		db.users.find({}, function(err, data) {
+			if(err||!data) {
 				timestamp("***Error printing user data.");
 			}else{
 				timestamp("***user data: ");
-				data.forEach(function(cur){
+				data.forEach(function(cur) {
 					console.log("-->",cur.username);
 					console.log(cur);
 				});
 			}
 		});
-		db.games.find({}, function(err, data){
-			if(err||!data){
+		db.games.find({}, function(err, data) {
+			if(err||!data) {
 				timestamp("***Error printing game data.");
 			}else{
 				timestamp("***game data: ");
-				data.forEach(function(cur){
+				data.forEach(function(cur) {
 					console.log(cur.username, cur.password);
 				});
 			}
@@ -1537,7 +1575,7 @@ io.on('connection', function(socket){
 		timestamp("Print data done");
 	});
 
-	socket.on('check', function(){
+	socket.on('check', function() {
 		if(socket.vars.online)socket.send({type:0});
 		else socket.send({type:4});
 	});
