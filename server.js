@@ -826,35 +826,6 @@ io.on('connection', function(socket) {
 
 	socket.on('log', function(msg) {
 		timestamp(socket.username+": "+msg);
-
-
-		// remove this ASAP
-			db.users.find({}, function(err, data) {
-				if(err) {
-					socket.send({type:500,errType:5});
-					return;
-				}
-
-				for(let i in data)
-				{
-					// encrypt passwords
-					cryptPassword(data[i].password, function functionName(err, hashPass) {
-						if(err!=null)
-						{
-							socket.send({type:500,errType:8,error:"encryption"});
-							return;
-						}
-							// update stored password
-						db.users.update({username:data[i].username}, {$set:{
-							password:hashPass
-						}});
-					});
-				}
-			});
-			// end REMOVE
-
-
-
 	});
 
 	function Make_Unique_Map_Index(onFinish) {
