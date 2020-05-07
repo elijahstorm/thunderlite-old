@@ -2347,6 +2347,7 @@ var Interface_Class = function()
 	};
 	self.Warn_Hurry = function()
 	{
+		if(game==null)return;
 		if(game.Game_Over)return;
 		if(game.Active_Player()!=game.Client_Player())return;
 		MUSIC = MUSIC.Switch(Music.Retrieve("hurry warning"));

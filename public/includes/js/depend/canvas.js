@@ -403,10 +403,11 @@ var Canvas = {
 	},
 	Add_Ticker:function(fnc){
 		Canvas.Tick_Functions.push(fnc);
-		return Canvas.Tick_Functions.length-1;
+		return fnc;
 	},
 	Kill_Ticker:function(index){
-		if(index>=Canvas.Tick_Functions.length)return;
+		index = Canvas.Tick_Functions.indexOf(index);
+		if(index==-1)return;
 		return Canvas.Tick_Functions.splice(index, 1);
 	},
 	Next_Tick:function(){

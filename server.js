@@ -142,6 +142,11 @@ function timestamp() {
 	}
 	console.log(new Date().toLocaleTimeString(),"->",str);
 }
+function Display_ID(input) {
+	if(input.length==9)
+		return "("+input.substring(0, 3) + "-" + input.substring(3, 6) + "-" + input.substring(6, 9)+")";
+	return input;
+}
 var data_list = function()
 {
 	function make_letter()
@@ -828,11 +833,6 @@ io.on('connection', function(socket) {
 		timestamp(socket.username+": "+msg);
 	});
 
-	function Display_ID(input) {
-		if(input.length==9)
-			return input.substring(0, 3) + "-" + input.substring(3, 6) + "-" + input.substring(6, 9);
-		return input;
-	}
 	function Make_Unique_Map_Index(onFinish) {
 		function make_letter() { // 65 = A, 97 = a
 			let start = Math.random()>0.5 ? 65 : 97;

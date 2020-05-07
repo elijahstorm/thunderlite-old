@@ -128,6 +128,7 @@
 	<!-- Popup container -->
 	<div class="w3-container w3-padding-16 popup-bg" id="popup-container">
 		<div class="w3-container w3-center w3-padding-32 w3-light-grey popup" id="profile-pic-popup">
+			<span class="w3-button w3-black w3-xlarge w3-display-topright" onclick="Close_Popup()" style="margin:5px">×</span>
 			<h4>Profile Picture</h4>
 			<div><img class="user-pic" id="upload-pic"></img></div>
 			<br />
@@ -169,14 +170,15 @@
 			<div class="container box w3-half" id="update pass">
 				<h3>Update Password</h3>
 				<div class="data-hidden" id="error-pass"></div>
-				<p>New password:</p>
-				<input id="up-pass-input" type="text"></input>
-				<p>Confirm password:</p>
-				<input id="up-pass-confirm" type="password"></input>
-				<br />
+				<form autocomplete="on">
+					<p>New password:</p>
+					<input id="up-pass-input" type="text" autocomplete="username"></input>
+					<p>Confirm password:</p>
+					<input id="up-pass-confirm" type="password" autocomplete="current-password"></input>
+					<br />
+				</form>
 				<div class="w3-button w3-block w3-black" style="margin-top:10px" onclick="update_pass();">Update Password</div>
 			</div>
-
     </div>
   </div>
 

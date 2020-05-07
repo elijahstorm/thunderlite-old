@@ -698,7 +698,6 @@ function init_map(map, players, game_id, skip_pregame, offline_game)
 		else if(offline_game[2]==3)
 			Game.game_data[3] = 3;
 	}
-	Animations.Retrieve("Load").Remove_All();
 	Game.id = game_id;
 	Game.Map = map;
 	INTERFACE.Close_Menu();

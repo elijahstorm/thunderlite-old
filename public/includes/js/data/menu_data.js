@@ -869,6 +869,9 @@ let MapEditorClass = function() {
 			let __TIME_CHART = document.createElement('canvas');
 			__TIME_CHART.width = PIE.clientWidth;
 			__TIME_CHART.height = PIE.clientHeight;
+
+__TIME_CHART.style.display = "none";
+
 			TIMELINE.appendChild(__TIME_CHART);
 
 			let __weather_pie = new Array(turn),
@@ -1108,6 +1111,27 @@ let MapEditorClass = function() {
 		// Change_Map_Size(width, height-1, 0, 0); // V
 
 
+		let map_sizer = document.createElement('div');
+		map_sizer.className = "editor-options-list";
+
+		caption = document.createElement('h3');
+		caption.className = "editor-text w3-rest w3-left-align";
+		caption.style.margin = "0px";
+		caption.innerHTML = "Content Available Next Update!";
+
+		button = document.createElement('div');
+		button.className = "w3-button w3-black editor-tab w3-right";
+		button.innerHTML = "BACK";
+		button.onclick = function() {
+			Open_Options();
+			menu_back_fnc = function() {};
+		};
+
+		map_sizer.appendChild(button);
+		map_sizer.appendChild(caption);
+
+		container.appendChild(map_sizer);
+
 		menu_back_fnc = function() {
 			Open_Options();
 			menu_back_fnc = function() {};
@@ -1127,18 +1151,20 @@ let MapEditorClass = function() {
 		caption = document.createElement('h3');
 		caption.className = "editor-text w3-rest w3-left-align";
 		caption.style.margin = "0px";
-		caption.innerHTML = "Special Conditions";
+		caption.innerHTML = "Content Available Next Update!";
 
 		button = document.createElement('div');
 		button.className = "w3-button w3-black editor-tab w3-right";
-		button.innerHTML = "OPEN";
-		button.onclick = function(){
-			Open_Special_Conditions();
+		button.innerHTML = "BACK";
+		button.onclick = function() {
+			Open_Options();
+			menu_back_fnc = function() {};
 		};
 
 		special_conditions.appendChild(button);
 		special_conditions.appendChild(caption);
 
+		container.appendChild(special_conditions);
 
 		menu_back_fnc = function() {
 			Open_Options();
@@ -1159,18 +1185,20 @@ let MapEditorClass = function() {
 		caption = document.createElement('h3');
 		caption.className = "editor-text w3-rest w3-left-align";
 		caption.style.margin = "0px";
-		caption.innerHTML = "Restrict Units";
+		caption.innerHTML = "Content Available Next Update!";
 
 		button = document.createElement('div');
 		button.className = "w3-button w3-black editor-tab w3-right";
-		button.innerHTML = "OPEN";
-		button.onclick = function(){
-			Open_Special_Conditions();
+		button.innerHTML = "BACK";
+		button.onclick = function() {
+			Open_Options();
+			menu_back_fnc = function() {};
 		};
 
 		special_conditions.appendChild(button);
 		special_conditions.appendChild(caption);
 
+		container.appendChild(special_conditions);
 
 		menu_back_fnc = function() {
 			Open_Options();

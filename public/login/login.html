@@ -12,10 +12,12 @@
 		<img id="loginLogo"></img>
 		<br />
 		<div id="error">Error <div id="errno"></div></div>
-		<input class="textInput" type="text" id="username" placeholder="NAME"></input>
-		<br />
-		<input class="textInput" type="password" id="pass" placeholder="PASSWORD"></input>
-		<br />
+		<form autocomplete="on">
+			<input class="textInput" type="text" id="username" placeholder="NAME" autocomplete="username"></input>
+			<br />
+			<input class="textInput" type="password" id="pass" placeholder="PASSWORD" autocomplete="current-password"></input>
+			<br />
+		</form>
 		<div class="button" id="sendBtn" onclick="sendMsgBtn()">LOGIN</div>
 		<div id="stayOnDiv" onclick="toggleMemory();">
 			<div id="staySignedOn" class="checkmarkbox">&nbsp;</div>
