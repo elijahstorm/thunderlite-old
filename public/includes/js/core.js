@@ -870,6 +870,7 @@ function changeContent(choice, title, dontAsk)
 
 	document.getElementById("LOADINGOVERLAY").style.display = "none";
 	document.getElementById("GAMECONTENT").style.display = "none";
+	document.getElementById("MAPEDITOR").style.display = "none";
 	document.getElementById("MAPSELECTION").style.display = "none";
 	document.getElementById("CONTACT").style.display = "none";
 	document.getElementById("GAMELOBBY").style.display = "none";

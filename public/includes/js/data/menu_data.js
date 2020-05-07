@@ -10,156 +10,20 @@ Menu.Button = [	"#056937",	"#08AF5C",	"#726962",	"#FFB200",	"#4B5148",	"#FDF5BF"
 let MapEditorClass = function() {
 	let initalized = false;
 
-	function Allowed(_tile) {
-		if(ACTIVE_TYPE==TYPES.UNIT)
-		{
-			if(ACTIVE_PLAYER==-1)return false;
-			var _unit = Char_Data.CHARS[ACTIVE_INDEX];
-			var _ter = Terrain_Data.TERRE[map_list[_tile]];
-			if(_ter.Type==7)	// units cannot exist on impassable terrain
-				return false;
-			if(_ter.Type==6)	// ground units cannot traverse sea terrain
-			if(_unit.Type==0)
-				return false;
-			if(_ter.Type==2)	// only foot units can climb rugged terrain
-			if(_unit.Move_Type==1 || _unit.Move_Type==2)
-				return false;
-			if(_ter.Type!=6)	// sea units cannot traverse ground terrain
-			if(_unit.Type==2)
-				return false;
-		}
-		else if(ACTIVE_TYPE==TYPES.CITY)
-		{
-			var _city = Building_Data.PLACE[ACTIVE_INDEX];
-			var _ter = Terrain_Data.TERRE[map_list[_tile]];
-			if(_ter.Type==7)	// cities cannot be on impassable terrain
-				return false;
-			if(_ter.Type==2)	// cities cannot be on rugged terrain
-				return false;
-			if(_ter.Type==6)	// ground cities can't exist on sea terrain
-			if(_city.Terrain==0)
-				return false;
-			if(_ter.Type!=6)	// sea cities can't exist on ground terrain
-			if(_city.Terrain==2)
-				return false;
-		}
-		else if(ACTIVE_TYPE==TYPES.TERRAIN)
-		{
-			var _ter = Terrain_Data.TERRE[ACTIVE_INDEX];
-
-			if(Terrain_Data.Get("Shore")==ACTIVE_INDEX)
-			{			// connections must be near at least one ground and one sea type
-				var ground = false,
-					sea = false,
-					ter_check;
-				if(_tile<map_list.length)
-				{
-					ter_check = Terrain_Data.TERRE[map_list[_tile+1]];
-					if(ter_check.Type==6)
-						sea = true;
-					else if(ter_check.Type<6 && ter_check.Type>=0)
-						ground = true;
-				}
-				if(_tile>0)
-				{
-					ter_check = Terrain_Data.TERRE[map_list[_tile-1]];
-					if(ter_check.Type==6)
-						sea = true;
-					else if(ter_check.Type<6 && ter_check.Type>=0)
-						ground = true;
-				}
-				if(_tile+height<map_list.length)
-				{
-					ter_check = Terrain_Data.TERRE[map_list[_tile+height]];
-					if(ter_check.Type==6)
-						sea = true;
-					else if(ter_check.Type<6 && ter_check.Type>=0)
-						ground = true;
-				}
-				if(_tile-height>0)
-				{
-					ter_check = Terrain_Data.TERRE[map_list[_tile-height]];
-					if(ter_check.Type==6)
-						sea = true;
-					else if(ter_check.Type<6 && ter_check.Type>=0)
-						ground = true;
-				}
-				return (ground && sea);
-			}
-			if(_ter.Type==6)
-			{
-				if(Terrain_Data.Get("Sea")!=ACTIVE_INDEX)
-				{		// sea interior cannot be placed near sea border
-					if(_tile<map_list.length)
-					if(Terrain_Data.TERRE[map_list[_tile+1]].Type!=6)
-						return false;
-					if(_tile>0)
-					if(Terrain_Data.TERRE[map_list[_tile-1]].Type!=6)
-						return false;
-					if(_tile+height<map_list.length)
-					if(Terrain_Data.TERRE[map_list[_tile+height]].Type!=6)
-						return false;
-					if(_tile-height>0)
-					if(Terrain_Data.TERRE[map_list[_tile-height]].Type!=6)
-						return false;
-				}
-			}
-			else if(_ter.Type==8)
-			{			// connections must be near at least one ground and one sea type
-				var ground = false,
-					sea = false,
-					ter_check;
-				if(_tile<map_list.length)
-				{
-					ter_check = Terrain_Data.TERRE[map_list[_tile+1]];
-					if(ter_check.Type==6)
-						sea = true;
-					else if(ter_check.Type<6 && ter_check.Type>=0)
-						ground = true;
-				}
-				if(_tile>0)
-				{
-					ter_check = Terrain_Data.TERRE[map_list[_tile-1]];
-					if(ter_check.Type==6)
-						sea = true;
-					else if(ter_check.Type<6 && ter_check.Type>=0)
-						ground = true;
-				}
-				if(_tile+height<map_list.length)
-				{
-					ter_check = Terrain_Data.TERRE[map_list[_tile+height]];
-					if(ter_check.Type==6)
-						sea = true;
-					else if(ter_check.Type<6 && ter_check.Type>=0)
-						ground = true;
-				}
-				if(_tile-height>0)
-				{
-					ter_check = Terrain_Data.TERRE[map_list[_tile-height]];
-					if(ter_check.Type==6)
-						sea = true;
-					else if(ter_check.Type<6 && ter_check.Type>=0)
-						ground = true;
-				}
-				if(!ground || !sea)
-					return false;
-			}
-		}
-		return true;
-	};
 	let Tile_Array;
+	let self = this;
 
 	let DATA = {
 		id:-1,
 		name:"",
-		width:10,
-		height:10,
+		width:0,
+		height:0,
 		map_list:null,
 		max_players:2,
 		players:2,
-		units:new Array(),
-		cities:new Array(),
-		weather:new Array(3),
+		units:null,
+		cities:null,
+		weather:null,
 		__script__:""
 	};
 	let CHOICE = {
@@ -187,9 +51,171 @@ let MapEditorClass = function() {
 	let TYPE = CHOICE.TERRAIN;
 	let SELECTION = 0;
 	let PAGE = 0;
+	let ACTIVE_PLAYER = 0;
+	let DEFULT_NAMES = ["Red","Blue","Green","Yellow"];
+	let CONTAINER, CANVAS;
 	let BLANK = BLANKIMG.Source();
 	let SFX = SFXs.Retrieve("editor sheet");
 
+			//** Add the game event handler interactions */
+	const tile_size = 40;
+	let scroller, tiling;
+	let LEFT, TOP;
+	let last_handler;
+	let current_interactions = new Array(8);
+	let mousedown = false;
+	let __mousedown_time;
+	const ___touchstart = function(e) {
+
+		e.preventDefault();
+
+		scroller.doTouchStart(e.touches, e.timeStamp);
+		mousedown = true;
+
+		setTimeout(function(){
+			if(!mousedown)return false;
+
+			let x = Math.floor((LEFT+e.layerX)/tile_size),
+				y = Math.floor((TOP+e.layerY)/tile_size);
+
+			SELECT(x, y);
+
+			scroller.doTouchEnd(e.timeStamp);
+		}, 150);
+
+		return false;
+	};
+	const ___touchmove = function(e) {
+		e.preventDefault();
+
+		mousedown = false;
+		scroller.doTouchMove(e.touches, e.timeStamp, e.scale)
+
+		return false;
+	};
+	const ___touchend = function(e) {
+		e.preventDefault();
+		if(e.touches.length==0)return;
+
+		scroller.doTouchEnd(e.timeStamp);
+		mousedown = false;
+
+		return false;
+	};
+	const ___touchcancel = function(e) {
+		e.preventDefault();
+
+		mousedown = false;
+	};
+	const ___mousedown = function(e) {
+		try {
+			__mousedown_time = e.timeStamp;
+			scroller.doTouchStart([e], e.timeStamp);
+			mousedown = true;
+			return false;
+		} catch (e) {
+
+		} finally {
+			return false;
+		}
+	};
+	const ___mouseup = function(e) {
+		try {
+			if(!mousedown)return;
+
+			if(e.timeStamp-__mousedown_time<150)
+			{
+				let x = Math.floor((LEFT+e.layerX)/tile_size),
+				y = Math.floor((TOP+e.layerY)/tile_size);
+
+				SELECT(x, y);
+			}
+
+			scroller.doTouchEnd(e.timeStamp);
+			mousedown = false;
+			return false;
+		} catch (e) {
+
+		} finally {
+			return false;
+		}
+	};
+	const ___contextmenu = function(e) {
+		e.preventDefault();
+		return false;
+	};
+	const ___mousemove = function(e) {
+
+		scroller.doTouchMove([e], e.timeStamp);
+		return false;
+	};
+	const set_current_interactions = function(list) {
+		for(let i=0;i<8;i++)
+		{
+			if(list[i]!=null)
+				current_interactions[i] = list[i];
+		}
+	};
+	const do_current_interaction = function(index, e) {
+		current_interactions[index](e);
+	};
+	const reset_interations = function(){
+		set_current_interactions([
+			___touchstart,	___touchmove,	___touchend,		___touchcancel,
+			___mousedown,		___mouseup,		___contextmenu,	___mousemove]);
+	};
+	reset_interations();
+	const Set_Controls = function(handler) {
+		if(last_handler!=null)
+		{
+			return;
+			last_handler.removeEventListener("touchstart touchmove touchend touchcancel mousedown mouseup contextmenu mousemove");
+			last_handler = null;
+		}
+		if(handler==null)return;
+		last_handler = handler;
+		window.onkeyup = function(e){
+			e = e || window.event;
+			if (e.keyCode == '38') {
+				scroller.scrollBy(0,-tile_size,true);
+			}
+			else if (e.keyCode == '40') {
+				scroller.scrollBy(0,+tile_size,true);
+			}
+			else if (e.keyCode == '37') {
+				scroller.scrollBy(-tile_size,0,true);
+			}
+			else if (e.keyCode == '39') {
+				scroller.scrollBy(+tile_size,0,true);
+			}
+		};
+		handler.addEventListener("touchstart", function(e){
+			do_current_interaction(0, e);
+		});
+		handler.addEventListener("touchmove", function(e){
+			do_current_interaction(1, e);
+		});
+		handler.addEventListener("touchend", function(e){
+			do_current_interaction(2, e);
+		});
+		handler.addEventListener("touchcancel", function(e){
+			do_current_interaction(3, e);
+		});
+		handler.addEventListener("mousedown", function(e){
+			do_current_interaction(4, e);
+		});
+		handler.addEventListener("mouseup", function(e){
+			do_current_interaction(5, e);
+		});
+		handler.addEventListener("contextmenu", function(e){
+			do_current_interaction(6, e);
+		});
+		handler.addEventListener("mousemove", function(e){
+			do_current_interaction(7, e);
+		});
+	};
+
+		//** SERVER */
 	function send_map_data_to_server(type, data) {
 		if(!online)return;
 		if(SERVER.new_map && type=='update')
@@ -198,8 +224,11 @@ let MapEditorClass = function() {
 		socket.emit('mapdata '+type, socket.password, data);
 	}
 	function display_server_saved_maps(fnc1, fnc2, fnc3) {
+		Clean_Popup_Screen();
+
 		let _read_game_data = new Array(9),
 			_data_text = new Array(9),
+			_casings = new Array(9),
 			_game_imgs = new Array(9);
 		if(fnc1==null) {
 			fnc1 = function(_load){
@@ -253,7 +282,6 @@ let MapEditorClass = function() {
 					_read_game_data[index] = Map_Reader.String(_data_text[index]);
 					_read_game_data[index].id = curMap.map_id;
 					_read_game_data[index].uploaded = curMap.uploaded;
-
 					if(_read_game_data[index].Valid)
 					{
 						setTimeout(function(index){
@@ -268,77 +296,115 @@ let MapEditorClass = function() {
 							Canvas.ScaleImageData(ctx, INTERFACE.Get_Sample(sampledGame), 0, 0, 10/sampledGame.Terrain_Map.Width, 10/sampledGame.Terrain_Map.Height);
 
 							_game_imgs[index].src = canvas.toDataURL("image/png");
+							_casings[index].childNodes[0].remove();
 							sampledGame.End_Game();
-						}, 5, index);
+
+							let caption = document.createElement('p');
+							caption.innerHTML = _read_game_data[index].Name;
+							caption.style.margin = "0px";
+							caption.style.overflow = "hidden";
+							caption.style.transform = "translate(0px, -4px)";
+							caption.style.background = "#ccc859";
+							caption.style.color = "#000";
+							caption.style.borderRadius = "10px";
+
+							let delete_btn = document.createElement('div');
+							delete_btn.className = "w3-button w3-red";
+							delete_btn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+							delete_btn.style.borderRadius = "15px";
+							delete_btn.style.transform = "translate(0px, 4px)";
+							delete_btn.onclick = function() {
+								if(!confirm("Do you really want to delete "+_read_game_data[index].Name+"?"))return;
+								send_map_data_to_server(SERVER.DELETE, _read_game_data[index].id);
+							};
+
+							_casings[index].appendChild(caption);
+							_casings[index].appendChild(_game_imgs[index]);
+
+							if(_read_game_data[index].uploaded)
+							{
+								let uploaded = document.createElement('img');
+								uploaded.src = Images.Retrieve("Uploaded").Source();
+								uploaded.style.display = "inline";
+								uploaded.style.width = "30px";
+								uploaded.style.transform = "translate(-15px, -40px)";
+								delete_btn.style.transform = "translate(-15px, 4px)";
+								_casings[index].appendChild(uploaded);
+							}
+
+							_casings[index].appendChild(delete_btn);
+						}, 15, index);
 					}
 				} catch (e) {
 					_read_game_data[index] = null;
+					LOG.popup("Issue reading map #"+index);
 					console.error(e);
 				}
 			}
 
 			let container = document.getElementById("e-p-content"),
-				casing, img, uploaded, delete_btn;
-			for(let i=0;i<container.childNodes.length;)
-			{
-				container.childNodes[i].remove();
-			}
+				casing, img, loading_icon;
+			Clean_Popup_Screen(container);
 
 			for(let i=0;i<9;i++)
 			{
 				casing = document.createElement('div');
+				_casings[i] = casing;
 				casing.style.width = "25%";
 				casing.style.margin = "10px";
 				casing.style.display = "inline-block";
+				casing.style.cursor = "pointer";
+				casing.onclick = function() {
+					self.Open(i, _read_game_data[i]);
+				};
 				container.appendChild(casing);
 
 				if(_read_game_data[i]!=null)
 				{	// image display
 					_game_imgs[i] = document.createElement('img');
-					_game_imgs[i].onclick = function() {
-						self.Open(i, _read_game_data[i]);
-					};
-					delete_btn = document.createElement('img');
-					delete_btn.onclick = function() {
-						if(!confirm("Do you really want to delete "+_read_game_data[i].Name+"?"))return;
-						send_map_data_to_server(SERVER.DELETE, _read_game_data[i].id);
-					};
-					casing.appendChild(delete_btn);
+
+					loading_icon = document.createElement('div');
+					loading_icon.innerHTML = '<div class="lds-ellipsis"><div></div><div></div><div></div></div>';
+					loading_icon.style.backgroundColor = "lightgrey";
+					casing.appendChild(loading_icon);
 				}
 				else
 				{	// empty new game here
+					casing.style.transform = "translate(0px,-60px)";
 					_game_imgs[i] = document.createElement('div');
+					_game_imgs[i].innerHTML = '<i class="w3-padding-32 fas fa-plus-square"></i>';
+					_game_imgs[i].style.backgroundColor = "aqua";
 					_game_imgs[i].onclick = function() {
 						self.Open(i);
 					};
+					casing.appendChild(_game_imgs[i]);
 				}
 				_game_imgs[i].style.maxWidth = "100%";
-				_game_imgs[i].innerHTML = '<i class="fas fa-plus-square"></i>';
-				_game_imgs[i].style.height = "100%";
-				_game_imgs[i].style.backgroundColor = "aqua";
 				_game_imgs[i].style.borderRadius = "5px";
-				casing.appendChild(_game_imgs[i]);
 			}
 		});
 
 		send_map_data_to_server(SERVER.LOAD);
 		document.getElementById("editor-popup").style.display = "block";
+		document.getElementById("editor-popup").onclick = function() {
+			document.getElementById("editor-popup").style.display = 'none';
+		};
 	}
 	function map_data_to_str() {
-		var str = ""+DATA.id+";";
+		let str = ""+DATA.id+";";
 		str+=DATA.name+";";
 		str+=DATA.width+";";
 		str+=DATA.height+";";
-		for(var i=0;i<DATA.map_list.length;i++)
+		for(let i=0;i<DATA.map_list.length;i++)
 		str+=DATA.map_list[i]+":";
 		str+=";";
-		for(var i=0;i<DATA.max_players;i++)
+		for(let i=0;i<DATA.max_players;i++)
 		str+=DATA.players[i]+":";
 		str+=";";
-		for(var i=0;i<DATA.units.length;i++)
+		for(let i=0;i<DATA.units.length;i++)
 		str+=DATA.units[i]+":";
 		str+=";";
-		for(var i=0;i<DATA.cities.length;i++)
+		for(let i=0;i<DATA.cities.length;i++)
 		str+=DATA.cities[i]+":";
 		str+=";";
 		str+=(DATA.weather[0] ? "1" : "0");
@@ -347,7 +413,6 @@ let MapEditorClass = function() {
 			str+=""+DATA.weather[j][0]+""+DATA.weather[j][1]+"-"+DATA.weather[j][2]+":";
 		}
 		str+=";";
-
 		return str+DATA.__script__+";";
 	}
 	this.Server_Response = {
@@ -366,6 +431,755 @@ let MapEditorClass = function() {
 		}
 	};
 
+			//** MAP SIZE */
+	function make_map_bigger(new_x, new_y, start_x, start_y) {
+		var new_list = new Array(new_x*new_y),
+			_new = 0,
+			_old = 0;
+
+		for(let x=0;x<new_x;x++)
+		{
+			for(let y=0;y<new_y;y++)
+			{
+				if((x>=start_x && y>=start_y) && (x<DATA.width+start_x && y<DATA.height+start_y))
+				{
+					new_list[_new++] = DATA.map_list[_old++];
+				}
+				else new_list[_new++] = 1;
+			}
+		}
+
+		DATA.width = new_x;
+		DATA.height = new_y;
+		DATA.map_list = new_list;
+
+		for(let i in DATA.units)
+		{
+			DATA.units[i][1]+=start_x;
+			DATA.units[i][2]+=start_y;
+		}
+		for(let i in DATA.cities)
+		{
+			DATA.cities[i][1]+=start_x;
+			DATA.cities[i][2]+=start_y;
+		}
+	}
+	function make_map_smaller(new_x, new_y, start_x, start_y) {
+		var new_list = new Array(new_x*new_y),
+			_new = 0,
+			_old = start_x*DATA.height+start_y;
+
+		for(let x=0;x<DATA.width;x++)
+		{
+			for(let y=0;y<DATA.height;y++)
+			{
+				if(x>=new_x || y>=new_y)
+				{
+					_old++;
+					continue;
+				}
+				new_list[_new++] = DATA.map_list[_old++];
+			}
+		}
+
+		DATA.width = new_x;
+		DATA.height = new_y;
+		DATA.map_list = new_list;
+
+		for(let i=DATA.units.length-1;i>=0;i--)
+		{
+			DATA.units[i][1]-=start_x;
+			DATA.units[i][2]-=start_y;
+			if(DATA.units[i][1]<0 || DATA.units[i][2]<0)
+				DATA.units.splice(i, 1);
+			else if(DATA.units[i][1]>=DATA.width || DATA.units[i][2]>=DATA.height)
+				DATA.units.splice(i, 1);
+		}
+		for(let i=DATA.cities.length-1;i>=0;i--)
+		{
+			DATA.cities[i][1]-=start_x;
+			DATA.cities[i][2]-=start_y;
+			if(DATA.cities[i][1]<0 || DATA.cities[i][2]<0)
+				DATA.cities.splice(i, 1);
+			else if(DATA.cities[i][1]>=DATA.width || DATA.cities[i][2]>=DATA.height)
+				DATA.cities.splice(i, 1);
+		}
+	}
+	function Change_Map_Size(x, y, start_x, start_y ){	// in here puts the tile click controls
+		if(x>30 || y>30)return;
+		if(x<10 || y<10)return;
+		if(x==DATA.width && y==DATA.height)return;
+
+		if(DATA.map_list==null)
+		{	// make new map
+			DATA.width = x;
+			DATA.height = y;
+			DATA.map_list = new Array(DATA.width*DATA.height);
+			for(let i=0;i<DATA.map_list.length;i++)
+			{
+				DATA.map_list[i] = 1;
+			}
+		} else {	// this is to resize map
+			if(start_x==null)
+				start_x = 0;
+			if(start_y==null)
+				start_y = 0;
+			if(x>DATA.width)
+				make_map_bigger(x, DATA.height, start_x, 0);
+			if(x<DATA.width)
+				make_map_smaller(x, DATA.height, start_x, 0);
+			if(y>DATA.height)
+				make_map_bigger(DATA.width, y, 0, start_y);
+			if(y<DATA.height)
+				make_map_smaller(DATA.width, y, 0, start_y);
+		}
+	}
+
+			//** PLAYERS */
+	function add_player() {	// increase max players
+		if(DATA.max_players>=4)
+		{
+			DATA.max_players = 4;
+			return false;
+		}
+		DATA.players.push(DEFULT_NAMES[DATA.max_players]);
+		DATA.max_players++;
+		return true;
+	}
+	function remove_player(PLAYER, callback) {	// decrease max players
+		if(DATA.max_players<=2)return;
+		if(PLAYER==NaN)return;
+		PLAYER = Math.floor(PLAYER);
+		if(PLAYER<0)return;
+		if(PLAYER>=4)return;
+
+			// This will remove the player. Is that okay?
+		let container = document.getElementById("e-p-content"),
+			question, yes_btn, no_btn;
+		Clean_Popup_Screen(container);
+
+		question = document.createElement("p");
+		question.className = "editor-border w3-sand";
+		question.innerHTML = "This will remove all of Player "+(PLAYER+1)+"'s units and cities. It won't change the script.<br />Make sure to check your script after to make sure it still works!<br /><br />Are you okay with this?";
+
+		yes_btn = document.createElement('div');
+		yes_btn.className = "w3-button w3-green w3-inline";
+		yes_btn.innerHTML = "Yes";
+		yes_btn.onclick = function(){
+			DATA.max_players--;
+			for(let i=DATA.units.length-1;i>=0;i--)
+			{
+				if(DATA.units[i][3]==PLAYER)
+					DATA.units.splice(i, 1);
+				else if(DATA.units[i][3]>PLAYER)
+					DATA.units[i][3]--;
+			}
+			for(let i=DATA.cities.length-1;i>=0;i--)
+			{
+				if(DATA.cities[i][3]==PLAYER)
+					DATA.cities.splice(i, 1);
+				else if(DATA.cities[i][3]>PLAYER)
+					DATA.cities[i][3]--;
+			}
+			document.getElementById('editor-players-amount').innerHTML = DATA.max_players;
+			DATA.players.splice(PLAYER, 1);
+			if(callback!=null) callback();
+		};
+
+		no_btn = document.createElement('div');
+		no_btn.className = "w3-button w3-red w3-inline";
+		no_btn.innerHTML = "No";
+
+		container.appendChild(question);
+		container.appendChild(yes_btn);
+		container.appendChild(no_btn);
+		document.getElementById("editor-popup").style.display = "block";
+		document.getElementById("editor-popup").onclick = function() {
+			document.getElementById("editor-popup").style.display = 'none';
+		};
+	}
+	function change_active_player(PLAYER) {
+		if(PLAYER>=DATA.max_players)return;
+		if(PLAYER<0)return;
+		if(PLAYER==NaN)return;
+
+		ACTIVE_PLAYER = PLAYER;
+		document.getElementById('editor-color-changer0').style.backgroundColor = data_to_hex(Team_Colors.Color[ACTIVE_PLAYER+1][0]);
+		document.getElementById('editor-color-changer1').style.backgroundColor = data_to_hex(Team_Colors.Color[ACTIVE_PLAYER+1][0]);
+	}
+
+			//** POP UP SCREENS */
+	let menu_back_fnc = function() {};
+	function Clean_Popup_Screen(container) {
+
+		if(container==null)
+			container = document.getElementById("e-p-content");
+		for(let i=0;i<container.childNodes.length;)
+		{
+			container.childNodes[i].remove();
+		}
+	}
+	function Open_Script_Editor() {
+
+		let learnMoreLink = document.createElement('a');
+		learnMoreLink.href = "/about/script";
+		learnMoreLink.innerHTML = "Learn ThunderLite scripting";
+		learnMoreLink.target = "_blank";
+		learnMoreLink.id = "learnScriptLink";
+		learnMoreLink.style.color = "#28C5D3";
+		learnMoreLink.className = "w3-black w3-button"
+		learnMoreLink.style.position = "absolute";
+		learnMoreLink.style.left = "20px";
+		learnMoreLink.style.top = "10px";
+
+		let container = document.getElementById("e-p-content");
+		Clean_Popup_Screen(container);
+
+		let textarea = document.createElement('textarea');
+		textarea.style.width = "100%";
+		textarea.style.height = "300px";
+		textarea.style.display = "block";
+		textarea.value = DATA.__script__;
+		textarea.focus();
+
+		function scriptIsValid(_script) {
+			if(_script.charAt(0)=='.')
+			{	// test error
+				return 10;
+			}
+			return 0;
+		}
+		function save_fnc() {
+			let err = scriptIsValid(textarea.value);
+			if(err!=0)
+			{
+				LOG.popup("Invalid game script",err);
+				return;
+			}
+			__script__ = textarea.value;
+			Edited();
+			render(LEFT, TOP);
+		}
+
+		let save_btn = document.createElement('div');
+		save_btn.className = "w3-button w3-green w3-inline w3-xlarge";
+		save_btn.innerHTML = '<i class="fas fa-save"></i><div class="w3-hide-small"> SAVE</div>';
+		save_btn.onclick = function(e) {
+			save_fnc();
+		};
+
+		let exit_btn = document.createElement('div');
+		exit_btn.className = "w3-button w3-red w3-inline w3-xlarge";
+		exit_btn.innerHTML = '<i class="fas fa-times"></i><div class="w3-hide-small"> EXIT</div>';
+		exit_btn.onclick = function(e) {
+			document.getElementById("editor-popup").style.display = "none";
+		};
+
+		container.appendChild(learnMoreLink);
+		container.appendChild(textarea);
+		container.appendChild(save_btn);
+		container.appendChild(exit_btn);
+		document.getElementById("editor-popup").style.display = "block";
+		document.getElementById("editor-popup").onclick = function() {};
+	}
+	function Open_Player_Info_Editor(PLAYER, NAME) {
+		if(PLAYER>=DATA.max_players)return;
+		if(PLAYER<0)return;
+
+		let container = document.getElementById("e-p-content");
+		Clean_Popup_Screen(container);
+
+		let title = document.createElement('p');
+		title.innerHTML = "Player # "+(PLAYER+1);
+		title.className = "editor-third editor-border w3-sand";
+
+		let textarea = document.createElement('input');
+		textarea.className = "w3-rest";
+		textarea.value = DATA.players[PLAYER];
+		textarea.focus();
+
+		function save_fnc() {
+			if(textarea.value==0 || textarea.value==null)
+			{
+				LOG.popup("Can't have no name.");
+				return;
+			}
+			if(textarea.value.length>=14)
+			{
+				LOG.popup("Name is too long.");
+				return;
+			}
+			if(textarea.value.indexOf(".")==-1)
+			if(textarea.value.indexOf("/")==-1)
+			if(textarea.value.indexOf("\\")==-1)
+			if(textarea.value.indexOf(":")==-1)
+			if(textarea.value.indexOf(";")==-1)
+			if(textarea.value.indexOf("-")==-1)
+			if(textarea.value.indexOf("(")==-1)
+			if(textarea.value.indexOf(")")==-1)
+			if(textarea.value.indexOf("[")==-1)
+			if(textarea.value.indexOf("]")==-1)
+			if(textarea.value.indexOf("{")==-1)
+			if(textarea.value.indexOf("]")==-1)
+			{
+				DATA.players[PLAYER] = textarea.value;
+				NAME.innerHTML = textarea.value;
+				Edited();
+				return;
+			}
+			LOG.popup("Can't use those characters in the name.");
+		}
+
+		let save_btn = document.createElement('div');
+		save_btn.className = "w3-button w3-green w3-inline w3-xlarge";
+		save_btn.innerHTML = '<i class="fas fa-save"></i><div class="w3-hide-small"> SAVE</div>';
+		save_btn.onclick = function(e) {
+			save_fnc();
+		};
+
+		let exit_btn = document.createElement('div');
+		exit_btn.className = "w3-button w3-red w3-inline w3-xlarge";
+		exit_btn.innerHTML = '<i class="fas fa-times"></i><div class="w3-hide-small"> EXIT</div>';
+		exit_btn.onclick = function(e) {
+			document.getElementById("editor-popup").style.display = "none";
+		};
+
+		container.appendChild(title);
+		container.appendChild(textarea);
+		container.appendChild(save_btn);
+		container.appendChild(exit_btn);
+		document.getElementById("editor-popup").style.display = "block";
+		document.getElementById("editor-popup").onclick = function() {};
+	}
+	function Open_Players_Editor() {
+			/// Slide up
+		let SLIDE = document.getElementById('editor-slide-up');
+		SLIDE.className += " editor-slide-open";
+
+		let close_p_fnc = function() {
+			SLIDE.className = "editor-border w3-col w3-content w3-sand";
+			self.Players = Open_Players_Editor;
+		};
+		document.getElementById('editor-slide-close').onclick = close_p_fnc;
+		this.Players = close_p_fnc;
+
+			/// Show current data
+		document.getElementById('editor-players-amount').innerHTML = DATA.max_players;
+		let LIST_CONTAINER = document.getElementById('editor-players-list');
+		for(let i=0;i<LIST_CONTAINER.childNodes.length;)
+			LIST_CONTAINER.childNodes[0].remove();
+
+		function create_player(ADDITION) {
+			let casing = document.createElement('div'),
+				remove = document.createElement('div'),
+				edit = document.createElement('div'),
+				name = document.createElement('div');
+
+			casing.className = "editor-border editor-tab";
+			casing.style.backgroundColor = data_to_hex(Team_Colors.Color[ADDITION+1][0]);
+			casing.style.maxHeight = "72px";
+
+			name.className = "w3-padding-16 editor-margin w3-center";
+			name.innerHTML = DATA.players[ADDITION];
+			name.onclick = function() {
+				change_active_player(ADDITION);
+			};
+
+			remove.className = "editor-half editor-border w3-button w3-black w3-small";
+			remove.innerHTML = "<i class='fas fa-minus'></i>";
+			remove.onclick = function() {
+				remove_player(ADDITION, function() {
+					self.Players();
+					render(LEFT, TOP);
+					self.Players();
+				});
+			};
+
+			edit.className = "editor-half editor-border w3-button w3-small";
+			edit.innerHTML = "<i class='fas fa-edit'></i>";
+			edit.onclick = function() {
+				Open_Player_Info_Editor(ADDITION, name);
+			};
+
+			casing.appendChild(remove);
+			casing.appendChild(edit);
+			casing.appendChild(name);
+			return casing;
+		}
+		for(let i=0;i<DATA.max_players;i++)
+		{
+			LIST_CONTAINER.appendChild(create_player(i));
+		}
+
+		document.getElementById('editor-players-plus').onclick = function() {
+			if(add_player()) LIST_CONTAINER.appendChild(create_player(DATA.max_players-1));
+			document.getElementById('editor-players-amount').innerHTML = DATA.max_players;
+		};
+	}
+	function Open_Weather_Editor() {
+
+		let container = document.getElementById("e-p-content");
+		Clean_Popup_Screen(container);
+
+		let pallette = ["#EFCA8B", "#8BAFED", "#8AD7EA", "#E88888"];
+		let __weather = [Images.Retrieve("Sunny Icon"), Images.Retrieve("Rainy Icon"), Images.Retrieve("Snowy Icon"), Images.Retrieve("Heat Icon")];
+		let __names = ["Sunny", "Rainy", "Snowy", "Dry Heat"];
+		let turn = DATA.weather.length-1;
+		const STATIC_RATE = 1;
+		let __cur_data = new Array(turn), __weather_pie_data;
+		let __start_turn = 0;
+
+		if(turn==0)
+		{
+			turn = 1;
+			__cur_data.push(0);
+		}
+		else
+		{
+			for(let i=0;i<turn;i++)
+			{
+				__cur_data[i] = DATA.weather[i+1][0];
+			}
+		}
+
+		let PIE = document.createElement('div');
+		PIE.style.width = "100%";
+		PIE.style.height = "300px";
+		let TIMELINE = document.createElement('div');
+		TIMELINE.style.width = "100%";
+		TIMELINE.style.height = "300px";
+
+		function updateWeather() {
+			turn = __cur_data.length;
+			__weather_pie_data = new Array(turn);
+			for(let i=0;i<turn;i++)
+			{
+				__weather_pie_data[i] = [__cur_data[i], pallette[__cur_data[i]], __weather[__cur_data[i]]];
+			}
+			display_chart();
+		}
+		function display_chart() {
+			Clean_Popup_Screen(PIE);
+			Clean_Popup_Screen(TIMELINE);
+
+			let __PIE_CHART = document.createElement('canvas');
+			__PIE_CHART.width = PIE.clientWidth;
+			__PIE_CHART.height = PIE.clientHeight;
+			PIE.appendChild(__PIE_CHART);
+			let __TIME_CHART = document.createElement('canvas');
+			__TIME_CHART.width = PIE.clientWidth;
+			__TIME_CHART.height = PIE.clientHeight;
+			TIMELINE.appendChild(__TIME_CHART);
+
+			let __weather_pie = new Array(turn),
+				__weather_colors = new Array(turn),
+				__weather_pie_label = new Array(turn);
+			for (let _p = 0; _p < turn; _p++) {
+				__weather_pie[_p] = STATIC_RATE;
+				__weather_colors[_p] = __weather_pie_data[_p][1];
+				__weather_pie_label[_p] = __names[__weather_pie_data[_p][0]];
+			}
+
+			let __data_turns = new Array(turn),
+				__weather_line = new Array(turn);
+			for (let _t = 0; _t < turn; _t++) {
+				__data_turns[_t] = "Turn "+(_t+1);
+			}
+
+			new Chart(__PIE_CHART.getContext('2d'), { // pie chart
+
+				type: 'doughnut',
+				data: {
+					labels: __weather_pie_label,
+					datasets: [{
+						data: __weather_pie,
+						backgroundColor: __weather_colors
+					}]
+				},
+				options: {
+  				legend: { display: false }
+    		}
+			});
+
+			new Chart(__TIME_CHART.getContext('2d'), { // pie chart
+
+				type: 'doughnut',
+				data: {
+					labels: __weather_pie_label,
+					datasets: [{
+						data: __weather_pie,
+						backgroundColor: __weather_colors
+					}]
+				},
+				options: {
+  				legend: { display: false }
+    		}
+			});
+		}
+		function sendPatternToData() {
+			DATA.weather = [DATA.weather[0]];
+			for(let i=0;i<turn;i++)
+			{
+				DATA.weather.push([__cur_data[i], __start_turn+i, turn]);
+			}
+			Edited();
+		}
+
+		let save_btn = document.createElement('div');
+		save_btn.className = "w3-button w3-green w3-inline w3-xlarge";
+		save_btn.innerHTML = '<i class="fas fa-save"></i><div class="w3-hide-small"> SAVE</div>';
+		save_btn.onclick = function(e) {
+			sendPatternToData();
+		};
+
+		let del_btn = document.createElement('div');
+		del_btn.className = "w3-button w3-red w3-inline w3-xlarge";
+		del_btn.innerHTML = '<i class="fas fa-backspace"></i><div class="w3-hide-small"> DELETE</div>';
+		del_btn.onclick = function(e) {
+			if(turn<=1)return;
+			turn--;
+			__weather_pie_data.pop();
+			__cur_data.pop();
+			display_chart();
+		};
+
+		function weather_click_adder(type)
+		{
+			if(turn>=12)return;
+			__cur_data.push(type);
+			updateWeather();
+		};
+
+		let casing, img;
+	  for(let i=0;i<Weather_Data.Global_Amount;i++)
+	  {
+			casing = document.createElement('div');
+			casing.className = "editor-tab w3-button";
+			casing.style.backgroundColor = pallette[i];
+			casing.style.borderRadius = "90px";
+			casing.style.padding = "5px";
+			casing.onclick = function() {
+				weather_click_adder(i);
+			};
+
+			img = document.createElement('img');
+			img.src = Weather_Data.Get_Global(i).Icon.Source();
+
+			casing.appendChild(img);
+			container.appendChild(casing);
+		}
+
+		updateWeather();
+
+		container.appendChild(PIE);
+		container.appendChild(TIMELINE);
+		container.appendChild(del_btn);
+		container.appendChild(save_btn);
+
+		document.getElementById("editor-popup").style.display = "block";
+		document.getElementById("editor-popup").onclick = function() {};
+	}
+
+	function Open_Options() {
+
+		document.getElementById('editor-menu-back-btn').style.display = "none";
+
+		let container = document.getElementById("e-p-content");
+		Clean_Popup_Screen(container);
+
+		let caption, button;
+
+
+		/// 1) make special conditions
+
+		let special_conditions = document.createElement('div');
+		special_conditions.className = "editor-options-list";
+
+		caption = document.createElement('h3');
+		caption.className = "editor-text w3-rest w3-left-align";
+		caption.style.margin = "0px";
+		caption.innerHTML = "Special Conditions";
+
+		button = document.createElement('div');
+		button.className = "w3-button w3-black editor-tab w3-right";
+		button.innerHTML = "OPEN";
+		button.onclick = function(){
+			Open_Special_Conditions();
+		};
+
+		special_conditions.appendChild(button);
+		special_conditions.appendChild(caption);
+
+
+		/// 2) limit units that can be built
+
+		let limit_units = document.createElement('div');
+		limit_units.className = "editor-options-list";
+
+		caption = document.createElement('h3');
+		caption.className = "editor-text w3-rest w3-left-align";
+		caption.style.margin = "0px";
+		caption.innerHTML = "Restrict Units";
+
+		button = document.createElement('div');
+		button.className = "w3-button w3-black editor-tab w3-right";
+		button.innerHTML = "OPEN";
+		button.onclick = function(){
+			Open_Restrict_Units();
+		};
+
+		limit_units.appendChild(button);
+		limit_units.appendChild(caption);
+
+
+		/// 3) fog of war option
+
+		let fog_of_war = document.createElement('div');
+		fog_of_war.className = "editor-options-list";
+
+		caption = document.createElement('h3');
+		caption.className = "editor-text w3-rest w3-left-align";
+		caption.style.margin = "0px";
+		caption.innerHTML = "Fog of War";
+
+		button = document.createElement('div');
+		const fog_btn = button;
+		function check_fog() {
+			fog_btn.innerHTML = (DATA.weather[0]) ? "ON" : "OFF";
+			fog_btn.className = "w3-button editor-tab w3-right w3-blue" + ((DATA.weather[0]) ? "" : "-grey");
+		}
+		button.onclick = function(){
+			DATA.weather[0] = (DATA.weather[0]) ? false : true;
+			check_fog();
+			Edited();
+		};
+		check_fog();
+
+		fog_of_war.appendChild(button);
+		fog_of_war.appendChild(caption);
+
+
+		/// 4) map size change
+
+		let map_sizer = document.createElement('div');
+		map_sizer.className = "editor-options-list";
+
+		caption = document.createElement('h3');
+		caption.className = "editor-text w3-rest w3-left-align";
+		caption.style.margin = "0px";
+		caption.innerHTML = "Change Map Size";
+
+		button = document.createElement('div');
+		button.className = "w3-button w3-black editor-tab w3-right";
+		button.innerHTML = "OPEN";
+		button.onclick = function(){
+			Open_Map_Size();
+		};
+
+		map_sizer.appendChild(button);
+		map_sizer.appendChild(caption);
+
+
+		container.appendChild(special_conditions);
+		container.appendChild(limit_units);
+		container.appendChild(fog_of_war);
+		container.appendChild(map_sizer);
+
+		document.getElementById("editor-popup").style.display = "block";
+		document.getElementById("editor-popup").onclick = function() {};
+	}
+		/// STILL TO DO
+	function Open_Map_Size() {
+
+		let container = document.getElementById("e-p-content");
+		Clean_Popup_Screen(container);
+
+		let caption, button;
+
+		// Change_Map_Size(width+1, height, 0, 0); // >
+		// Change_Map_Size(width+1, height, 1, 0); // <
+		// Change_Map_Size(width, height+1, 0, 1); // ^
+		// Change_Map_Size(width, height+1, 0, 0); // V
+		//
+		//
+		// Change_Map_Size(width-1, height, 1, 0); // >
+		// Change_Map_Size(width-1, height, 0, 0); // <
+		// Change_Map_Size(width, height-1, 0, 1); // ^
+		// Change_Map_Size(width, height-1, 0, 0); // V
+
+
+		menu_back_fnc = function() {
+			Open_Options();
+			menu_back_fnc = function() {};
+		};
+		document.getElementById('editor-menu-back-btn').style.display = "block";
+	}
+	function Open_Special_Conditions() {
+
+		let container = document.getElementById("e-p-content");
+		Clean_Popup_Screen(container);
+
+		let caption, button;
+
+		let special_conditions = document.createElement('div');
+		special_conditions.className = "editor-options-list";
+
+		caption = document.createElement('h3');
+		caption.className = "editor-text w3-rest w3-left-align";
+		caption.style.margin = "0px";
+		caption.innerHTML = "Special Conditions";
+
+		button = document.createElement('div');
+		button.className = "w3-button w3-black editor-tab w3-right";
+		button.innerHTML = "OPEN";
+		button.onclick = function(){
+			Open_Special_Conditions();
+		};
+
+		special_conditions.appendChild(button);
+		special_conditions.appendChild(caption);
+
+
+		menu_back_fnc = function() {
+			Open_Options();
+			menu_back_fnc = function() {};
+		};
+		document.getElementById('editor-menu-back-btn').style.display = "block";
+	}
+	function Open_Restrict_Units() {
+
+		let container = document.getElementById("e-p-content");
+		Clean_Popup_Screen(container);
+
+		let caption, button;
+
+		let special_conditions = document.createElement('div');
+		special_conditions.className = "editor-options-list";
+
+		caption = document.createElement('h3');
+		caption.className = "editor-text w3-rest w3-left-align";
+		caption.style.margin = "0px";
+		caption.innerHTML = "Restrict Units";
+
+		button = document.createElement('div');
+		button.className = "w3-button w3-black editor-tab w3-right";
+		button.innerHTML = "OPEN";
+		button.onclick = function(){
+			Open_Special_Conditions();
+		};
+
+		special_conditions.appendChild(button);
+		special_conditions.appendChild(caption);
+
+
+		menu_back_fnc = function() {
+			Open_Options();
+			menu_back_fnc = function() {};
+		};
+		document.getElementById('editor-menu-back-btn').style.display = "block";
+	}
+
+			//** MUSIC AND ART */
 	let MUSIC_CHANGING = false;
 	function Change_Music(change) {
 		if(MUSIC_CHANGING)return;
@@ -378,7 +1192,10 @@ let MapEditorClass = function() {
 	function Play_Placement_SFX() {
 		SFX.Play_Out(Math.floor(Math.random()*(SFX.Sprite_Amount())));
 	}
-	function refreshChoiceImages() {
+
+			//** SIMPLE EDITING */
+	let RECENTLY_SAVED = true;
+	function refresh_choice_images() {
 		let image_list;
 		if(TYPE==CHOICE.TERRAIN)
 		 	image_list = Terrain_Data.TERRE;
@@ -408,22 +1225,22 @@ let MapEditorClass = function() {
 		if(changeTo==CHOICE.TERRAIN)
 		{
 			TYPE = CHOICE.TERRAIN;
-			refreshChoiceImages();
+			refresh_choice_images();
 		}
 		else if(changeTo==CHOICE.UNITS)
 		{
 			TYPE = CHOICE.UNITS;
-			refreshChoiceImages();
+			refresh_choice_images();
 		}
 		else if(changeTo==CHOICE.CITY)
 		{
 			TYPE = CHOICE.CITY;
-			refreshChoiceImages();
+			refresh_choice_images();
 		}
 		else if(changeTo==CHOICE.WEATHER)
 		{
 			TYPE = CHOICE.WEATHER;
-			refreshChoiceImages();
+			refresh_choice_images();
 		}
 		else if(changeTo==CHOICE.ERASE)
 			TYPE = CHOICE.ERASE;
@@ -435,153 +1252,354 @@ let MapEditorClass = function() {
 		SELECTION = index;
 		document.getElementById("editor-selection" + SELECTION).className += " editor-selected";
 	}
-	function SELECT(tile) {
-		var _x = Math.floor(tile/DATA.height);
-		var _y = tile%DATA.height;
+	function Allowed(_tile) {
+		if(TYPE==CHOICE.UNIT)
+		{
+			if(ACTIVE_PLAYER==-1)return false;
+			var _unit = Char_Data.CHARS[SELECTION];
+			var _ter = Terrain_Data.TERRE[DATA.map_list[_tile]];
+			if(_ter.Type==7)	// units cannot exist on impassable terrain
+				return false;
+			if(_ter.Type==6)	// ground units cannot traverse sea terrain
+			if(_unit.Type==0)
+				return false;
+			if(_ter.Type==2)	// only foot units can climb rugged terrain
+			if(_unit.Move_Type==1 || _unit.Move_Type==2)
+				return false;
+			if(_ter.Type!=6)	// sea units cannot traverse ground terrain
+			if(_unit.Type==2)
+				return false;
+		}
+		else if(TYPE==CHOICE.CITY)
+		{
+			var _city = Building_Data.PLACE[SELECTION];
+			var _ter = Terrain_Data.TERRE[DATA.map_list[_tile]];
+			if(_ter.Type==7)	// cities cannot be on impassable terrain
+				return false;
+			if(_ter.Type==2)	// cities cannot be on rugged terrain
+				return false;
+			if(_ter.Type==6)	// ground cities can't exist on sea terrain
+			if(_city.Terrain==0)
+				return false;
+			if(_ter.Type!=6)	// sea cities can't exist on ground terrain
+			if(_city.Terrain==2)
+				return false;
+		}
+		else if(TYPE==CHOICE.TERRAIN)
+		{
+			var _ter = Terrain_Data.TERRE[SELECTION];
+
+			if(Terrain_Data.Get("Shore")==SELECTION)
+			{			// connections must be near at least one ground and one sea type
+				var ground = false,
+					sea = false,
+					ter_check;
+				if(_tile<DATA.map_list.length)
+				{
+					ter_check = Terrain_Data.TERRE[DATA.map_list[_tile+1]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile>0)
+				{
+					ter_check = Terrain_Data.TERRE[DATA.map_list[_tile-1]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile+height<DATA.map_list.length)
+				{
+					ter_check = Terrain_Data.TERRE[DATA.map_list[_tile+height]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile-height>0)
+				{
+					ter_check = Terrain_Data.TERRE[DATA.map_list[_tile-height]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				return (ground && sea);
+			}
+			if(_ter.Type==6)
+			{
+				if(Terrain_Data.Get("Sea")!=SELECTION)
+				{		// sea interior cannot be placed near sea border
+					if(_tile<DATA.map_list.length)
+					if(Terrain_Data.TERRE[DATA.map_list[_tile+1]].Type!=6)
+						return false;
+					if(_tile>0)
+					if(Terrain_Data.TERRE[DATA.map_list[_tile-1]].Type!=6)
+						return false;
+					if(_tile+height<DATA.map_list.length)
+					if(Terrain_Data.TERRE[DATA.map_list[_tile+height]].Type!=6)
+						return false;
+					if(_tile-height>0)
+					if(Terrain_Data.TERRE[DATA.map_list[_tile-height]].Type!=6)
+						return false;
+				}
+			}
+			else if(_ter.Type==8)
+			{			// connections must be near at least one ground and one sea type
+				var ground = false,
+					sea = false,
+					ter_check;
+				if(_tile<DATA.map_list.length)
+				{
+					ter_check = Terrain_Data.TERRE[DATA.map_list[_tile+1]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile>0)
+				{
+					ter_check = Terrain_Data.TERRE[DATA.map_list[_tile-1]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile+height<DATA.map_list.length)
+				{
+					ter_check = Terrain_Data.TERRE[DATA.map_list[_tile+height]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(_tile-height>0)
+				{
+					ter_check = Terrain_Data.TERRE[DATA.map_list[_tile-height]];
+					if(ter_check.Type==6)
+						sea = true;
+					else if(ter_check.Type<6 && ter_check.Type>=0)
+						ground = true;
+				}
+				if(!ground || !sea)
+					return false;
+			}
+		}
+		return true;
+	}
+	function Edited() {
+		SERVER.data_saved = false;
+		SERVER.beaten_game = false;
+		document.getElementById('editor-save-btn').className = "editor-tab w3-button w3-green";
+
+		if(!RECENTLY_SAVED)return;	// stop from making multiple save timers at once
+		RECENTLY_SAVED = false;
+		setTimeout(function() {	// turn save button red after 5 minutes without saving
+			if(RECENTLY_SAVED)return;	// if saved, no worries
+			document.getElementById('editor-save-btn').className = "editor-tab w3-button w3-red";
+		}, 300000);
+	}
+	function Reflow() {
+
+		scroller.setDimensions(CONTAINER.clientWidth, CONTAINER.clientHeight+80, DATA.height*tile_size+90, DATA.width*tile_size);
+	}
+	function paint(y, x, left, top) {	//	inverting x & y on purpose
+		let TILE = x*DATA.height+y;
+		let y_scale = Terrain_Data.TERRE[DATA.map_list[TILE]].Sprite[0].Image().height/TILESIZE,
+			y_diff = (Terrain_Data.TERRE[DATA.map_list[TILE]].Sprite[0].Image().height-TILESIZE)/y_scale;
+		Terrain_Data.TERRE[DATA.map_list[TILE]].Sprite[0].Draw(CANVAS, left, top-y_diff, tile_size, tile_size*y_scale);
+	}
+	function render(left, top) {
+
+		CANVAS.clearRect(0, 0, 600, 600);
+
+		LEFT = Math.round(left);
+		TOP = Math.round(top);
+
+		tiling.render(LEFT, TOP, 1, paint);
+
+		let flag_str, current, shrink_amt = tile_size/10;
+		for(let i=0;i<DATA.units.length;i++)
+		{
+			current = DATA.units[i];
+			if(current[3]==0)
+				flag_str = "Red Flag";
+			else if(current[3]==1)
+				flag_str = "Blue Flag";
+			else if(current[3]==2)
+				flag_str = "Green Flag";
+			else if(current[3]==3)
+				flag_str = "Yellow Flag";
+			Char_Data.CHARS[current[0]].Sprite[0].Draw(CANVAS, current[1]*tile_size+shrink_amt-LEFT, current[2]*tile_size+shrink_amt-TOP, tile_size-(2*shrink_amt), tile_size-(2*shrink_amt));
+			Images.Retrieve(flag_str).Draw(CANVAS, current[1]*tile_size-LEFT, current[2]*tile_size-TOP, tile_size/4, tile_size/4);
+		}
+		for(let i=0;i<DATA.cities.length;i++)
+		{
+			current = DATA.cities[i];
+			if(current[3]==0)
+				flag_str = "Red Flag";
+			else if(current[3]==1)
+				flag_str = "Blue Flag";
+			else if(current[3]==2)
+				flag_str = "Green Flag";
+			else if(current[3]==3)
+				flag_str = "Yellow Flag";
+			Building_Data.PLACE[current[0]].Sprite.Draw(CANVAS, current[1]*tile_size+shrink_amt-LEFT, current[2]*tile_size+shrink_amt-TOP, tile_size-(2*shrink_amt), tile_size-(2*shrink_amt));
+			Images.Retrieve(flag_str).Draw(CANVAS, current[1]*tile_size-LEFT, current[2]*tile_size-TOP, tile_size/4, tile_size/4);
+		}
+	}
+	function SELECT(x, y) {
+		let tile = x*DATA.height+y;
 
 		if(!Allowed(tile))
 		{
-
+			LOD.popup("ERROR");
 			return;
 		}
 
-		SERVER.data_saved = false;
-		SERVER.beaten_game = false;
+		Edited();
 
 		let INDEX = PAGE*10+SELECTION;
 		if(TYPE==CHOICE.TERRAIN)
 		{
 			if(SELECTION==0){
-				document.getElementById("editor-tile"+tile+"img").src = Terrain_Data.TERRE[1].Sprite[0].Source();
+				DATA.map_list[tile] = 1;
 			} else {
-				document.getElementById("editor-tile"+tile+"img").src = Terrain_Data.TERRE[INDEX].Sprite[0].Source();
-					DATA.map_list[tile] = INDEX;
-					var _ter = Terrain_Data.TERRE[INDEX];
-					for(var j in DATA.cities)
+				DATA.map_list[tile] = INDEX;
+				let _ter = Terrain_Data.TERRE[INDEX];
+				for(let j in DATA.cities)
+				{
+					if(DATA.cities[j][1]==x && DATA.cities[j][2]==y)
 					{
-						if(DATA.cities[j][1]==_x && DATA.cities[j][2]==_y)
+						var _city = Building_Data.PLACE[DATA.cities[j][0]];
+						if(_ter.Type==0)
+						if(_city.Terrain==2)
 						{
-							var _city = Building_Data.PLACE[DATA.cities[j][0]];
-							if(_ter.Type==0)
-							if(_city.Terrain==2)
-							{
-								DATA.cities.splice(j, 1);
-								break;
-							}
-							if(_ter.Type==6)
-							if(_city.Terrain==0)
-							{
-								DATA.cities.splice(j, 1);
-								break;
-							}
+							DATA.cities.splice(j, 1);
 							break;
 						}
-					}
-					for(var j in units)
-					{
-						if(DATA.units[j][1]==_x && DATA.units[j][2]==_y)
+						if(_ter.Type==6)
+						if(_city.Terrain==0)
 						{
-							var _unit = Char_Data.CHARS[DATA.units[j][0]];
-							if(_ter.Type==0)
-							if(_unit.Move_Type==6 || _unit.Move_Type==7)
-							{
-								DATA.units.splice(j, 1);
-								break;
-							}
-							if(_ter.Type==6)
-							if(_unit.Move_Type==0 || _unit.Move_Type==1 || _unit.Move_Type==2)
-							{
-								DATA.units.splice(j, 1);
-								break;
-							}
+							DATA.cities.splice(j, 1);
 							break;
 						}
+						break;
 					}
-
-					let _wateramt = 49;
-					for(let i=0;i<DATA.map_list.length;i++)
+				}
+				for(let j in DATA.units)
+				{
+					if(DATA.units[j][1]==x && DATA.units[j][2]==y)
 					{
-						if(DATA.map_list[i]>=12)
+						var _unit = Char_Data.CHARS[DATA.units[j][0]];
+						if(_ter.Type==0)
+						if(_unit.Move_Type==6 || _unit.Move_Type==7)
 						{
-							_wateramt++;
+							DATA.units.splice(j, 1);
+							break;
 						}
+						if(_ter.Type==6)
+						if(_unit.Move_Type==0 || _unit.Move_Type==1 || _unit.Move_Type==2)
+						{
+							DATA.units.splice(j, 1);
+							break;
+						}
+						break;
 					}
-					if(_wateramt>=DATA.width*DATA.height/2)
+				}
+				let _wateramt = 49;
+				for(let i=0;i<DATA.map_list.length;i++)
+				{
+					if(DATA.map_list[i]>=12)
 					{
-						if(MUSIC.Name().includes("plains"))
-						{
-							Change_Music("water");
-						}
+						_wateramt++;
 					}
-					else
+				}
+				if(_wateramt>=DATA.width*DATA.height/2)
+				{
+					if(MUSIC.Name().includes("plains"))
 					{
-						if(MUSIC.Name().includes("water"))
-						{
-							Change_Music("plains");
-						}
+						Change_Music("water");
 					}
+				}
+				else
+				{
+					if(MUSIC.Name().includes("water"))
+					{
+						Change_Music("plains");
+					}
+				}
 			}
 		}
 		else if(TYPE==CHOICE.UNITS)
 		{
-			if(SELECTION==0) {
-				document.getElementById("editor-tile"+tile+"imgUNI").src = BLANK;
-			} else {
-				document.getElementById("editor-tile"+tile+"imgUNI").src = Char_Data.CHARS[INDEX].Sprite[0].Source();
-				var found = false;
-				for(var j in DATA.units)
+			let found = false;
+			for(let j in DATA.units)
+			{
+				if(DATA.units[j][1]==x && DATA.units[j][2]==y)
 				{
-					if(DATA.units[j][1]==_x && DATA.units[j][2]==_y)
+					if(SELECTION==0)
+					{
+						DATA.units.splice(j, 1);
+						render(LEFT, TOP);
+						return;
+					}
+					else
 					{
 						DATA.units[j][0] = INDEX;
 						DATA.units[j][3] = ACTIVE_PLAYER;
-						found = true;
-						break;
 					}
+					found = true;
+					break;
 				}
-				if(!found)
-				{
-					DATA.units.push([INDEX, _x, _y, ACTIVE_PLAYER]);
-				}
+			}
+			if(!found)
+			{
+				DATA.units.push([INDEX, x, y, ACTIVE_PLAYER]);
 			}
 		}
 		else if(TYPE==CHOICE.CITY)
 		{
-			if(SELECTION==0) {
-				document.getElementById("editor-tile"+tile+"imgBUI").src = BLANK;
-			} else {
-				document.getElementById("editor-tile"+tile+"imgBUI").src = Building_Data.PLACE[INDEX].Sprite.Source();
-				var found = false;
-				for(var j in DATA.cities)
+			let found = false;
+			for(let j in DATA.cities)
+			{
+				if(DATA.cities[j][1]==x && DATA.cities[j][2]==y)
 				{
-					if(DATA.cities[j][1]==_x && DATA.cities[j][2]==_y)
+					if(SELECTION==0)
+					{
+						DATA.cities.splice(j, 1);
+						render(LEFT, TOP);
+						return;
+					}
+					else
 					{
 						DATA.cities[j][0] = INDEX;
 						DATA.cities[j][3] = ACTIVE_PLAYER;
-						found = true;
-						break;
 					}
+					found = true;
+					break;
 				}
-				if(!found)
-				{
-					DATA.cities.push([INDEX, _x, _y, ACTIVE_PLAYER]);
-				}
+			}
+			if(!found)
+			{
+				DATA.cities.push([INDEX, x, y, ACTIVE_PLAYER]);
 			}
 		}
 		else if(TYPE==CHOICE.WEATHER)
 		{
-			if(SELECTION==0) {
-				document.getElementById("editor-tile"+tile+"imgWEA").src = BLANK;
-			} else {
-				document.getElementById("editor-tile"+tile+"imgWEA").src = Weather_Data.WEATHER[INDEX].Sprite[0].Source();
-			}
+
 		}
 
 		Play_Placement_SFX();
+		render(LEFT, TOP);
 	}
 
+			//** UI COMMUNICATION */
 	this.Save = function() {
 		if(SERVER.data_saved)return;
+		if(RECENTLY_SAVED)return;
 
 		if(SERVER.local_saved_map==-1)
 		{	// ask to save, because user created a map before saving
@@ -600,8 +1618,14 @@ let MapEditorClass = function() {
 			map:encrypt_game_data(map_data_to_str())
 		});
 		SERVER.data_saved = true;
+		document.getElementById('editor-save-btn').className += " inactive";
+		RECENTLY_SAVED = true;
 	};
 	this.Load = function() {
+		if(this.Players!=Open_Players_Editor)
+		{
+			this.Players();
+		}
 		display_server_saved_maps();
 	};
 	this.Test = function() {
@@ -629,7 +1653,14 @@ let MapEditorClass = function() {
 		new_custom_game(map_data_to_str(), [DATA.name], true, SERVER.local_saved_map, 1);
 	};
 	this.Options = function() {
-
+		Open_Options();
+	};
+	this.Players = Open_Players_Editor;
+	this.Weather = function() {
+		Open_Weather_Editor();
+	};
+	this.Script = function () {
+		Open_Script_Editor();
 	};
 	this.Upload = function() {
 		if(!SERVER.beaten_game)return;
@@ -638,11 +1669,14 @@ let MapEditorClass = function() {
 		send_map_data_to_server(SERVER.PUBLISH, DATA.id);
 		LOG.popup("Successfully uploaded.");
 	};
+	this.Back = function() {
+		menu_back_fnc();
+	};
 	this.Page_Left = function() {
 		if(PAGE==0)
 			return;
 		PAGE--;
-		refreshChoiceImages();
+		refresh_choice_images();
 	};
 	this.Page_Right = function() {
 		if(TYPE==CHOICE.TERRAIN)
@@ -666,64 +1700,41 @@ let MapEditorClass = function() {
 				return;
 		}
 		PAGE++;
-		refreshChoiceImages();
+		refresh_choice_images();
 	};
 	this.Choose = function(choice) {
 		PAGE = 0;
 		CHANGECHOICE(choice);
 	};
 
+			//** CREATING AND OPENING MAP DATA */
 	this.Init = function() {
 		if(initalized)return;
 		initalized = true;
-		let tileHolder = document.getElementById('editor-tile-holder');
-		for(let i=0;i<tileHolder.childNodes.length;)
-			tileHolder.childNodes[0].remove();
-		let tile, img, index = -1;
-		for(let x=0;x<10;x++)
-		{
-			for(let y=0;y<10;y++)
-			{
-				tile = document.createElement('div');
-				tile.className = "w3-col editor-tile";
-				tile.id = "editor-tile" + (++index);
-				tile.onclick = function() {
-					SELECT(parseInt(this.id.split("editor-tile")[1]));
-				};
+		CONTAINER = document.getElementById('editor-tile-holder');
+		for(let i=0;i<CONTAINER.childNodes.length;)
+			CONTAINER.childNodes[0].remove();
 
-				img = document.createElement('img');
-				img.className = "editor-tile-ter";
-				img.id = "editor-tile" + (index) + "img";
-				img.src = Terrain_Data.TERRE[1].Sprite[0].Source();
+		let holder = document.createElement('canvas');
+		holder.width = CONTAINER.clientWidth;
+		holder.height = CONTAINER.clientHeight;
+	 	CANVAS = holder.getContext("2d");
 
-				tile.appendChild(img);
+		Set_Controls(holder);
+		CONTAINER.appendChild(holder);
+		window.onresize = function() {
+			holder.width = CONTAINER.clientWidth;
+			Reflow();
+		};
 
-				img = document.createElement('img');
-				img.className = "editor-tile-img";
-				img.id = "editor-tile" + (index) + "imgBUI";
-				img.src = BLANK;
-
-				tile.appendChild(img);
-
-				img = document.createElement('img');
-				img.className = "editor-tile-img";
-				img.id = "editor-tile" + (index) + "imgUNI";
-				img.src = BLANK;
-
-				tile.appendChild(img);
-
-				img = document.createElement('img');
-				img.className = "editor-tile-img";
-				img.id = "editor-tile" + (index) + "imgWEA";
-				img.src = BLANK;
-
-				tile.appendChild(img);
-				tileHolder.appendChild(tile);
-			}
-		}
+		scroller = new Scroller(render, {
+			bouncing:false,
+			locking:false,
+			zooming:false
+		});
 
 		let selectionHolder = document.getElementById('editor-selction-holder');
-		let selection;
+		let selection, img, index;
 		for(index=1;index<11;index++)
 		{
 			selection = document.createElement('div');
@@ -779,8 +1790,6 @@ let MapEditorClass = function() {
 
 		selection.appendChild(img);
 		selectionHolder.appendChild(selection);
-
-		CHOOSEINDEX(1);
 	};
 	this.Open = function(save_data_index, game_data, tested_complete) {
 		if(tested_complete)
@@ -788,750 +1797,63 @@ let MapEditorClass = function() {
 			send_map_data_to_server(SERVER.PLAYTEST, game_data.id);
 			SERVER.beaten_game = true;
 			SERVER.data_saved = true;
+			document.getElementById('editor-upload-btn').style.display = "block";
 		}
 
-		ACTIVE_INDEX = 1;
-		ACTIVE_PLAYER = 0;
-		ACTIVE_TYPE = 0;
-		OLD_TYPE = 1;
 		SERVER.local_saved_map = (save_data_index==null) ? -1 : save_data_index;
-		DATA.units = new Array();
-		DATA.cities = new Array();
-		DATA.name = "Unnamed Custom Map";
-		DATA.players = ["Red","Blue","Green","Yellow"];
-		DATA.max_players = 2;
-		DATA.id = -1;
 
 		if(game_data==null || !game_data.Valid)
 		{
-			DATA.map_list = null;
-			// Map_Size(10, 10);
-			// Update_Active_List(TYPES.TERRAIN);
+			DATA.id = -1;
+			DATA.units = new Array();
+			DATA.cities = new Array();
+			DATA.weather = [0];
+			DATA.name = "Unnamed Custom Map";
+			DATA.max_players = 2;
+			DATA.players = new Array(DATA.max_players);
+			for(let i=0;i<DATA.max_players;i++)
+				DATA.players[i] = DEFULT_NAMES[i];
+
+			Change_Map_Size(10, 10);
 			SERVER.new_map = true;
-			return;
 		}
-		SERVER.new_map = false;
+		else
+		{
+			SERVER.new_map = false;
 
-		var data = game_data.Data.Get();
-		DATA.id = game_data.id;
-		DATA.name = data.name;
-		DATA.width = data.t_width;
-		DATA.height = data.t_height;
+			var data = game_data.Data.Get();
+			DATA.id = game_data.id;
+			DATA.name = data.name;
 
-		// Map_Size(width, height);
-		DATA.map_list = new Array(width*height);
-		for(let x=0,i=0;x<DATA.width;x++)
-		for(let y=0;y<DATA.height;y++)
-		DATA.map_list[i++] = data.terrain[x][y];
+			Change_Map_Size(data.t_width, data.t_height);
+			for(let x=0,i=0;x<DATA.width;x++)
+			for(let y=0;y<DATA.height;y++)
+				DATA.map_list[i++] = data.terrain[x][y];
 
-		DATA.players = data.p_list;
-		DATA.max_players = DATA.players.length;
-		DATA.units = data.u_list;
-		DATA.cities = data.c_list;
-		DATA.weather = data.w_data;
-		DATA.__script__ = data.__script;
+			DATA.players = data.p_list;
+			DATA.max_players = DATA.players.length;
+			DATA.units = data.u_list;
+			DATA.cities = data.c_list;
+			DATA.weather = data.w_data;
+			DATA.__script__ = data.__script;
 
+			if(game_data.uploaded)
+			{
+				LOG.popup("Warning: This map is already uploaded. Editing and Saving this map will remove it from the published maps page. You will have to re-test it and re-publish it to put it back on the public server.");
+			}
+		}
+
+		tiling = new Tiling;
+		tiling.setup(CONTAINER.clientWidth, CONTAINER.clientHeight, DATA.width*tile_size, DATA.height*tile_size, tile_size, tile_size);
+
+		Reflow();
+		change_active_player(0);
 		CHANGECHOICE(CHOICE.TERRAIN);
+		CHOOSEINDEX(1);
 	};
 };
 var Map_Editor = new MapEditorClass;
 
-
-
-
-
-Menu.MapEditor = new Menu.Menu_Class("#7F9172");
-Menu.MapEditor.Open = function()
-{
-	Animations.Retrieve("Load").Remove_All();
-	with(Menu.MapEditor){
-
-		function open_script_editor()
-		{
-			POPUP_ADDER();									// declare popup about to be used
-
-			/// SETUP background and box
-
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, -10, -10, 900, 900, "#333", null, .7), function(){});
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 600, "#777", null, .75), function(){});
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 30, "#999", null, .5));
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("20pt Verdana", "#fff"), null, 60, 30, 400, 30, "Script Editor"));
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 725, 30, 20, 20, "#F49097"), POPUP_CLOSER);
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 727, 32, 20, 18, "X"), POPUP_CLOSER);
-
-			var doc = new Document(__script__),
-          editor = new CanvasTextEditor(doc, {width:645, height:480, left:70, top:100});
-
-      document.getElementById('inputHandler').appendChild(editor.getEl());
-			editor.getEl().id = "canvasScriptInput";
-
-			let learnMoreLink = document.createElement('a');
-			learnMoreLink.href = "/about/script";
-			learnMoreLink.innerHTML = "Learn ThunderLite scripting";
-			learnMoreLink.target = "_blank";
-			learnMoreLink.id = "learnScriptLink";
-			learnMoreLink.style.color = "#28C5D3";
-			learnMoreLink.style.position = "absolute";
-			learnMoreLink.style.left = "500px";
-			learnMoreLink.style.top = "600px";
-			document.getElementById('inputHandler').appendChild(learnMoreLink);
-
-			Menu.MapEditor.Current_Scale = function(x, y)
-			{
-				learnMoreLink.style.left = (500*x)+"px";
-				learnMoreLink.style.top = (600*x)+"px";
-				editor.reflow(x, y);
-			};
-
-			Menu.MapEditor.Current_Scale(Menu.MapEditor.xScale, Menu.MapEditor.yScale);
-      editor.focus();
-
-			Menu.MapEditor.Script = editor;
-
-			function scriptIsValid(_script){
-				if(_script.charAt(0)=='.')
-				{	// test error
-					return 10;
-				}
-				return 0;
-			}
-			function save_fnc()
-			{
-				let err = scriptIsValid(editor._document.storage[0]);
-				if(err!=0)
-				{
-					console.error("Invalid game script",err);
-					return;
-				}
-				__script__ = "";
-				for(let i=0;i<editor._document.storage.length;i++)
-					__script__+=editor._document.storage[i];
-				data_saved = false;
-
-				Draw();
-			}
-			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Close"), null, 100, 65, 25, 25, "Erase"), function()
-			{
-				POPUP_CLOSER();
-				Draw();
-			});
-			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Save"), null, 175, 65, 25, 25, "SAVE"), save_fnc);
-			editor.save = save_fnc;
-
-		}
-		function open_weather_editor()
-		{
-			POPUP_ADDER();									// declare popup about to be used
-
-			/// SETUP background and box
-
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, -10, -10, 900, 900, "#333", null, .7));
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 600, "#777", null, .75), function(){
-				Draw();
-				return false;
-			});
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 50, 25, 700, 30, "#999", null, .5));
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("20pt Verdana", "#fff"), null, 60, 30, 400, 30, "Weather Editor"));
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 725, 30, 20, 20, "#F49097"), POPUP_CLOSER);
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 727, 32, 20, 18, "X"), POPUP_CLOSER);
-
-			let pallette = ["#EFCA8B", "#8BAFED", "#8AD7EA", "#E88888"];
-			let __weather = [Images.Retrieve("Sunny Icon"), Images.Retrieve("Rainy Icon"), Images.Retrieve("Snowy Icon"), Images.Retrieve("Heat Icon")];
-			let turn = weather.length-1;
-			const static_rate = 10;
-			let __weather_pie_data = new Array(turn), __cur_data = new Array(turn);
-			let __start_turn = 0;
-
-			if(turn==0)
-			{
-				turn = 1;
-				__cur_data.push(0);
-			}
-			else
-			{
-				for(let i=0;i<turn;i++)
-				{
-					__cur_data[i] = weather[i+1][0];
-				}
-			}
-
-			function updateWeather()
-			{
-				for(let i=0;i<turn;i++)
-				{
-					__weather_pie_data[i] = [static_rate, pallette[__cur_data[i]], __weather[__cur_data[i]]];
-				}
-			}
-
-			function sendPatternToData()
-			{
-				weather = [weather[0]];
-				for(let i=0;i<turn;i++)
-				{
-					weather.push([__cur_data[i], __start_turn+i, turn]);
-				}
-				data_saved = false;
-				POPUP_CLOSER();
-				Draw();
-			}
-
-			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Erase"), null, 100, 80, 50, 50, "Erase"), function()
-			{
-				if(turn<=1)return;
-				turn--;
-				__weather_pie_data.pop();
-				__cur_data.pop();
-				Draw();
-			});
-			POPUP_ADDER(new Canvas.Drawable(Images.Retrieve("Save"), null, 175, 80, 50, 50, "SAVE"), function()
-			{
-				sendPatternToData();
-			});
-
-			for(let i=0;i<Weather_Data.Global_Amount;i++)
-			{
-				POPUP_ADDER(new Canvas.Drawable({
-					Draw:function(c,x,y,w,h,s)
-					{
-						Weather_Data.Get_Global(s).Icon.Draw(c,x,y,w,h);
-						// new Text_Class("15pt Verdana", "#fff").Draw(c,x,y,w,h,);
-					}
-				}, null, 410+(i*75), 80, 50, 50, i), function()
-				{
-					if(turn>=12)return;
-					turn++;
-					__cur_data.push(i);
-					updateWeather();
-					Draw();
-				});
-			}
-
-			updateWeather();
-			POPUP_ADDER(new Canvas.Drawable(Shape.Pie, null, 175, 150, 400, 400, __weather_pie_data));
-
-		}
-
-
-
-
-		var MAP_OPTION_ADDER = function(){
-			POPUP_ADDER();									// declare popup about to be used
-
-			/// SETUP background and box
-
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 150, 125, 400, 300, "#777", null, .75), function(){
-				Draw();
-				return false;
-			});
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 150, 125, 400, 30, "#999", null, .5));
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("20pt Verdana", "#fff"), null, 160, 130, 400, 30, "Map and Game Options"));
-			POPUP_ADDER(new Canvas.Drawable(Shape.Rectangle, null, 525, 130, 20, 20, "#F49097"), POPUP_CLOSER);
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 527, 132, 20, 18, "X"), POPUP_CLOSER);
-
-			/// 1) make special conditions
-			/// 2) limit units that can be built
-
-
-
-			/// 3) add script options
-
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 175, 190, 130, 25, "Script Editor"));
-			POPUP_ADDER(new Canvas.Drawable({							// script addor
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+12,y+3,260,20,s);
-				}
-			}, null, 190, 215, 85, 25, "Open"), function(text){
-				POPUP_CLOSER();
-				open_script_editor();
-				Draw();
-			});
-
-
-			/// 4) fog of war option
-
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 182, 250, 130, 25, "Fog of War"));
-			POPUP_ADDER(new Canvas.Drawable({							// toggle on and off
-				Draw:function(c, x, y, w, h,value){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					var text = (value[0]) ? "On" : "Off";;
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+27,y+5,260,20,text);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+26,y+4,260,20,text);
-				}
-			}, null, 190, 270, 85, 25, weather), function(text){
-				weather[0] = (weather[0]) ? false : true;
-				data_saved = false;
-				Draw();
-			});
-
-
-			/// 5) weather changes
-
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 420, 190, 130, 25, "Weather"));
-			POPUP_ADDER(new Canvas.Drawable({							// weather changes
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+12,y+3,260,20,s);
-				}
-			}, null, 425, 215, 85, 25, "Open"), function(text){
-				POPUP_CLOSER();
-				open_weather_editor();
-				Draw();
-			});
-
-
-			/// 6) max player adjustments
-
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 405, 250, 130, 25, "Total Players"));
-			POPUP_ADDER(new Canvas.Drawable({
-				Draw:function(c,x,y,w,h,s)
-				{
-					s.Draw(c,x,y,w,h,""+max_players);
-				}
-			}, null, 458, 270, 25, 25, new Text_Class("20pt Verdana", "#fff")));
-			POPUP_ADDER(new Canvas.Drawable({							// down one player
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,"<");
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,"<");
-				}
-			}, null, 425, 270, 25, 25, Player_Text), function(text){
-				if(max_players>2)
-					max_players--;
-				data_saved = false;
-				Draw();
-			}, {
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,"<");
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,"<");
-				}
-			});
-			POPUP_ADDER(new Canvas.Drawable({							// up one player
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,">");
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,">");
-				}
-			}, null, 485, 270, 25, 25, Player_Text), function(text){
-				if(max_players<4)
-					max_players++;
-				data_saved = false;
-				Draw();
-			}, {
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x+3,y+4,260,20,">");
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x+2,y+3,260,20,">");
-				}
-			});
-
-
-			/// 7) map size change
-
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 185, 310, 150, 20, "Grow Map"));
-			POPUP_ADDER(new Canvas.Drawable({				// GROW btn		>
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			}, null, 250, 350, 25, 25, ">"), function(){
-				POPUP_CLOSER();
-				Map_Size(width+1, height, 0, 0);
-				MAP_OPTION_ADDER();
-				data_saved = false;
-				Draw();
-			}, {
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			});
-			POPUP_ADDER(new Canvas.Drawable({				// GROW btn		<
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			}, null, 190, 350, 25, 25, "<"), function(){
-				POPUP_CLOSER();
-				Map_Size(width+1, height, 1, 0);
-				MAP_OPTION_ADDER();
-				data_saved = false;
-				Draw();
-			}, {
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			});
-			POPUP_ADDER(new Canvas.Drawable({				// GROW btn		^
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			}, null, 220, 335, 25, 25, "^"), function(){
-				POPUP_CLOSER();
-				Map_Size(width, height+1, 0, 1);
-				MAP_OPTION_ADDER();
-				data_saved = false;
-				Draw();
-			}, {
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			});
-			POPUP_ADDER(new Canvas.Drawable({				// GROW btn		v
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			}, null, 220, 365, 25, 25, "v"), function(){
-				POPUP_CLOSER();
-				Map_Size(width, height+1, 0, 0);
-				MAP_OPTION_ADDER();
-				data_saved = false;
-				Draw();
-			}, {
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			});
-
-			POPUP_ADDER(new Canvas.Drawable(new Text_Class("15pt Verdana", "#fff"), null, 420, 310, 150, 20, "Shrink Map"));
-			POPUP_ADDER(new Canvas.Drawable({				// SHRINK btn	>
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			}, null, 425, 350, 25, 25, ">"), function(){
-				POPUP_CLOSER();
-				Map_Size(width-1, height, 1, 0);
-				MAP_OPTION_ADDER();
-				data_saved = false;
-				Draw();
-			}, {
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			});
-			POPUP_ADDER(new Canvas.Drawable({				// SHRINK btn	<
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			}, null, 485, 350, 25, 25, "<"), function(){
-				POPUP_CLOSER();
-				Map_Size(width-1, height, 0, 0);
-				MAP_OPTION_ADDER();
-				data_saved = false;
-				Draw();
-			}, {
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			});
-			POPUP_ADDER(new Canvas.Drawable({				// SHRINK btn	^
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			}, null, 455, 335, 25, 25, "v"), function(){
-				POPUP_CLOSER();
-				Map_Size(width, height-1, 0, 1);
-				MAP_OPTION_ADDER();
-				data_saved = false;
-				Draw();
-			}, {
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			});
-			POPUP_ADDER(new Canvas.Drawable({				// SHRINK btn	v
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			}, null, 455, 365, 25, 25, "^"), function(){
-				POPUP_CLOSER();
-				Map_Size(width, height-1, 0, 0);
-				MAP_OPTION_ADDER();
-				data_saved = false;
-				Draw();
-			}, {
-				Draw:function(c, x, y, w, h, s){
-					Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+5,60,20,s);
-					new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+5,60,20,s);
-				}
-			});
-
-
-
-
-
-			// max_players
-
-			Draw();
-		};
-
-		function make_map_bigger(new_x, new_y, start_x, start_y)
-		{
-			var new_list = new Array(new_x*new_y),
-				_new = 0,
-				_old = 0;
-
-			for(var x=0;x<new_x;x++)
-			{
-				for(var y=0;y<new_y;y++)
-				{
-					if((x>=start_x && y>=start_y) && (x<width+start_x && y<height+start_y))
-					{
-						new_list[_new++] = map_list[_old++];
-					}
-					else new_list[_new++] = 1;
-				}
-			}
-
-			width = new_x;
-			height = new_y;
-			map_list = new_list;
-
-			for(var i in units)
-			{
-				units[i][1]+=start_x;
-				units[i][2]+=start_y;
-			}
-			for(var i in cities)
-			{
-				cities[i][1]+=start_x;
-				cities[i][2]+=start_y;
-			}
-		}
-		function make_map_smaller(new_x, new_y, start_x, start_y)
-		{
-			var new_list = new Array(new_x*new_y),
-				_new = 0,
-				_old = start_x*height+start_y;
-
-			for(var x=0;x<width;x++)
-			{
-				for(var y=0;y<height;y++)
-				{
-					if(x>=new_x || y>=new_y)
-					{
-						_old++;
-						continue;
-					}
-					new_list[_new++] = map_list[_old++];
-				}
-
-			}
-
-			width = new_x;
-			height = new_y;
-			map_list = new_list;
-
-			for(var i=units.length-1;i>=0;i--)
-			{
-				units[i][1]-=start_x;
-				units[i][2]-=start_y;
-				if(units[i][1]<0 || units[i][2]<0)
-					units.splice(i, 1);
-				else if(units[i][1]>=width || units[i][2]>=height)
-					units.splice(i, 1);
-			}
-			for(var i=cities.length-1;i>=0;i--)
-			{
-				cities[i][1]-=start_x;
-				cities[i][2]-=start_y;
-				if(cities[i][1]<0 || cities[i][2]<0)
-					cities.splice(i, 1);
-				else if(cities[i][1]>=width || cities[i][2]>=height)
-					cities.splice(i, 1);
-			}
-		}
-
-
-
-
-		Player_Text = new Canvas.Drawable({
-			Draw:function(c,x,y,w,h,s){
-				if(s==0)
-					new Text_Class("18pt Verdana", "#F5E4D7").Draw(c,x-5,y+6,w,h,"Idle");
-				else new Text_Class("18pt Verdana", "#F5E4D7").Draw(c,x-5,y+6,w,h,"Team "+s);
-				Team_Colors.Draw(c,x+80,y+17,h-17,{
-					Color:s
-				});
-			}
-		}, null, 650, 145, 150, 30, 1);
-		Player_Text.Index = Menu.MapEditor;
-		Add(new Canvas.Drawable({							// down one player
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+4,260,20,"<");
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+3,260,20,"<");
-			}
-		}, null, 620, 145, 20, 30, Player_Text), function(text){
-			if(ACTIVE_PLAYER>-1)
-				ACTIVE_PLAYER--;
-			text.State.Set(ACTIVE_PLAYER+1);
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+4,260,20,"<");
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+3,260,20,"<");
-			}
-		});
-		Add(new Canvas.Drawable({							// up one player
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[0]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+4,260,20,">");
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+3,260,20,">");
-			}
-		}, null, 755, 145, 20, 30, Player_Text), function(text){
-			if(ACTIVE_PLAYER<max_players-1)
-				ACTIVE_PLAYER++;
-			text.State.Set(ACTIVE_PLAYER+1);
-		}, {
-			Draw:function(c, x, y, w, h, s){
-				Shape.Rectangle.Draw(c,x,y,w,h,Menu.Button[1]);
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[2]).Draw(c,x,y+4,260,20,">");
-				new Text_Class(""+(2*h/3)+"pt Verdana", Menu.Button[3]).Draw(c,x,y+3,260,20,">");
-			}
-		});
-		Add(Player_Text);
-
-
-		Map_Size = function(_x, _y, start_x, start_y)
-		{													// in here puts the tile click controls
-			if(_x>30 || _y>30)return;
-			if(_x<10 || _y<10)return;
-
-			if(map_list==null)
-			{	// make new map
-				width = _x;
-				height = _y;
-				map_list = new Array(width*height);
-				for(var i=0;i<map_list.length;i++)
-				{
-					map_list[i] = 1;
-				}
-			}
-			else
-			{	// this is to resize map
-				if(VIEW_ACTIVE_LIST[0]>FIRST_MAP_DRAW)
-					VIEW_ACTIVE_LIST[0]-=map_list.length+1;
-
-					// delete last buttons
-				Remove(FIRST_MAP_DRAW, map_list.length+1);
-
-				if(start_x==null)
-					start_x = 0;
-				if(start_y==null)
-					start_y = 0;
-				if(_x>width)
-					make_map_bigger(_x, height, start_x, 0);
-				if(_x<width)
-					make_map_smaller(_x, height, start_x, 0);
-				if(_y>height)
-					make_map_bigger(width, _y, 0, start_y);
-				if(_y<height)
-					make_map_smaller(width, _y, 0, start_y);
-			}
-			x_scale = 600/width;
-			y_scale = 600/height;
-			ERROR_DISPLAY.Width.Set(x_scale);
-			ERROR_DISPLAY.Height.Set(y_scale);
-
-				/// draw map
-			for(var x=0,i=0;x<width;x++)
-			for(var y=0;y<height;y++)
-				Add(new Canvas.Drawable(MAP_DRAWER, Canvas.Merge,
-						10+(x_scale*x), 30+(y_scale*y),
-						x_scale, y_scale, i++),
-					MAP_CLICKER, new Canvas.Drawable(Shape.Rectangle, null,
-						10+(x_scale*x), 30+(y_scale*y), x_scale, y_scale,
-						"#666607", null, .4));
-			FIRST_MAP_DRAW = Add(ERROR_DISPLAY)-(i);
-		};
-
-		Menu.MapEditor.New = function(save_data_index, game_data, tested_complete){
-			if(tested_complete)
-			{
-				send_map_data_to_server(SERVER.PLAYTEST, game_data.id);
-				beaten_game = true;
-				data_saved = true;
-			}
-			Animations.Retrieve("Load").Remove_All();
-			ERROR_DISPLAY.Index = Menu.MapEditor;
-			ERROR_DISPLAY.Alpha.Set(0);
-			ACTIVE_INDEX = 1;
-			ACTIVE_PLAYER = 0;
-			ACTIVE_TYPE = 0;
-			OLD_TYPE = 1;
-			local_saved_map = (save_data_index==null) ? -1 : save_data_index;
-			units = new Array();
-			cities = new Array();
-			name = "Unnamed Custom Map";
-			players = ["Red","Blue","Green","Yellow"];
-			max_players = 2;
-			id = -1;
-
-			if(game_data==null || !game_data.Valid)
-			{
-				map_list = null;
-				Map_Size(10, 10);
-				Update_Active_List(TYPES.TERRAIN);
-				SERVER.new_map = true;
-				return;
-			}
-			SERVER.new_map = false;
-
-			var data = game_data.Data.Get();
-			id = game_data.id;
-			name = data.name;
-			width = data.t_width;
-			height = data.t_height;
-
-			Map_Size(width, height);
-			map_list = new Array(width*height);
-			for(var x=0,i=0;x<width;x++)
-			for(var y=0;y<height;y++)
-				map_list[i++] = data.terrain[x][y];
-
-			players = data.p_list;
-			max_players = players.length;
-			units = data.u_list;
-			cities = data.c_list;
-			weather = data.w_data;
-			__script__ = data.__script;
-
-			Update_Active_List(TYPES.TERRAIN);
-		};
-	}
-};
-
-Menu.MapEditor = null;
 
 /*** In game unit popup, unit double click ***/
 Menu.Game_Prompt = new Menu.Menu_Class();

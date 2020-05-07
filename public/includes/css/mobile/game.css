@@ -32,11 +32,11 @@ body{
 	background-color: #A7C0CCCC;
 }
 .inactive{
-	background: #696C6D;
-	cursor: not-allowed;
+	background: #696C6D !important;
+	cursor: not-allowed !important;
 }
 .inactive:hover{
-	background-color: #696C6D;
+	background-color: #696C6D !important;
 }
 
 .search-wrapper{
@@ -134,9 +134,6 @@ search-input::placeholder {
   cursor: pointer;
 }
 img.MAPCHOICEIMG{
-	position: relative;
-	left: 50%;
-	transform: translate(-50%, 0);
 	width: 50%;
 	height: 100%;
 }
@@ -150,6 +147,37 @@ img.MAPCHOICEIMG{
 	width: 50%;
 }
 
+
+#editor-selction-holder{
+	min-width: 113px;
+}
+#editor-slide-up{
+	padding: 40px 16px;
+	width: 100%;
+	max-height: 0px;
+	font-weight: bold;
+	opacity: 0;
+	transition: all .5s ease;
+}
+.editor-options-list{
+	width: 100%;
+	padding: 16px 24px;
+	margin: 10px 0px;
+	background: tan;
+	border-bottom: solid 1px grey;
+	border-right: solid 1px grey;
+}
+.editor-slide-open{
+	max-height: 160px !important;
+	opacity: 1 !important;
+	transform: translate(0px, -194px);
+}
+.editor-margin{
+	margin-top: 4px;
+}
+.editor-border{
+	border-radius: 7px;
+}
 .editor-tile{
 	width: 10% !important;
 	margin: 0px;
@@ -183,8 +211,18 @@ img.MAPCHOICEIMG{
 	background-color: #ccc;
 }
 .editor-tab{
-	width: 25%;
+	width: 24.99999% !important;
+	float: left;
 }
+.editor-third{
+	width: 33.33333% !important;
+	float: left;
+}
+.editor-half{
+	width: 49.49999% !important;
+	float: left;
+}
+
 
 #canvasHolder{
 	position: absolute;

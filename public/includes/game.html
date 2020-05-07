@@ -6,6 +6,7 @@
 
 		if(window.parent==null)
 		{
+			console.log('in here');
 			window.location = window.location.href.split("includes/game.html")[0];
 		}
 
@@ -100,7 +101,7 @@
 
 		<!-- Modal for full size images on click-->
 	  <div id="modal01" class="w3-modal w3-grey" style="padding-top:0" onclick="this.style.display='none'">
-	    <span class="w3-button w3-black w3-xlarge w3-display-topright">×</span>
+	    <span class="w3-button w3-black w3-xlarge w3-display-topright" style="margin:5px">×</span>
 	    <div class="w3-modal-content w3-animate-zoom w3-center w3-transparent w3-padding-64">
 				<button class="w3-button w3-xlarge w3-black" onclick="INTERFACE.Open_Game()">Play game!</button>
 				<br />
@@ -231,7 +232,7 @@
 					<h1 id="end-game-results" class="w3-center">Game over!</h1>
 				</div>
 				<div class="w3-half">
-					<button onclick="changeContent(CONTENT_REDIRECT)" style="margin:20px" class="w3-button w3-block w3-center w3-black">DONE</button>
+					<button onclick="changeContent(CONTENT_REDIRECT)" margin="20px 0px" class="w3-button w3-block w3-center w3-black">DONE</button>
 				</div>
 			</div>
 
@@ -258,23 +259,77 @@
   <!-- MAP EDITOR CONTENT -->
 	<div id="MAPEDITOR" class="w3-container w3-light-grey w3-padding-32 w3-padding-large" >
 		<div class="w3-content" style="max-width:600px">
+
+		<div id="editor-upload-btn" style="display:none" class="w3-col w3-button w3-blue" onclick="Map_Editor.Upload()">
+			<i class="fas fa-cloud-upload-alt"></i>
+			<div class="w3-hide-small">  UPLOAD</div>
+		</div>
+
 			<div class="w3-row">
-				<div class="editor-tab w3-button w3-black" onclick="Map_Editor.Save()"><i class="fas fa-save"></i> SAVE</div>
-				<div class="editor-tab w3-button w3-black" onclick="Map_Editor.Load()"><i class="fas fa-folder-open"></i> LOAD</div>
-				<div class="editor-tab w3-button w3-black" onclick="Map_Editor.Test()"><i class="fas fa-vial"></i> TEST</div>
-				<div class="editor-tab w3-button w3-black" onclick="Map_Editor.Options()"><i class="fas fa-cogs"></i> OPTIONS</div>
-				<!-- <div class="w3-quarter w3-button w3-black" onclick="Map_Editor.Upload()"><i class="fas fa-cloud-upload-alt"></i> UPLOAD</div> -->
+				<div id="editor-save-btn" class="editor-tab w3-button inactive" onclick="Map_Editor.Save()">
+					<i class="fas fa-save"></i>
+					<div class="w3-hide-small"> SAVE</div>
+				</div>
+				<div class="editor-tab w3-button w3-black" onclick="Map_Editor.Load()">
+					<i class="fas fa-folder-open"></i>
+					<div class="w3-hide-small"> LOAD</div>
+				</div>
+				<div class="editor-tab w3-button w3-black" onclick="Map_Editor.Test()">
+					<i class="fas fa-vial"></i>
+					<div class="w3-hide-small"> TEST</div>
+				</div>
+				<div class="editor-tab w3-button w3-black" onclick="Map_Editor.Options()">
+					<i class="fas fa-cogs"></i>
+					<div class="w3-hide-small"> OPTIONS</div>
+				</div>
 			</div>
 
 		  <div  class="w3-row">
-		    <div id="editor-tile-holder" class="w3-col w3-row" style="width:70%"></div>
+				<div class="w3-col w3-row" style="width:70%">
+					<div id="editor-tile-holder" style="height:400px"></div>
+					<div class="w3-col">
+						<div class="editor-third w3-button w3-black" onclick="Map_Editor.Players()">
+							<i class="fas fa-user-friends"></i>
+							<div class="w3-hide-small">  PLAYERS</div>
+						</div>
+						<div class="editor-third w3-button w3-black" onclick="Map_Editor.Weather()">
+							<i class="fas fa-bolt"></i>
+							<i class="fas fa-wind"></i>
+							<i class="fas fa-smog"></i>
+							<div class="w3-hide-small">  WEATHER</div>
+						</div>
+						<div class="editor-third w3-button w3-black" onclick="Map_Editor.Script()">
+							<i class="fas fa-code"></i>
+							<div class="w3-hide-small">  SCRIPT</div>
+						</div>
+					</div>
+					<div id="editor-slide-up" class="editor-border w3-col w3-content w3-sand">
+						<span id="editor-slide-close" class="editor-border w3-button w3-black w3-small w3-display-topright" style="margin:3px">×</span>
+						<div class="w3-row">
+							<div id="editor-players-list" class="w3-row"></div>
+						</div>
+						<div class="w3-row editor-margin">
+							<div class="editor-third editor-margin">
+								Total Players
+							</div>
+							<div class="w3-row w3-rest">
+								<div id="editor-players-amount" class="editor-margin w3-center editor-third">
+									2
+								</div>
+								<div id="editor-players-plus" class="editor-border w3-button w3-green w3-rest">
+									<i class="fas fa-plus"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
 		    <div class="w3-rest">
 					<div class="w3-row">
 					  <div class="w3-col w3-left w3-button w3-white" onclick="Map_Editor.Choose(0)" style="padding:5px!important;width:49%"><i class="fas fa-tree"></i></div>
-					  <div class="w3-col w3-right w3-button w3-white" onclick="Map_Editor.Choose(1)" style="padding:5px!important;width:49%"><i class="fas fa-fighter-jet"></i></div>
-					  <div class="w3-col w3-left w3-button w3-white" onclick="Map_Editor.Choose(2)" style="padding:5px!important;width:49%"><i class="fas fa-landmark"></i></div>
-					  <div class="w3-col w3-right w3-button w3-white" onclick="Map_Editor.Choose(3)" style="padding:5px!important;width:49%"><i class="fas fa-cloud-sun-rain"></i></div>
+						<div class="w3-col w3-right w3-button w3-white" onclick="Map_Editor.Choose(3)" style="padding:5px!important;width:49%"><i class="fas fa-cloud-sun-rain"></i></div>
+					  <div id="editor-color-changer0" class="w3-col w3-right w3-button" onclick="Map_Editor.Choose(1)" style="padding:5px!important;width:49%"><i class="fas fa-fighter-jet"></i></div>
+					  <div id="editor-color-changer1" class="w3-col w3-left w3-button" onclick="Map_Editor.Choose(2)" style="padding:5px!important;width:49%"><i class="fas fa-landmark"></i></div>
 					</div>
 
 					<div id="editor-selction-holder" class="w3-row w3-center platform border"></div>
@@ -283,12 +338,16 @@
 						<div class="w3-col w3-left w3-button w3-black" onclick="Map_Editor.Page_Left()" style="padding:0px!important;width:49%"><i class="fas fa-arrow-left"></i></div>
 						<div class="w3-col w3-right w3-button w3-black" onclick="Map_Editor.Page_Right()" style="padding:0px!important;width:49%"><i class="fas fa-arrow-right"></i></div>
 					</div>
+				</div>
 		  </div>
 
 			<!-- Container for popups -->
-		  <div id="editor-popup" class="w3-modal w3-grey" style="padding-top:0" onclick="this.style.display='none'">
-		    <span class="w3-button w3-black w3-xlarge w3-display-topright">×</span>
-		    <div id="e-p-content" class="w3-modal-content w3-row w3-animate-zoom w3-center w3-transparent w3-padding-64"></div>
+		  <div id="editor-popup" class="w3-modal w3-grey" style="padding-top:0">
+				<span class="w3-button w3-black w3-xlarge w3-display-topright" onclick="document.getElementById('editor-popup').style.display='none'" style="margin:5px">×</span>
+				<span id="editor-menu-back-btn" class="w3-button w3-blue-grey w3-xlarge w3-display-topleft" onclick="Map_Editor.Back()" style="margin:5px;display:none">
+					<i class="fas fa-angle-left"></i>
+				</span>
+		    <div id="e-p-content" class="w3-modal-content w3-row w3-animate-zoom w3-center w3-transparent w3-padding-64" style="margin-left:50px;margin-right:50px"></div>
 		  </div>
 		</div>
 	</div>
@@ -397,7 +456,6 @@ window.addEventListener('unload', function(event) {
 <script src="js/depend/scroll/Animate.js"></script>
 <script src="js/depend/scroll/Scroller.js"></script>
 <script src="js/depend/scroll/asset/Tiling.js"></script>
-<script src="js/depend/editor/texteditor.js"></script>
 <script src="js/depend/howler/howler.js"></script>
 
 <!-- General Game Dependencies -->

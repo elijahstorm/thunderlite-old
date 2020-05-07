@@ -1195,7 +1195,8 @@ var Interface_Class = function()
 	};
 	self.Sample_Draw = function(canvas, x, y, w, h, sampledGame)
 	{
-		Canvas.ScaleImageData(canvas, self.Get_Sample(sampledGame), x, y, w/fullWidth, h/fullHeight);
+		Canvas.ScaleImageData(canvas, self.Get_Sample(sampledGame),
+			x, y, w/sampledGame.Terrain_Map.Width*TILESIZE, h/sampledGame.Terrain_Map.Height*TILESIZE);
 	};
 	self.Get_Sample = function(sampledGame)
 	{
@@ -1442,6 +1443,7 @@ var Interface_Class = function()
 
 		let _read_game_data = new Array(_data_text.length),
 			_game_imgs = new Array(_data_text.length),
+			_loading_icons = new Array(_data_text.length),
 			names = new Array(_data_text.length);
 
 		let id_start = document.getElementById("MAPSELECTIONROW").childNodes[Map_Data.Searching*2+1].childNodes[0];
@@ -1473,6 +1475,10 @@ var Interface_Class = function()
 			{	// for updates to the MAP ID post game upload.
 				_read_game_data[index].id = MAPID;
 			}
+			let row_holder = document.getElementById(id_start+index);
+			_loading_icons[index] = document.createElement('div');
+			_loading_icons[index].innerHTML = '<div class="lds-ellipsis"><div></div><div></div><div></div></div>';
+			row_holder.appendChild(_loading_icons[index]);
 
 			if(_read_game_data[index].Valid)
 			{
@@ -1513,8 +1519,8 @@ var Interface_Class = function()
 
 					}
 
-					let row_holder = document.getElementById(id_start+index);
 					try {
+						row_holder.removeChild(_loading_icons[index]);
 						row_holder.appendChild(img);
 						row_holder.onclick = function() {
 							onClick(img);
@@ -1524,7 +1530,7 @@ var Interface_Class = function()
 					} finally {
 
 					}
-				}, 0, index);
+				}, 15, index);
 			}
 		}
 	};
@@ -1572,7 +1578,7 @@ var Interface_Class = function()
 	function makeElement(_id)
 	{
 		let el = document.createElement('div');
-		el.className = "MAPCHOICE";
+		el.className = "MAPCHOICE w3-center";
 		el.id = _id;
 		return el;
 	}

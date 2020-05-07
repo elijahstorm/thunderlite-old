@@ -287,7 +287,7 @@ var Game = function(map, name, slots) {
 			return true;
 		if(input_key==SUDO_ROUTE_PASS)
 			return true;
-		timestamp("Invalid passkey attempt in Game",self.index_in_server,"-> bad key:",input_key);
+		timestamp("Invalid passkey attempt in Game",Display_ID(self.index_in_server),"-> bad key:",input_key);
 		return false;
 	}
 	this.Passkey = function()
@@ -533,7 +533,7 @@ var gl_handler = function() {
 		amt++;
 		var gameId = games.Add(game);
 		game.index_in_server = gameId;
-		timestamp("Game",gameId,"->",game.Name(),"opened");
+		timestamp("Game",Display_ID(gameId),"->",game.Name(),"opened");
 		return gameId;
 	};
 	this.Active = function()
@@ -551,7 +551,7 @@ var gl_handler = function() {
 		if(cur==null)return;
 		amt--;
 
-		timestamp("Game",cur.index_in_server,"->",cur.Name(),"closed");
+		timestamp("Game",Display_ID(cur.index_in_server),"->",cur.Name(),"closed");
 	};
 };
 let Game_List = new gl_handler();
@@ -807,7 +807,7 @@ io.on('connection', function(socket) {
 			});
 		}
 		game.started = true;
-		timestamp("Game",game.index_in_server,"->",game.Name(),"started");
+		timestamp("Game",Display_ID(game.index_in_server),"->",game.Name(),"started");
 		send_lobby_info({
 			type:25,
 			game:socket.vars.in_game
@@ -828,6 +828,11 @@ io.on('connection', function(socket) {
 		timestamp(socket.username+": "+msg);
 	});
 
+	function Display_ID(input) {
+		if(input.length==9)
+			return input.substring(0, 3) + "-" + input.substring(3, 6) + "-" + input.substring(6, 9);
+		return input;
+	}
 	function Make_Unique_Map_Index(onFinish) {
 		function make_letter() { // 65 = A, 97 = a
 			let start = Math.random()>0.5 ? 65 : 97;
@@ -963,7 +968,7 @@ io.on('connection', function(socket) {
 								if(err||!saved)socket.send({type:707});
 								else{
 									socket.send({type:706,mapid:__index});
-									timestamp("User saved map with map ID:", __index);
+									timestamp("User saved map with map ID:", Display_ID(__index));
 								}
 							});
 						}
@@ -998,7 +1003,7 @@ io.on('connection', function(socket) {
 					if(data.length!=0) {
 						if(data[0].mapowner!=socket.username)
 						{
-							timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+							timestamp("Usernames do not match -- Potential Highjacking attempt:", Display_ID(data[0].Map_Id));
 							socket.send({type:709});
 							return;
 						}
@@ -1010,7 +1015,7 @@ io.on('connection', function(socket) {
 							if(err||!saved)socket.send({type:707});
 							else{
 								socket.send({type:710});
-								timestamp("MAP EDITOR -> "+socket.username+" updated map with map ID:", input_data.index);
+								timestamp("MAP EDITOR -> "+socket.username+" updated map with map ID:", Display_ID(input_data.index));
 							}
 						});
 					}
@@ -1044,7 +1049,7 @@ io.on('connection', function(socket) {
 					if(data.length!=0) {
 						if(data[0].mapowner!=socket.username)
 						{
-							timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+							timestamp("Usernames do not match -- Potential Highjacking attempt:", Display_ID(data[0].Map_Id));
 							socket.send({type:709});
 							return;
 						}
@@ -1055,7 +1060,7 @@ io.on('connection', function(socket) {
 							if(err||!saved)socket.send({type:707});
 							else{
 								socket.send({type:710});
-								timestamp("MAP EDITOR -> "+socket.username+" playtested map with map ID:", data[0].Map_Id);
+								timestamp("MAP EDITOR -> "+socket.username+" playtested map with map ID:", Display_ID(data[0].Map_Id));
 							}
 						});
 					}
@@ -1089,7 +1094,7 @@ io.on('connection', function(socket) {
 					if(data.length!=0) {
 						if(data[0].mapowner!=socket.username)
 						{
-							timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+							timestamp("Usernames do not match -- Potential Highjacking attempt:", Display_ID(data[0].Map_Id));
 							socket.send({type:709});
 							return;
 						}
@@ -1097,7 +1102,7 @@ io.on('connection', function(socket) {
 							if(err||!saved)socket.send({type:707});
 							else{
 								socket.send({type:710});
-								timestamp("MAP EDITOR -> "+socket.username+" deleted map with map ID:", data[0].Map_Id);
+								timestamp("MAP EDITOR -> "+socket.username+" deleted map with map ID:", Display_ID(data[0].Map_Id));
 							}
 						});
 					}
@@ -1131,7 +1136,7 @@ io.on('connection', function(socket) {
 					if(data.length!=0) {
 						if(data[0].mapowner!=socket.username)
 						{
-							timestamp("Usernames do not match -- Potential Highjacking attempt:", data[0].Map_Id);
+							timestamp("Usernames do not match -- Potential Highjacking attempt:", Display_ID(data[0].Map_Id));
 							socket.send({type:709});
 							return;
 						}
@@ -1142,7 +1147,7 @@ io.on('connection', function(socket) {
 							if(err||!saved)socket.send({type:707});
 							else{
 								socket.send({type:710});
-								timestamp("MAP EDITOR -> "+socket.username+" PUBLISHED map with map ID:", data[0].Map_Id);
+								timestamp("MAP EDITOR -> "+socket.username+" PUBLISHED map with map ID:", Display_ID(data[0].Map_Id));
 							}
 						});
 					}
@@ -1299,7 +1304,7 @@ io.on('connection', function(socket) {
 					if(!rejoined) {
 						socket.index = Connections.Add(socket);
 						socket.username = username;
-						timestamp("user",username,"connected:",socket.index);
+						timestamp("user",username,"connected:",Display_ID(socket.index));
 					}
 					socket.send({
 						type:20,
