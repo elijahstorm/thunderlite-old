@@ -69,19 +69,9 @@ let MapEditorClass = function() {
 
 		e.preventDefault();
 
+		__mousedown_time = e.timeStamp;
 		scroller.doTouchStart(e.touches, e.timeStamp);
 		mousedown = true;
-
-		setTimeout(function(){
-			if(!mousedown)return false;
-
-			let x = Math.floor((LEFT+e.layerX)/tile_size),
-				y = Math.floor((TOP+e.layerY)/tile_size);
-
-			SELECT(x, y);
-
-			scroller.doTouchEnd(e.timeStamp);
-		}, 150);
 
 		return false;
 	};
@@ -94,12 +84,21 @@ let MapEditorClass = function() {
 		return false;
 	};
 	const ___touchend = function(e) {
+		if(!mousedown)return;
+
 		e.preventDefault();
 		if(e.touches.length==0)return;
 
+		if(e.timeStamp-__mousedown_time<150)
+		{
+			let x = Math.floor((LEFT+e.layerX)/tile_size),
+			y = Math.floor((TOP+e.layerY)/tile_size);
+
+			SELECT(x, y);
+		}
+
 		scroller.doTouchEnd(e.timeStamp);
 		mousedown = false;
-
 		return false;
 	};
 	const ___touchcancel = function(e) {
@@ -108,37 +107,25 @@ let MapEditorClass = function() {
 		mousedown = false;
 	};
 	const ___mousedown = function(e) {
-		try {
-			__mousedown_time = e.timeStamp;
-			scroller.doTouchStart([e], e.timeStamp);
-			mousedown = true;
-			return false;
-		} catch (e) {
-
-		} finally {
-			return false;
-		}
+		__mousedown_time = e.timeStamp;
+		scroller.doTouchStart([e], e.timeStamp);
+		mousedown = true;
+		return false;
 	};
 	const ___mouseup = function(e) {
-		try {
-			if(!mousedown)return;
+		if(!mousedown)return;
 
-			if(e.timeStamp-__mousedown_time<150)
-			{
-				let x = Math.floor((LEFT+e.layerX)/tile_size),
-				y = Math.floor((TOP+e.layerY)/tile_size);
+		if(e.timeStamp-__mousedown_time<150)
+		{
+			let x = Math.floor((LEFT+e.layerX)/tile_size),
+			y = Math.floor((TOP+e.layerY)/tile_size);
 
-				SELECT(x, y);
-			}
-
-			scroller.doTouchEnd(e.timeStamp);
-			mousedown = false;
-			return false;
-		} catch (e) {
-
-		} finally {
-			return false;
+			SELECT(x, y);
 		}
+
+		scroller.doTouchEnd(e.timeStamp);
+		mousedown = false;
+		return false;
 	};
 	const ___contextmenu = function(e) {
 		e.preventDefault();
@@ -232,32 +219,56 @@ let MapEditorClass = function() {
 			_game_imgs = new Array(9);
 		if(fnc1==null) {
 			fnc1 = function(_load){
-				if(!confirm("This will delete the map "+_read_game_data[_load].Name+".\n\nDelete and Replace?"))return;
+					// This will remove the player. Is that okay?
+				let container = document.getElementById("e-p-content"),
+					question, yes_btn, no_btn;
+				Clean_Popup_Screen(container);
 
-				SERVER.local_saved_map = _load;
+				question = document.createElement("p");
+				question.className = "editor-border w3-sand";
+				question.innerHTML = "This will delete the map "+_read_game_data[_load].Name+".\n\nDelete and Replace?";
 
-				while(DATA.name=="" || DATA.name==null || DATA.name=="Unnamed Custom Map")
-					DATA.name = prompt("Give your map a name", DATA.name);
-				if(DATA.name==null)
-					return;
+				yes_btn = document.createElement('div');
+				yes_btn.className = "w3-button w3-green w3-inline";
+				yes_btn.innerHTML = "Yes";
+				yes_btn.onclick = function(){
+					SERVER.local_saved_map = _load;
 
-				send_map_data_to_server(SERVER.DELETE, _read_game_data[_load].id);
+					while(DATA.name=="" || DATA.name.length>20 || DATA.name==null || DATA.name=="Unnamed Custom Map" || DATA.name.includes(";"))
+						DATA.name = prompt("Give your map a name", DATA.name);
+					if(DATA.name==null)
+						return;
 
-				setTimeout(function(){
-					send_map_data_to_server(SERVER.SAVE, {
-						index:DATA.id==-1 ? SERVER.local_saved_map : DATA.id,
-						name:DATA.name,
-						map:encrypt_game_data(map_data_to_str())
-					});
-				}, 500);
-				SERVER.data_saved = true;
+					send_map_data_to_server(SERVER.DELETE, _read_game_data[_load].id);
+
+					setTimeout(function(){
+						send_map_data_to_server(SERVER.SAVE, {
+							index:DATA.id==-1 ? SERVER.local_saved_map : DATA.id,
+							name:DATA.name,
+							map:encrypt_game_data(map_data_to_str())
+						});
+					}, 500);
+					SERVER.data_saved = true;
+				};
+
+				no_btn = document.createElement('div');
+				no_btn.className = "w3-button w3-red w3-inline";
+				no_btn.innerHTML = "No";
+
+				container.appendChild(question);
+				container.appendChild(yes_btn);
+				container.appendChild(no_btn);
+				document.getElementById("editor-popup").style.display = "block";
+				document.getElementById("editor-popup").onclick = function() {
+					document.getElementById("editor-popup").style.display = 'none';
+				};
 			};
 		}
 		if(fnc2==null) {
 			fnc2 = function(_new){
 				SERVER.local_saved_map = _new;
 
-				while(DATA.name=="" || DATA.name==null || DATA.name=="Unnamed Custom Map")
+				while(DATA.name=="" || DATA.name.length>20 || DATA.name==null || DATA.name=="Unnamed Custom Map" || DATA.name.includes(";"))
 					DATA.name = prompt("Give your map a name", DATA.name);
 				if(DATA.name==null)
 					return;
@@ -314,8 +325,33 @@ let MapEditorClass = function() {
 							delete_btn.style.borderRadius = "15px";
 							delete_btn.style.transform = "translate(0px, 4px)";
 							delete_btn.onclick = function() {
-								if(!confirm("Do you really want to delete "+_read_game_data[index].Name+"?"))return;
-								send_map_data_to_server(SERVER.DELETE, _read_game_data[index].id);
+									// This will remove the player. Is that okay?
+								let container = document.getElementById("e-p-content"),
+									question, yes_btn, no_btn;
+								Clean_Popup_Screen(container);
+
+								question = document.createElement("p");
+								question.className = "editor-border w3-sand";
+								question.innerHTML = "Do you really want to delete "+_read_game_data[index].Name+"?";
+
+								yes_btn = document.createElement('div');
+								yes_btn.className = "w3-button w3-green w3-inline";
+								yes_btn.innerHTML = "Yes";
+								yes_btn.onclick = function(){
+									send_map_data_to_server(SERVER.DELETE, _read_game_data[index].id);
+								};
+
+								no_btn = document.createElement('div');
+								no_btn.className = "w3-button w3-red w3-inline";
+								no_btn.innerHTML = "No";
+
+								container.appendChild(question);
+								container.appendChild(yes_btn);
+								container.appendChild(no_btn);
+								document.getElementById("editor-popup").style.display = "block";
+								document.getElementById("editor-popup").onclick = function() {
+									document.getElementById("editor-popup").style.display = 'none';
+								};
 							};
 
 							_casings[index].appendChild(caption);
@@ -1449,6 +1485,20 @@ __TIME_CHART.style.display = "none";
 		tiling.render(LEFT, TOP, 1, paint);
 
 		let flag_str, current, shrink_amt = tile_size/10;
+		for(let i=0;i<DATA.cities.length;i++)
+		{
+			current = DATA.cities[i];
+			if(current[3]==0)
+			flag_str = "Red Flag";
+			else if(current[3]==1)
+			flag_str = "Blue Flag";
+			else if(current[3]==2)
+			flag_str = "Green Flag";
+			else if(current[3]==3)
+			flag_str = "Yellow Flag";
+			Building_Data.PLACE[current[0]].Sprite.Draw(CANVAS, current[1]*tile_size+shrink_amt-LEFT, current[2]*tile_size+shrink_amt-TOP, tile_size-(2*shrink_amt), tile_size-(2*shrink_amt));
+			Images.Retrieve(flag_str).Draw(CANVAS, current[1]*tile_size-LEFT, current[2]*tile_size-TOP, tile_size/4, tile_size/4);
+		}
 		for(let i=0;i<DATA.units.length;i++)
 		{
 			current = DATA.units[i];
@@ -1461,20 +1511,6 @@ __TIME_CHART.style.display = "none";
 			else if(current[3]==3)
 				flag_str = "Yellow Flag";
 			Char_Data.CHARS[current[0]].Sprite[0].Draw(CANVAS, current[1]*tile_size+shrink_amt-LEFT, current[2]*tile_size+shrink_amt-TOP, tile_size-(2*shrink_amt), tile_size-(2*shrink_amt));
-			Images.Retrieve(flag_str).Draw(CANVAS, current[1]*tile_size-LEFT, current[2]*tile_size-TOP, tile_size/4, tile_size/4);
-		}
-		for(let i=0;i<DATA.cities.length;i++)
-		{
-			current = DATA.cities[i];
-			if(current[3]==0)
-				flag_str = "Red Flag";
-			else if(current[3]==1)
-				flag_str = "Blue Flag";
-			else if(current[3]==2)
-				flag_str = "Green Flag";
-			else if(current[3]==3)
-				flag_str = "Yellow Flag";
-			Building_Data.PLACE[current[0]].Sprite.Draw(CANVAS, current[1]*tile_size+shrink_amt-LEFT, current[2]*tile_size+shrink_amt-TOP, tile_size-(2*shrink_amt), tile_size-(2*shrink_amt));
 			Images.Retrieve(flag_str).Draw(CANVAS, current[1]*tile_size-LEFT, current[2]*tile_size-TOP, tile_size/4, tile_size/4);
 		}
 	}
@@ -1635,7 +1671,7 @@ __TIME_CHART.style.display = "none";
 			return;
 		}
 
-		while(DATA.name=="" || DATA.name==null || DATA.name=="Unnamed Custom Map" || DATA.name.includes(";"))
+		while(DATA.name=="" || DATA.name.length>20 || DATA.name==null || DATA.name=="Unnamed Custom Map" || DATA.name.includes(";"))
 			DATA.name = prompt("Give your map a name", DATA.name);
 		if(DATA.name==null)
 			return;

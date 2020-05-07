@@ -55,18 +55,6 @@ var Interface_Class = function()
 		terrain_disp.setup(600, 600, game.Terrain_Map.Width*TILESIZE, game.Terrain_Map.Height*TILESIZE, TILESIZE, TILESIZE);
 		return 0;
 	};
-	// self.Slide_Up = HUD_Display.Add_Drawable(Shape.Rectangle, "up", 100, 0, 400, 20, "#FF0", Canvas.Clear, 0);
-	// self.Slide_Down = HUD_Display.Add_Drawable(Shape.Rectangle, "down", 100, 580, 400, 20, "#FF0", Canvas.Clear, 0);
-	// self.Slide_Left = HUD_Display.Add_Drawable(Shape.Rectangle, "left", 0, 100, 20, 400, "#FF0", Canvas.Clear, 0);
-	// self.Slide_Right = HUD_Display.Add_Drawable(Shape.Rectangle, "right", 580, 100, 20, 400, "#FF0", Canvas.Clear, 0);
-	function overSliders(x,y)
-	{
-		// if(Canvas.overlappingDrawable(self.Slide_Up,x,y))return 0;
-		// if(Canvas.overlappingDrawable(self.Slide_Down,x,(y*self.gameYScale+(TILESIZE*10-gameHeight))))return 1;
-		// if(Canvas.overlappingDrawable(self.Slide_Left,x,y))return 2;
-		// if(Canvas.overlappingDrawable(self.Slide_Right,(x*self.gameXScale+(TILESIZE*10-gameWidth)),y))return 3;
-		return -1;
-	}
 	var hovered_dir = [false,false,false,false];
 
 	/** display */
@@ -526,6 +514,7 @@ var Interface_Class = function()
 		prevPinchDiff = 0;
 
 		//** Add the game event handler interactions */
+	let __mousedown_time;
 	let current_interactions = new Array(8);
 	const ___touchstart = function(e){
 		HUD_Avoid_Mouse.interact();
@@ -544,14 +533,7 @@ var Interface_Class = function()
 		scroller.doTouchStart(e.touches, e.timeStamp);
 		mousedown = true;
 		in_hl_path = false;
-
-		setTimeout(function(){
-			if(!mousedown)return false;
-
-			in_hl_path = true;
-			self.Release(x,y);
-			scroller.doTouchEnd(e.timeStamp);
-		}, 150);
+		__mousedown_time = e.timeStamp;
 
 		return false;
 	};
@@ -601,8 +583,8 @@ var Interface_Class = function()
 	};
 	const ___touchend = function(e){
 		e.preventDefault();
-
-		if(e.touches.length==0)return;
+		if(e.touches.length==0)return false;
+		if(!mousedown)return false;
 
 		var x = Math.round(e.touches[0].clientX);
 		var y = Math.round(e.touches[0].clientY);
@@ -611,12 +593,11 @@ var Interface_Class = function()
 		if(clientWidth>600)
 			x-=Math.floor((clientWidth-600)/2);
 
-		if(!in_hl_path)
-		{
-			if(Math.abs(x-touch_start_loc[0])<5 &&
-				Math.abs(y-touch_start_loc[1])<5)
-				self.Release(x,y);
-		}
+		if(e.timeStamp-__mousedown_time<150)	// if released quickly ...
+		if(Math.abs(x-touch_start_loc[0])<5 &&	// and without moving
+			Math.abs(y-touch_start_loc[1])<5)
+			self.Release(x,y);
+
 		scroller.doTouchEnd(e.timeStamp);
 		touch_start_loc[0] = -1;
 		touch_start_loc[1] = -1;
@@ -1070,76 +1051,12 @@ var Interface_Class = function()
 	self.interact = function() {
 		HUD_Avoid_Mouse.interact();
 	};
-	var m_move_fnc = function(x, y){
+	let m_move_fnc = function(x, y){
 		HUD_Avoid_Mouse.scared(x, y);
 		if(!allow_input)return;
 		if(mousedown && !in_hl_path)return;
 		x/=self.inputXScale;
 		y/=self.inputYScale;
-		if(!window.parent.mobilecheck())
-		{
-			var dir = overSliders(x/self.gameXScale,y/self.gameYScale);
-			if(dir==0)
-			{
-				if(!hovered_dir[0])
-				if(scroller.getValues().top!=0)
-				{
-					hovered_dir[0] = true;
-					// self.Slide_Up.Alpha.Set(1);
-					return;
-				}
-			}
-			else if(hovered_dir[0])
-			{
-				hovered_dir[0] = false;
-				// self.Slide_Up.Alpha.Set(0);
-			}
-			if(dir==1)
-			{
-				if(!hovered_dir[1])
-				if(scroller.getValues().top!=scroller.getScrollMax().top)
-				{
-					hovered_dir[1] = true;
-					// self.Slide_Down.Alpha.Set(1);
-					return;
-				}
-			}
-			else if(hovered_dir[1])
-			{
-				hovered_dir[1] = false;
-				// self.Slide_Down.Alpha.Set(0);
-			}
-			if(dir==2)
-			{
-				if(!hovered_dir[2])
-				if(scroller.getValues().left!=0)
-				{
-					hovered_dir[2] = true;
-					// self.Slide_Left.Alpha.Set(1);
-					return;
-				}
-			}
-			else if(hovered_dir[2])
-			{
-				hovered_dir[2] = false;
-				// self.Slide_Left.Alpha.Set(0);
-			}
-			if(dir==3)
-			{
-				if(!hovered_dir[3])
-				if(scroller.getValues().left!=scroller.getScrollMax().left)
-				{
-					hovered_dir[3] = true;
-					// self.Slide_Right.Alpha.Set(1);
-					return;
-				}
-			}
-			else if(hovered_dir[3])
-			{
-				hovered_dir[3] = false;
-				// self.Slide_Right.Alpha.Set(0);
-			}
-		}
 		self.Hover_Tile(Math.floor((x+scroller.getValues().left)/TILESIZE),Math.floor((y+scroller.getValues().top)/TILESIZE));
 	};
 	self.Click = click_fnc;
@@ -1432,9 +1349,7 @@ var Interface_Class = function()
 	let Map_Data = {
 		Searching:0,
 		Next_Search:[],
-		All_Data:[],
-		Caption: new Text_Class("25pt Raleway", "#D7EFD0"),
-		Owner: new Text_Class("20pt Raleway", "#C2D8BC")
+		All_Data:[]
 	};
 	self.Update_Map_Search = function(_data_text)
 	{			// data, y row index
@@ -1499,36 +1414,30 @@ var Interface_Class = function()
 					Canvas.ScaleImageData(ctx, _game_imgs[index], 0, 0, 10/sampledGame.Terrain_Map.Width, 10/sampledGame.Terrain_Map.Height);
 					sampledGame.End_Game();
 
-					// ctx.globalAlpha = .2;
-					// Shape.Rectangle.Draw(ctx,0,0,600,600,"#E5D1D0");
-					ctx.globalAlpha = .7;
-					Shape.Rectangle.Draw(ctx,50,20,500,100,"#57634E");
-					ctx.globalAlpha = 1;
 					Shape.Box.Draw(ctx,0,0,600,600,"#73877B");
 
-					Map_Data.Caption.Draw(ctx,65,30,500,40,_read_game_data[index].Name);
-					if(names[index]!=null)
-						Map_Data.Owner.Draw(ctx,65,80,500,40,"by "+names[index]);
+					let IMG = document.createElement("img");
+					IMG.src = canvas.toDataURL("image/png");
+					IMG.className = "MAPCHOICEIMG";
+					let NAME = document.createElement("h5");
+					NAME.innerHTML = _read_game_data[index].Name + (names[index]=="freemaps" ? "" : "<br />by " + names[index]);
+					NAME.className = "MAPCHOICETITLE";
 
-					let img = document.createElement("img");
-					img.src = canvas.toDataURL("image/png");
-					img.className = "MAPCHOICEIMG";
 					try {
 						Map_Data.All_Data[id_start].push(_read_game_data[index]);
 					} catch (e) {
-
+						console.error(id_start+index);
 					}
 
 					try {
 						row_holder.removeChild(_loading_icons[index]);
-						row_holder.appendChild(img);
+						row_holder.appendChild(IMG);
+						row_holder.appendChild(NAME);
 						row_holder.onclick = function() {
-							onClick(img);
+							onClick(IMG, NAME.innerHTML);
 						};
 					} catch (e) {
 						console.error(id_start+index);
-					} finally {
-
 					}
 				}, 15, index);
 			}

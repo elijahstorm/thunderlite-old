@@ -137,6 +137,25 @@ img.MAPCHOICEIMG{
 	width: 50%;
 	height: 100%;
 }
+.MAPCHOICETITLE{
+	transform: translate(20%, -140px);
+	width: 70%;
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	background-color: #f1f1f191;
+	overflow: hidden;
+	border-radius: 4px;
+	opacity: .4;
+	transition: opacity .5s ease;
+}
+.MAPCHOICETITLE:hover{
+	opacity: 1;
+}
+#caption{
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	background-color: #f1f1f191;
+}
 .PREGAMEIMG{
 	width: 100%;
 	height: 100%;

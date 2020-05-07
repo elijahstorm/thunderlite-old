@@ -6,6 +6,7 @@
 function validateSignup(user, pass){
 	if(!user||!pass)return false;
 	if(user==""||pass=="")return false;
+	if(user.length>20 || pass.length>20)return false;
 	if(user.indexOf("/")!=-1 || pass.indexOf("/")!=-1)return false;
 	if(user.indexOf("\\")!=-1 || pass.indexOf("\\")!=-1)return false;
 	if(user.indexOf(" ")!=-1 || pass.indexOf(" ")!=-1)return false;
