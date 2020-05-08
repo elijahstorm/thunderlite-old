@@ -539,8 +539,8 @@ var Interface_Class = function()
 	};
 	const ___touchmove = function(e){
 		e.preventDefault();
-		var x = Math.round(e.touches[0].clientX);
-		var y = Math.round(e.touches[0].clientY);
+		let x = Math.round(e.touches[0].clientX);
+		let y = Math.round(e.touches[0].clientY);
 
 		y-=85; // this is a temp fix for a mobile bug
 		if(clientWidth>600)
@@ -586,8 +586,8 @@ var Interface_Class = function()
 		if(e.touches.length==0)return false;
 		if(!mousedown)return false;
 
-		var x = Math.round(e.touches[0].clientX);
-		var y = Math.round(e.touches[0].clientY);
+		let x = Math.round(e.touches[0].clientX);
+		let y = Math.round(e.touches[0].clientY);
 
 		y-=85; // this is a temp fix for a mobile bug
 		if(clientWidth>600)

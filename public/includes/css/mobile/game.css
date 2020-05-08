@@ -142,14 +142,11 @@ img.MAPCHOICEIMG{
 	width: 70%;
 	border-top: 1px solid black;
 	border-bottom: 1px solid black;
-	background-color: #f1f1f191;
+	background-color: #f1f1f1;
 	overflow: hidden;
 	border-radius: 4px;
-	opacity: .4;
-	transition: opacity .5s ease;
-}
-.MAPCHOICETITLE:hover{
 	opacity: 1;
+	transition: opacity .5s ease;
 }
 #caption{
 	border-top: 1px solid black;

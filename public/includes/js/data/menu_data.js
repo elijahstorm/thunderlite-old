@@ -65,13 +65,15 @@ let MapEditorClass = function() {
 	let current_interactions = new Array(8);
 	let mousedown = false;
 	let __mousedown_time;
+	let touchLocX, touchLocY;
 	const ___touchstart = function(e) {
-
 		e.preventDefault();
 
 		__mousedown_time = e.timeStamp;
 		scroller.doTouchStart(e.touches, e.timeStamp);
 		mousedown = true;
+		touchLocX = e.touches[0].pageX - 26;	// for mobile display offset
+		touchLocY = e.touches[0].pageY - 151;
 
 		return false;
 	};
@@ -87,13 +89,12 @@ let MapEditorClass = function() {
 		if(!mousedown)return;
 
 		e.preventDefault();
-		if(e.touches.length==0)return;
 
-		if(e.timeStamp-__mousedown_time<150)
+		if(e.timeStamp-__mousedown_time<180)
 		{
-			let x = Math.floor((LEFT+e.layerX)/tile_size),
-			y = Math.floor((TOP+e.layerY)/tile_size);
-
+			let x = Math.floor((LEFT+touchLocX)/tile_size),
+				y = Math.floor((TOP+touchLocY)/tile_size);
+				
 			SELECT(x, y);
 		}
 
@@ -1018,7 +1019,6 @@ __TIME_CHART.style.display = "none";
 		document.getElementById("editor-popup").style.display = "block";
 		document.getElementById("editor-popup").onclick = function() {};
 	}
-
 	function Open_Options() {
 
 		document.getElementById('editor-menu-back-btn').style.display = "none";
@@ -1127,7 +1127,8 @@ __TIME_CHART.style.display = "none";
 		document.getElementById("editor-popup").style.display = "block";
 		document.getElementById("editor-popup").onclick = function() {};
 	}
-		/// STILL TO DO
+
+		/// ******************* STILL TO DO *******************
 	function Open_Map_Size() {
 
 		let container = document.getElementById("e-p-content");
