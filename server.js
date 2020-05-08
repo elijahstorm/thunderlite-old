@@ -24,7 +24,7 @@ const Service_Transport = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'thunderlitedev@gmail.com',
-    pass: 'LoudCr0ws5'
+    pass: process.env.EMAIL_PASS
   }
 });
 
@@ -83,7 +83,7 @@ function SEND_EMAIL(type, data) {
 		return;
 	Service_Transport.sendMail(mailOptions, function(error, info) {
 	  if (error) {
-	    timestamp("EMAIL ERROR", error);
+	    timestamp("EMAIL ERROR: ", error);
 	  } else {
 	    timestamp('Email sent: ' + info.response);
 	  }
